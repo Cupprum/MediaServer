@@ -1,0 +1,4 @@
+Oct 16, 2023 19:17:10.195 [274954074936] INFO - Crash Uploader - Platform: Linux ServerUUID: 7930a3432940498d684d9eb8394867da195ad397 UserId: 8zh6k7xnsg@privaterelay.appleid.com Version: 1.32.6.7557-1cf77d501
+Oct 16, 2023 19:17:10.197 [274954074936] INFO - Pre-processed minidump directory: /config/Library/Application Support/Plex Media Server/Crash Reports/1.32.6.7557-1cf77d501
+Oct 16, 2023 19:17:10.198 [274954074936] INFO - Post-processed minidump directory: /tmp
+Oct 16, 2023 19:17:10.190 [274922031112] INFO - Crash Uploader - Processing Complete.
