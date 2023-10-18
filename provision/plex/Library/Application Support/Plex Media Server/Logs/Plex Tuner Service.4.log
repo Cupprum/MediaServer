@@ -1,30 +1,21 @@
-Oct 16, 2023 19:17:14.095 [0x40046f3b38] INFO - Plex Tuner Service v1.32.6.7557-1cf77d501 - Docker Docker Container x86_64 - build: 
-Oct 16, 2023 19:17:14.102 [0x40046f3b38] INFO - Linux version: 6.1.29-0-virt (#1-Alpine SMP Wed, 17 May 2023 14:22:15 +0000), language: en-US
-Oct 16, 2023 19:17:14.108 [0x40046f3b38] INFO - Processor QEMU TCG CPU version 2.5+
-Oct 16, 2023 19:17:14.115 [0x40046f3b38] INFO - /usr/lib/plexmediaserver/Plex Tuner Service /usr/lib/plexmediaserver/Resources/Tuner/Private /usr/lib/plexmediaserver/Resources/Tuner/Shared 1.32.6.7557-1cf77d501 32600
-Oct 16, 2023 19:17:14.055 [0x4002b32808] INFO - [I] broker_t::start...
-Oct 16, 2023 19:17:14.114 [0x4002b32808] INFO - [I] device_manager_t::init.
-Oct 16, 2023 19:17:14.114 [0x4002b32808] INFO - [I] device_manager_t::init. Initialize provider manager
-Oct 16, 2023 19:17:14.114 [0x4002b32808] INFO - [I] device_manager_t::init. Initialize all device auxes
-Oct 16, 2023 19:17:14.114 [0x4002b32808] INFO - [I] dvb_device_factory_t::get_aux_list
-Oct 16, 2023 19:17:14.117 [0x4002b32808] INFO - [I] tvbutler_aux_t::init
-Oct 16, 2023 19:17:14.169 [0x4002b32808] INFO - [I] web_server_t::start. Starting web server on port 32600
-Oct 16, 2023 19:17:18.567 [0x4004b9fb38] INFO - [I] web_service_t::process_device_discovery
-Oct 16, 2023 19:17:18.568 [0x4004b9fb38] INFO - [I] device_reactor_t::get_device_list ()
-Oct 16, 2023 19:17:20.587 [0x4004b9fb38] INFO - [I] SAT2IP - discover_satip_servers(): no servers found
-Oct 16, 2023 19:17:21.003 [0x4004b9fb38] INFO - [I] v4l::DeviceGetList_impl. getting v4l device list
-Oct 16, 2023 19:17:21.012 [0x4004b9fb38] INFO - [I] onetv_factory::DeviceGetListEx >>
-Oct 16, 2023 19:17:21.019 [0x4004b9fb38] INFO - [I] onetv_factory::DeviceGetListEx. Found device 1575:1
-Oct 16, 2023 19:17:21.019 [0x4004b9fb38] INFO - [I] onetv_factory::DeviceGetListEx. Found device 7531:3
-Oct 16, 2023 19:17:21.019 [0x4004b9fb38] INFO - [I] onetv_factory::DeviceGetListEx. Found device 1575:1
-Oct 16, 2023 19:17:21.020 [0x4004b9fb38] INFO - [I] onetv_factory::DeviceGetListEx. Found device 7531:2
-Oct 16, 2023 19:17:45.005 [0x4002b32808] INFO - Received SIGINT: Interrupt from keyboard.
-Oct 16, 2023 19:17:45.041 [0x4002b32808] INFO - [I] device_manager_t::term
-Oct 16, 2023 19:17:45.042 [0x4002b32808] INFO - [I] device_manager_t::term. Stop all devices
-Oct 16, 2023 19:17:45.042 [0x4002b32808] INFO - [I] device_manager_t::term. Shut down all device auxes
-Oct 16, 2023 19:17:45.042 [0x4002b32808] INFO - [I] tvbutler_aux_t::term
-Oct 16, 2023 19:17:45.150 [0x4002b32808] INFO - [I] web_server_t::stop. Web server is stopped
-Oct 16, 2023 19:17:45.151 [0x4002b32808] INFO - [I] device_manager_t::term
-Oct 16, 2023 19:17:45.151 [0x4002b32808] INFO - [I] device_manager_t::term. Stop all devices
-Oct 16, 2023 19:17:45.151 [0x4002b32808] INFO - [I] device_manager_t::term. Shut down all device auxes
-Oct 16, 2023 19:17:45.152 [0x4002b32808] INFO - [I] broker_t::shutdown. Shutdown is completed.
+Oct 16, 2023 19:18:03.880 [0x40046f3b38] INFO - Plex Tuner Service v1.32.6.7557-1cf77d501 - Docker Docker Container x86_64 - build: 
+Oct 16, 2023 19:18:03.886 [0x40046f3b38] INFO - Linux version: 6.1.29-0-virt (#1-Alpine SMP Wed, 17 May 2023 14:22:15 +0000), language: en-US
+Oct 16, 2023 19:18:03.898 [0x40046f3b38] INFO - Processor QEMU TCG CPU version 2.5+
+Oct 16, 2023 19:18:03.898 [0x40046f3b38] INFO - /usr/lib/plexmediaserver/Plex Tuner Service /usr/lib/plexmediaserver/Resources/Tuner/Private /usr/lib/plexmediaserver/Resources/Tuner/Shared 1.32.6.7557-1cf77d501 32600
+Oct 16, 2023 19:18:03.837 [0x4002b32808] INFO - [I] broker_t::start...
+Oct 16, 2023 19:18:03.870 [0x4002b32808] INFO - [I] device_manager_t::init.
+Oct 16, 2023 19:18:03.870 [0x4002b32808] INFO - [I] device_manager_t::init. Initialize provider manager
+Oct 16, 2023 19:18:03.870 [0x4002b32808] INFO - [I] device_manager_t::init. Initialize all device auxes
+Oct 16, 2023 19:18:03.871 [0x4002b32808] INFO - [I] dvb_device_factory_t::get_aux_list
+Oct 16, 2023 19:18:03.871 [0x4002b32808] INFO - [I] tvbutler_aux_t::init
+Oct 16, 2023 19:18:03.912 [0x4002b32808] INFO - [I] web_server_t::start. Starting web server on port 32600
+Oct 16, 2023 19:18:08.249 [0x4002b32808] INFO - Received SIGINT: Interrupt from keyboard.
+Oct 16, 2023 19:18:08.270 [0x4002b32808] INFO - [I] device_manager_t::term
+Oct 16, 2023 19:18:08.271 [0x4002b32808] INFO - [I] device_manager_t::term. Stop all devices
+Oct 16, 2023 19:18:08.271 [0x4002b32808] INFO - [I] device_manager_t::term. Shut down all device auxes
+Oct 16, 2023 19:18:08.271 [0x4002b32808] INFO - [I] tvbutler_aux_t::term
+Oct 16, 2023 19:18:08.277 [0x4002b32808] INFO - [I] web_server_t::stop. Web server is stopped
+Oct 16, 2023 19:18:08.277 [0x4002b32808] INFO - [I] device_manager_t::term
+Oct 16, 2023 19:18:08.278 [0x4002b32808] INFO - [I] device_manager_t::term. Stop all devices
+Oct 16, 2023 19:18:08.278 [0x4002b32808] INFO - [I] device_manager_t::term. Shut down all device auxes
+Oct 16, 2023 19:18:08.279 [0x4002b32808] INFO - [I] broker_t::shutdown. Shutdown is completed.

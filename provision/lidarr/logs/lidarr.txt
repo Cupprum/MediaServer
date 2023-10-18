@@ -2697,3 +2697,24 @@
 2023-10-16 21:29:56.3|Info|RssSyncService|RSS Sync Completed. Reports found: 0, Reports grabbed: 0
 2023-10-16 21:41:59.0|Info|Microsoft.Hosting.Lifetime|Application is shutting down...
 2023-10-16 21:41:59.1|Info|ConsoleApp|Exiting main.
+2023-10-18 18:41:16.1|Info|Bootstrap|Starting Lidarr - /app/lidarr/bin/Lidarr - Version 1.4.5.3639
+2023-10-18 18:41:16.3|Info|AppFolderInfo|Data directory is being overridden to [/config]
+2023-10-18 18:41:16.3|Info|AppFolderInfo|Data directory is being overridden to [/config]
+2023-10-18 18:41:17.1|Info|AppFolderInfo|Data directory is being overridden to [/config]
+2023-10-18 18:41:17.9|Info|MigrationController|*** Migrating data source=/config/lidarr.db;cache size=-10000;datetimekind=Utc;journal mode=Wal;pooling=True;version=3 ***
+2023-10-18 18:41:18.3|Info|MigrationController|*** Migrating data source=/config/logs.db;cache size=-10000;datetimekind=Utc;journal mode=Wal;pooling=True;version=3 ***
+2023-10-18 18:41:19.2|Info|Microsoft.Hosting.Lifetime|Now listening on: http://[::]:8686
+2023-10-18 18:41:20.1|Info|Microsoft.Hosting.Lifetime|Application started. Press Ctrl+C to shut down.
+2023-10-18 18:41:20.1|Info|Microsoft.Hosting.Lifetime|Hosting environment: Production
+2023-10-18 18:41:20.1|Info|Microsoft.Hosting.Lifetime|Content root path: /app/lidarr/bin
+2023-10-18 18:41:50.2|Info|TrackGroupingService|Grouping 0 tracks
+2023-10-18 18:41:50.2|Info|ImportApprovedTracks|Importing 0 tracks
+2023-10-18 18:41:50.4|Info|HousekeepingService|Running housecleaning tasks
+2023-10-18 18:41:50.4|Info|Database|Vacuuming Log database
+2023-10-18 18:41:50.4|Info|Database|Log database compressed
+2023-10-18 18:41:50.4|Info|Database|Vacuuming Main database
+2023-10-18 18:41:50.5|Info|Database|Main database compressed
+2023-10-18 18:41:50.5|Info|RssSyncService|Starting RSS Sync
+2023-10-18 18:41:50.5|Warn|FetchAndParseRssService|No available indexers. check your configuration.
+2023-10-18 18:41:50.5|Info|DownloadDecisionMaker|No results found
+2023-10-18 18:41:50.5|Info|RssSyncService|RSS Sync Completed. Reports found: 0, Reports grabbed: 0
