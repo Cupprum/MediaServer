@@ -6,6 +6,8 @@
 
 * Enroll Jellyfin as a server, configure movie directory and so on.
 
+* Install Jellyfin app on Apple TV; configure it to access `http://192.168.0.101:8096`. The username is `root` and password can be found in stored passwords in Safari.
+
 * Access QBittorrent: [http://localhost:8080](http://localhost:8080) username is `admin` and password can be seen in logs: `docker logs qbittorrent`.
 
 * Change password.
@@ -30,4 +32,3 @@
     * Prowlarr -> Application Type: Prowlarr -> Set URL to: `http://localhost:9696`
     * QBittorrent -> Application Type: QBittorrent -> Set URL to: `http://localhost:8080`
     * Jellyfin -> Application Type: Jellyfin -> Add Application name and download logo from internet -> Set URL to: `http://localhost:8096`
-    
