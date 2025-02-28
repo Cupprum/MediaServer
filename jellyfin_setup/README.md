@@ -1,6 +1,6 @@
 # Configure Jellyfin setup
 
-* Run the setup, this step should be executed from mac, but its also fine from VM: `docker compose up -d`
+* Run the setup, this step should be executed from mac, but its also fine from VM: `docker compose up -d`. Note: it might be required to pull the containers manually, as it sometimes requires some stupid login.
 
 * Access Jellyfin: [http://localhost:8096](http://localhost:8096)
 
