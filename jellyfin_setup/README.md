@@ -25,3 +25,9 @@
     * LimeTorrents
     * The Pirate Bay
     * YTS
+
+* Access Heimdall: [http://localhost:80](http://localhost:80) and configure access to the rest of the services; add the following `applications` to the `application list`:
+    * Prowlarr -> Application Type: Prowlarr -> Set URL to: `http://localhost:9696`
+    * QBittorrent -> Application Type: QBittorrent -> Set URL to: `http://localhost:8080`
+    * Jellyfin -> Application Type: Jellyfin -> Add Application name and download logo from internet -> Set URL to: `http://localhost:8096`
+    
