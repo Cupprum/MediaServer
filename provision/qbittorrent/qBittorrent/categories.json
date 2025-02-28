@@ -1,8 +1,0 @@
-{
-    "radarr": {
-        "save_path": ""
-    },
-    "sonarr": {
-        "save_path": "/data/torrents/tv"
-    }
-}
