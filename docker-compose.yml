@@ -1,0 +1,24 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: host
+    volumes:
+      - /provision/jellyfin/config:/config
+      - /provision/jellyfin/cache:/cache
+      - type: bind
+        source: /Volumes/T5/MediaServer/media
+        target: /media
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - TZ=Europe/Copenhagen
+    volumes:
+      - /provision/qbittorrent/config:/config
+      - /Volumes/T5/MediaServer/media/movies:/data/torrents
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
