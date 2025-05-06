@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: heimdall-deployment
+  name: heimdall
   labels:
     app: heimdall
 spec:
@@ -30,13 +30,11 @@ spec:
       volumes:
         - name: heimdall-claim
           persistentVolumeClaim:
-            claimName: heimdall-claim
+            claimName: heimdall
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: heimdall
   name: heimdall
 spec:
   ports:
@@ -49,20 +47,16 @@ spec:
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: heimdall-storage
-  labels:
-    app: heimdall
+  name: heimdall
 provisioner: rancher.io/local-path
 # volumeBindingMode: WaitForFirstConsumer
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: heimdall-pv
-  labels:
-    app: heimdall
+  name: heimdall
 spec:
-  storageClassName: heimdall-storage
+  storageClassName: heimdall
   capacity:
     storage: 100Mi
   accessModes:
@@ -75,14 +69,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  labels:
-    app: heimdall
-  name: heimdall-claim
+  name: heimdall
 spec:
-  storageClassName: heimdall-storage
+  storageClassName: heimdall
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 100Mi
-  volumeName: heimdall-pv
