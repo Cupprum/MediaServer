@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-# Deploy the app set
+# Deploy the app
 kubectl apply -f heimdall.yaml
