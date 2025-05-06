@@ -11,6 +11,7 @@
     * /provision/jellyfin/cache
     * /provision/qbittorrent/config
     * /provision/prowlarr/config
+    * /provision/heimdall/config
 
 * Configure Jellyfin, learn more: `jellyfin_setup/README.md`.
 
