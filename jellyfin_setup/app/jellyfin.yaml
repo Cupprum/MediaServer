@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  labels:
+    app: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          env:
+            - name: TZ
+              value: Europe/Copenhagen
+          volumeMounts:
+            - mountPath: /config
+              name: jellyfin-config-claim
+            - mountPath: /cache
+              name: jellyfin-cache-claim
+            - mountPath: media
+              name: jellyfin-data-claim
+      volumes:
+        - name: jellyfin-config-claim
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        - name: jellyfin-cache-claim
+          persistentVolumeClaim:
+            claimName: jellyfin-cache
+        - name: jellyfin-data-claim
+          persistentVolumeClaim:
+            claimName: jellyfin-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+spec:
+  ports:
+    - name: "8096"
+      port: 8096
+      targetPort: 8096
+  selector:
+    app: jellyfin
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: jellyfin-config
+provisioner: rancher.io/local-path
+# volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-config
+spec:
+  storageClassName: jellyfin
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Volumes/T5/MediaServer/provision/jellyfin/config"
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config
+spec:
+  storageClassName: jellyfin
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: jellyfin-cache
+provisioner: rancher.io/local-path
+# volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-cache
+spec:
+  storageClassName: jellyfin
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Volumes/T5/MediaServer/provision/jellyfin/cache"
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-cache
+spec:
+  storageClassName: jellyfin
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: jellyfin-data
+provisioner: rancher.io/local-path
+# volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-data
+spec:
+  storageClassName: jellyfin
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Volumes/T5/MediaServer/media"
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-data
+spec:
+  storageClassName: jellyfin
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
