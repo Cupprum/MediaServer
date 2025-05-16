@@ -58,7 +58,7 @@ metadata:
 spec:
   storageClassName: prowlarr
   capacity:
-    storage: 128Mi
+    storage: 100Mi
   accessModes:
     - ReadWriteOnce
   hostPath:
@@ -76,4 +76,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 128Mi
+      storage: 100Mi
