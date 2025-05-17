@@ -1,0 +1,85 @@
+{{- $serviceName := .Values.serviceName }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.serviceName }}
+  labels:
+    app: {{ .Values.serviceName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.serviceName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.serviceName }}
+    spec:
+      containers:
+        - name: {{ .Values.serviceName }}
+          image: {{ .Values.image }}
+          env:
+            - name: TZ
+              value: Europe/Copenhagen
+          ports:
+            - containerPort: {{ .Values.servicePort }}
+              hostPort: {{ .Values.servicePort }}
+              protocol: TCP
+          volumeMounts:
+            {{- range .Values.mountPoints }}
+            - mountPath: {{ .destination | quote }}
+              name: {{ $serviceName }}-{{ .name }}-claim
+            {{- end }}
+      volumes:
+        {{- range .Values.mountPoints }}
+        - name: {{ $serviceName }}-{{ .name }}-claim
+          persistentVolumeClaim:
+            claimName: {{ $serviceName }}-{{ .name }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.serviceName }}
+spec:
+  ports:
+    - name: {{ .Values.servicePort | quote }}
+      port: {{ .Values.servicePort }}
+      targetPort: {{ .Values.servicePort }}
+  selector:
+    app: {{ .Values.serviceName }}
+{{- range .Values.mountPoints }}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $serviceName }}-{{ .name }}
+provisioner: rancher.io/local-path
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $serviceName }}-{{ .name }}
+spec:
+  storageClassName: {{ $serviceName }}-{{ .name }}
+  capacity:
+    storage: 100Mi # Required value, but is ignored by local-path-provisioner
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .source | quote }}
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $serviceName }}-{{ .name }}
+spec:
+  storageClassName: {{ $serviceName }}-{{ .name }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi # Required value, but is ignored by local-path-provisioner
+{{- end }}
