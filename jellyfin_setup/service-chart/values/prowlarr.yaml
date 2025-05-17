@@ -1,0 +1,7 @@
+serviceName: prowlarr
+image: linuxserver/prowlarr:latest
+servicePort: 9696
+mountPoints:
+  - name: config
+    source: /provision/prowlarr/config
+    destination: /config

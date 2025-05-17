@@ -1,0 +1,7 @@
+serviceName: heimdall
+image: linuxserver/heimdall:latest
+servicePort: 80
+mountPoints:
+  - name: config
+    source: /provision/heimdall/config
+    destination: /config

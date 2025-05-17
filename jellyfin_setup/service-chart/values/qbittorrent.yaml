@@ -1,0 +1,10 @@
+serviceName: qbittorrent
+image: lscr.io/linuxserver/qbittorrent:latest
+servicePort: 8080
+mountPoints:
+  - name: config
+    source: /provision/qbittorrent/config
+    destination: /config
+  - name: data
+    source: /Volumes/T5/MediaServer/media/movies
+    destination: /data/torrents

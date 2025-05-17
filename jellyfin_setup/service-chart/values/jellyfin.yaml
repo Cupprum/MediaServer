@@ -1,0 +1,13 @@
+serviceName: jellyfin
+image: jellyfin/jellyfin:latest
+servicePort: 8096
+mountPoints:
+  - name: config
+    source: /provision/jellyfin/config
+    destination: /config
+  - name: data
+    source: /Volumes/T5/MediaServer/media
+    destination: /media
+  - name: cache
+    source: /provision/jellyfin/cache
+    destination: /cache
