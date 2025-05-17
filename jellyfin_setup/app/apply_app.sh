@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-# Deploy the app
-kubectl apply -f "./*.yaml"
