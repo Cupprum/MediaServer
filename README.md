@@ -1,18 +1,13 @@
 # Setup MacOS to host torrent downloading docker based center
 
-* Start with setting up mac, learn more in `bootstrap` folder.
+* Start with setting up Raspberry PI, read more in `rpi` folder.
 
-* Create a new colima instance: `colima start --cpu 2 --memory 8`; in the `~/.colima/default/colima.yaml` update colima 'mounts' to also mount `/Volumes/T5/MediaServer` folder, remember to restart the VM afterwards: `colima restart`. Note: specifying mounts removes the default mounts, which are `/Users/x42` and `/tmp/colima`. `colima.yaml` can be copied over to `~/.colima/default/colima.yaml` for easy configuration.
+* Install the Kubernetes cluster, read more in the `cluster` folder.
 
-* Access colima VM: `colima ssh`
+* Install the whole Jellyfin setup, read more in the `jellyfin_setup` folder.
 
-* Create the following directories in the colima VM:
-    * /provision/jellyfin/config
-    * /provision/jellyfin/cache
-    * /provision/qbittorrent/config
-    * /provision/prowlarr/config
-    * /provision/heimdall/config
+// TODO
+* Install Grafana, read more in the `monitoring` folder.
 
-* Configure Jellyfin, learn more: `jellyfin_setup/README.md`.
-
-* Configure pi-hole.
+// TODO
+* Install pi-hole, read more in the `dns` folder.
