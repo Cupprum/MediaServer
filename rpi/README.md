@@ -1,17 +1,14 @@
-# Configure Mac
+# Configure Raspberry PI
 
 **Steps:**
+* Install the latest Raspbian OS using `Raspberry Pi Imager.app`.
 
-* Install [brew](https://brew.sh)
+* Execute the `bootstrap.sh` shell script to update the system, install Docker and minikube.
 
-* Install PIA, colima, docker and tmux: `brew install private-internet-access colima docker tmux`
+* Use `sudo raspi-config` to open settings and enable `VNC`. Its under `Interfacer` option.
 
-* Create a new tmux session: `tmux new -s keepawake` and stay awake: `sudo caffeinate -i`. Detach from the tmux session by pressing Ctrl+B followed by D. NOTE: This is required to do after restart. To attach to the session use: `tmux attach -t keepawake`.
+* Download [Pia VPN](https://www.privateinternetaccess.com/installer/x/download_installer_linux_arm/arm64). And install it by executing the downloaded script.
 
-TODO: Is this even required? doesnt it stay available either way?
+* Configure Kill Switch in `Pia` settings.
 
-* In System Preferences under `Lock Screen` configure display to never turn off.
-
-* Enable Kill Switch and Advanced Kill Switch opitions in PIA Application GUI in the `Privacy` part of settings. This will allow network traffic to flow only through the VPN, if the connection to VPN is lost, no network traffic will work. I can still however access the server through SSH on local network, even if the VPN is disconnected.
-
-* Configure PIA to run automatically on start up using the `configure_pia.sh` script.
+* Enable running Pia in the background by running: `piactl background enable`. Pia automatically installs systemd service, which starts it up after reboot. Because Pia can now run in background, it can enforce the Kill Switch, which disables connectivity to the internet.
