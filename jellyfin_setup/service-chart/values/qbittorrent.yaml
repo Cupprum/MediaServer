@@ -4,8 +4,8 @@ servicePort: 8080
 nodePort: 30002
 mountPoints:
   - name: config
-    source: /provision/qbittorrent/config
+    source: /media/x42/T5/MediaServer/provision/qbittorrent/config
     destination: /config
   - name: data
-    source: /Volumes/T5/MediaServer/media/movies
+    source: /media/x42/T5/MediaServermedia/movies
     destination: /data/torrents

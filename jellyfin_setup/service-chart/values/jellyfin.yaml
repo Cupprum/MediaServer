@@ -4,11 +4,11 @@ servicePort: 8096
 nodePort: 30001
 mountPoints:
   - name: config
-    source: /provision/jellyfin/config
+    source: /media/x42/T5/MediaServer/provision/jellyfin/config
     destination: /config
   - name: data
-    source: /Volumes/T5/MediaServer/media
+    source: /media/x42/T5/MediaServer/media
     destination: /media
   - name: cache
-    source: /provision/jellyfin/cache
+    source: /media/x42/T5/MediaServer/provision/jellyfin/cache
     destination: /cache

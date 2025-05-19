@@ -4,5 +4,5 @@ servicePort: 80
 nodePort: 30004
 mountPoints:
   - name: config
-    source: /provision/heimdall/config
+    source: /media/x42/T5/MediaServer/provision/heimdall/config
     destination: /config

@@ -4,5 +4,5 @@ servicePort: 9696
 nodePort: 30003
 mountPoints:
   - name: config
-    source: /provision/prowlarr/config
+    source: /media/x42/T5/MediaServer/provision/prowlarr/config
     destination: /config
