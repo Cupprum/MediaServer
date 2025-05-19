@@ -29,3 +29,11 @@ argocd account update-password \
     --new-password "$newArgoPassword"
 
 echo "- New argocd password: $newArgoPassword"
+
+# Add private repo
+gitHubToken="${GH_TOKEN:?Error: GH_TOKEN is not set}"
+argocd repo add https://github.com/Cupprum/MediaServer.git \
+  --name 'MediaServer' \
+  --project 'default' \
+  --username "$(git config user.name)" \
+  --password "$gitHubToken"
