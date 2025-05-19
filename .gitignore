@@ -1,2 +1,5 @@
 # MacOs
 .DS_Store
+
+# Kubernetes
+kubeconfig.yaml
