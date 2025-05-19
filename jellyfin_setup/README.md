@@ -1,14 +1,14 @@
 # Configure Jellyfin setup
 
-* Run the setup, this step should be executed from mac, but its also fine from VM: `docker compose up -d`. Note: it might be required to pull the containers manually, as it sometimes requires some stupid login.
+* Install the setup by using the `install_setup.sh` shell script.
 
 * Access Jellyfin: [http://localhost:8096](http://localhost:8096)
 
 * Enroll Jellyfin as a server, configure movie directory and so on.
 
-* Install Jellyfin app on Apple TV; configure it to access `http://192.168.0.101:8096`. The username is `root` and password can be found in stored passwords in Safari.
+* Install Jellyfin app on Apple TV; configure it to access `http://192.168.0.100:8096`. The username is `root` and password can be found in stored passwords in Safari.
 
-* Access QBittorrent: [http://localhost:8080](http://localhost:8080) username is `admin` and password can be seen in logs: `docker logs qbittorrent`.
+* Access QBittorrent: [http://localhost:8080](http://localhost:8080) username is `admin` and password can be seen in logs: `kubectl logs qbittorrent`.
 
 * Change password.
 
