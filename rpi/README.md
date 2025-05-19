@@ -1,7 +1,11 @@
 # Configure Raspberry PI
 
+NOTE: Raspberry Pi should be accessible on `pi.local` address from the browser.
+
 **Steps:**
 * Install the latest Raspbian OS using `Raspberry Pi Imager.app`.
+
+* Execute the `startup.sh` shell script to disable wifi.
 
 * Execute the `bootstrap.sh` shell script to update the system, install Docker and minikube.
 

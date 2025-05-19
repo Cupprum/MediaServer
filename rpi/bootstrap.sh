@@ -5,6 +5,7 @@
 sudo apt update
 sudo apt upgrade -y
 
+# TODO: Is this needed?
 # Install docker
 curl -sSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
