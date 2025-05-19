@@ -42,7 +42,7 @@ kind: Service
 metadata:
   name: {{ .Values.serviceName }}
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: {{ .Values.serviceName }}
   ports:
