@@ -1,7 +1,6 @@
 serviceName: qbittorrent
 image: lscr.io/linuxserver/qbittorrent:latest
 servicePort: 8080
-nodePort: 30002
 mountPoints:
   - name: config
     source: /media/x42/T5/MediaServer/provision/qbittorrent/config

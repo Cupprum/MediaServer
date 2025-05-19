@@ -1,7 +1,6 @@
 serviceName: jellyfin
 image: jellyfin/jellyfin:latest
 servicePort: 8096
-nodePort: 30001
 mountPoints:
   - name: config
     source: /media/x42/T5/MediaServer/provision/jellyfin/config
