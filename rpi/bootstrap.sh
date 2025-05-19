@@ -16,8 +16,7 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubect
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-# Install minikube
-curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-arm64
-sudo install minikube-linux-arm64 /usr/local/bin/minikube && rm minikube-linux-arm64
+# Preconfigure k3s - Enable cgroup
+echo ' cgroup_enable=memory' | sudo tee -a /boot/cmdline.txt
 
 echo "- NOTE: Please create a new bash session to use docker without sudo."
