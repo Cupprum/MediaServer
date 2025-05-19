@@ -21,6 +21,10 @@ spec:
           env:
             - name: TZ
               value: Europe/Copenhagen
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
           ports:
             - containerPort: {{ .Values.servicePort }}
               hostPort: {{ .Values.servicePort }}
