@@ -1,6 +1,7 @@
 serviceName: heimdall
 image: linuxserver/heimdall:latest
 servicePort: 80
+nodePort: 30004
 mountPoints:
   - name: config
     source: /provision/heimdall/config

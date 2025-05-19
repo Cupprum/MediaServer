@@ -42,12 +42,13 @@ kind: Service
 metadata:
   name: {{ .Values.serviceName }}
 spec:
-  ports:
-    - name: {{ .Values.servicePort | quote }}
-      port: {{ .Values.servicePort }}
-      targetPort: {{ .Values.servicePort }}
+  type: NodePort
   selector:
     app: {{ .Values.serviceName }}
+  ports:
+    - port: {{ .Values.servicePort }}
+      targetPort: {{ .Values.servicePort }}
+      nodePort: {{ .Values.nodePort }}
 {{- range .Values.mountPoints }}
 ---
 apiVersion: storage.k8s.io/v1
