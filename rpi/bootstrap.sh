@@ -17,6 +17,11 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubect
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+# Install argocd cli
+curl -sSL -o argocd-linux-arm64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-arm64
+sudo install -m 555 argocd-linux-arm64 /usr/local/bin/argocd
+rm argocd-linux-arm64
+
 # Preconfigure k3s - Enable cgroup
 echo ' cgroup_enable=memory' | sudo tee -a /boot/cmdline.txt
 
