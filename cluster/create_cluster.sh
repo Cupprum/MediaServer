@@ -48,8 +48,9 @@ echo "- Login with username 'admin' and new password, to update it in password m
 
 # Set the new password in the argocd secret
 kubectl get secret argocd-initial-admin-secret \
-    --output json | \
-    jq ".data['password']='$newArgoPassword'" | \
+    --output json \
+    --namespace argocd | \
+    jq ".data[\"password\"]=\"$newArgoPassword\"" | \
     kubectl apply -f -
 
 # Add private repo
