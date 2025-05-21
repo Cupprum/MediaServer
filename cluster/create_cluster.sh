@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Check for required environment variables
+GH_TOKEN="${GH_TOKEN:?Error: GH_TOKEN is not set}"
+
 # Check if k3s is installed
 if ! command -v k3s &> /dev/null; then
     echo "k3s not found, proceeding with installation..."
@@ -45,6 +48,13 @@ newArgoPassword=$(date +%s | sha256sum | base64 | head -c 32)
 argocd account update-password \
     --current-password "$argoPassword" \
     --new-password "$newArgoPassword"
+
+# Add private repo
+argocd repo add https://github.com/Cupprum/MediaServer.git \
+  --name 'MediaServer' \
+  --project 'default' \
+  --username "$(git config user.name)" \
+  --password "$GH_TOKEN"
 
 echo "- New argocd password: $newArgoPassword"
 echo "- ArgoCD UI: http://localhost:8080"
