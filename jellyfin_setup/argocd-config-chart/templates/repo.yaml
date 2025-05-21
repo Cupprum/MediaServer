@@ -6,6 +6,8 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
+  name: {{ .Values.git.name | quote }}
+  project: "default"
   url: {{ .Values.git.url | quote }}
   username: {{ .Values.git.username | quote }}
-  password: {{ .Values.git.token | b64enc | quote }}
+  password: {{ .Values.git.token | quote }}
