@@ -25,4 +25,7 @@ rm argocd-linux-arm64
 # Preconfigure k3s - Enable cgroup
 echo ' cgroup_enable=memory' | sudo tee -a /boot/cmdline.txt
 
+# Disable wifi
+echo "dtoverlay=disable-wifi" | sudo tee -a /boot/firmware/config.txt
+
 echo "- NOTE: Please create a new bash session to use docker without sudo."
