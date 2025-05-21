@@ -1,6 +1,9 @@
 # Configure Jellyfin setup
 
-* Install the setup by using the `install_setup.sh` shell script.
+
+## Installation process
+
+* Install the ArgoCD applications, which configure the services using `install.sh` shell script.
 
 * Access Jellyfin: [http://192.168.0.100:8096](http://192.168.0.100:8096)
 
@@ -16,7 +19,7 @@
 
 * Configure QBittorrent > Options > BitTorrent > `Seeding Limits`. Enable all three options, let change the last field to `Remove torrent`.
 
-* Access Prowlarr: [http://192.168.0.100:9696](http://192.168.0.100:9696) and setup username and password (Note: pro-tip disable authentication on local network in general settings)
+* Access Prowlarr: [http://192.168.0.100:9696](http://192.168.0.100:9696) and setup username and password (Note: pro-tip - disable authentication on local network in general settings)
 
 * Configure Prowlarr to use QBittorrent as a Download client, it is possible to configure qbittorrent to download films sequantally, so they can be streamed while downloading.
 
@@ -32,3 +35,7 @@
     * Prowlarr -> Application Type: Prowlarr -> Set URL to: `http://192.168.0.100:9696`
     * QBittorrent -> Application Type: QBittorrent -> Set URL to: `http://192.168.0.100:8080`
     * Jellyfin -> Application Type: Jellyfin -> Add Application name and download logo from internet -> Set URL to: `http://192.168.0.100:8096`
+
+## Deletion process
+
+Delete the argocd apps with their configuration: `./delete.sh`
