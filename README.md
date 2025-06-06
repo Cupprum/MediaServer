@@ -1,8 +1,8 @@
-# Setup MacOS to host torrent downloading docker based center
+# Setup Raspberry PI to host torrent downloading docker based media center
 
 * Start with setting up Raspberry PI, read more in `rpi` folder.
 
-* Install the Kubernetes cluster, read more in the `cluster` folder.
+* Install the Kubernetes cluster, read more in the `k8s` folder.
 
 * Install the whole Jellyfin setup, read more in the `jellyfin_setup` folder.
 
