@@ -12,9 +12,9 @@
 # - PIA VPN installation
 ###############################################################################
 
-set -e  # Exit on fail
-set -u  # Treat unset variables as an error
-set -o pipefail  # Fail if any command in a pipeline fails
+set -e # Exit on fail
+set -u # Treat unset variables as an error
+set -o pipefail # Fail if any command in a pipeline fails
 
 # Color definitions
 readonly RED='\033[0;31m'
