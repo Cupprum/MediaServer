@@ -26,6 +26,14 @@ fi
 export KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
 sudo chmod +r "$KUBECONFIG"
 
+# Wait for k3s API server to be ready
+echo "Waiting for Kubernetes API server to be ready..."
+until kubectl get nodes &>/dev/null; do
+  echo "Waiting for Kubernetes API server..."
+  sleep 5
+done
+echo "Kubernetes API server is ready"
+
 # Install ArgoCD
 kubectl create namespace argocd
 kubectl apply -n argocd \
