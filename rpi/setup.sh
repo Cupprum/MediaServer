@@ -78,16 +78,20 @@ enable_vnc() {
 }
 
 install_pia() {
-    readonly PIA_URL="https://www.privateinternetaccess.com/installer/x/download_installer_linux_arm/arm64"
-    readonly INSTALLER_PATH="/tmp/pia_installer.run"
+    local PIA_INSTALLER_URL="https://installers.privateinternetaccess.com/download/pia-linux-arm64-3.6-08303.run"
+    local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
 
     log_info "Downloading PIA installer..."
-    curl -o "$INSTALLER_PATH" "$PIA_URL" || { log_error "Failed to download PIA installer"; exit 1; }
-    chmod +x "$INSTALLER_PATH" || { log_error "Failed to make PIA installer executable"; exit 1; }
+    curl -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL" || { log_error "Failed to download PIA installer"; exit 1; }
+    chmod +x "$PIA_INSTALLER_PATH" || { log_error "Failed to make PIA installer executable"; exit 1; }
     log_info "Running PIA installer..."
-    "$INSTALLER_PATH" || { log_error "PIA installation failed"; exit 1; }
-    rm "$INSTALLER_PATH" || log_warn "Failed to remove PIA installer"
+    "$PIA_INSTALLER_PATH" || { log_error "PIA installation failed"; exit 1; }
+    rm "$PIA_INSTALLER_PATH" || log_warn "Failed to remove PIA installer"
     log_info "PIA installation completed"
+    
+    log_info "Enabling PIA background service..."
+    piactl background enable || { log_error "Failed to enable PIA background service"; exit 1; }
+    log_info "PIA background service enabled"
 }
 
 ###############################################################################
@@ -96,7 +100,7 @@ install_pia() {
 
 main() {
     check_root
-    log_info "Starting Raspberry Pi bootstrap process..."
+    log_info "Starting Raspberry Pi setup process..."
     update_system
     install_docker
     configure_k3s
