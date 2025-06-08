@@ -10,8 +10,8 @@ Cat and update Kubeconfig: `./configure.sh`
 
 ## Cluster creation
 
-Install things running on Kubernetes and configure ArgoCD.
+Install tooling around Kubernetes and configure ArgoCD.
 
 NOTE: This script is meant to be executed only once when initially creating the k3s cluster.
 
-Create and configure new cluster: `./create_cluster.sh`
+Create and configure new k3s cluster: `./setup.sh`
