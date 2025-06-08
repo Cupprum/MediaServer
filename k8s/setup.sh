@@ -1,67 +1,168 @@
 #!/usr/bin/env bash
 
-# Check for required environment variables
-GH_TOKEN="${GH_TOKEN:?Error: GH_TOKEN is not set}"
+###############################################################################
+# K3s and ArgoCD Setup Script
+#
+# This script automates the installation and configuration of:
+# - K3s
+# - kubectl
+# - Helm
+# - ArgoCD
+# - Repository setup
+###############################################################################
 
-# Check if k3s is installed
-if ! command -v k3s &> /dev/null; then
-    echo "k3s not found, proceeding with installation..."
+set -e # Exit on fail
+set -u # Treat unset variables as an error
+set -o pipefail # Fail if any command in a pipeline fails
 
-    echo "Install k3s"
-    echo "curl -sfL https://get.k3s.io | sh -"
+# Color definitions
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly NC='\033[0m' # No Color
 
-    echo "Install kubectl"
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl"
-    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
+# Constants
+readonly KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
 
-    echo "Install helm"
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+###############################################################################
+# Functions
+###############################################################################
 
-    echo "Install ArgoCD cli"
-    curl -sSL -o argocd-linux-arm64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-arm64
-    sudo install -m 555 argocd-linux-arm64 /usr/local/bin/argocd
-    rm argocd-linux-arm64
-fi
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
 
-export KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
-sudo chmod +r "$KUBECONFIG"
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
 
-# Wait for k3s API server to be ready
-echo "Waiting for Kubernetes API server to be ready..."
-until kubectl get nodes &>/dev/null; do
-  echo "Waiting for Kubernetes API server..."
-  sleep 5
-done
-echo "Kubernetes API server is ready"
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
 
-# Install ArgoCD
-kubectl create namespace argocd
-kubectl apply -n argocd \
-    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+check_prerequisites() {
+    if [[ -z "${GH_TOKEN:-}" ]]; then
+        log_error "GH_TOKEN environment variable is not set"
+        exit 1
+    fi
+}
 
-# ArgoCD login
-argoPassword=$(./argo_login.sh)
+install_k3s() {
+    if ! command -v k3s &> /dev/null; then
+        log_info "Installing k3s..."
+        curl -sfL https://get.k3s.io | sh - || { log_error "Failed to install k3s"; exit 1; }
+        log_info "k3s installation completed"
+    else
+        log_info "k3s is already installed"
+    fi
+}
 
-# Generate a new password for ArgoCD
-newArgoPassword=$(date +%s | sha256sum | base64 | head -c 32)
-argocd account update-password \
-    --current-password "$argoPassword" \
-    --new-password "$newArgoPassword"
+install_kubectl() {
+    if ! command -v kubectl &> /dev/null; then
+        log_info "Installing kubectl..."
+        local kubectl_version
+        kubectl_version=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+        curl -LO "https://dl.k8s.io/release/${kubectl_version}/bin/linux/arm64/kubectl" || { log_error "Failed to download kubectl"; exit 1; }
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
+        log_info "kubectl installation completed"
+    else
+        log_info "kubectl is already installed"
+    fi
+}
 
-echo "- New argocd password: $newArgoPassword"
-echo "- ArgoCD UI: http://localhost:8080"
-echo "- Login with username 'admin' and new password, to update it in password manager"
+install_helm() {
+    if ! command -v helm &> /dev/null; then
+        log_info "Installing Helm..."
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash || { log_error "Failed to install Helm"; exit 1; }
+        log_info "Helm installation completed"
+    else
+        log_info "Helm is already installed"
+    fi
+}
 
-# Set the new password in the argocd secret
-kubectl get secret argocd-initial-admin-secret \
-    --output json \
-    --namespace argocd | \
-    jq ".data[\"password\"]=\"$newArgoPassword\"" | \
-    kubectl apply -f -
+install_argocd_cli() {
+    if ! command -v argocd &> /dev/null; then
+        log_info "Installing ArgoCD CLI..."
+        curl -sSL -o argocd-linux-arm64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-arm64 || { log_error "Failed to download ArgoCD CLI"; exit 1; }
+        sudo install -m 555 argocd-linux-arm64 /usr/local/bin/argocd
+        rm argocd-linux-arm64
+        log_info "ArgoCD CLI installation completed"
+    else
+        log_info "ArgoCD CLI is already installed"
+    fi
+}
 
-# Add private repo
-argocd repo add https://github.com/Cupprum/MediaServer.git \
-  --name 'MediaServer' \
-  --project 'default' \
-  --username "$(git config user.name)" \
-  --password "$GH_TOKEN"
+setup_kubeconfig() {
+    log_info "Setting up kubeconfig..."
+    export KUBECONFIG
+    sudo chmod +r "$KUBECONFIG" || { log_error "Failed to set kubeconfig permissions"; exit 1; }
+}
+
+wait_for_k8s() {
+    log_info "Waiting for Kubernetes API server to be ready..."
+    until kubectl get nodes &>/dev/null; do
+        log_info "Waiting for Kubernetes API server..."
+        sleep 5
+    done
+    log_info "Kubernetes API server is ready"
+}
+
+install_argocd() {
+    log_info "Installing ArgoCD..."
+    kubectl create namespace argocd || true
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml || { log_error "Failed to install ArgoCD"; exit 1; }
+}
+
+setup_argocd() {
+    log_info "Setting up ArgoCD..."
+    local argoPassword
+    local newArgoPassword
+
+    argoPassword=$(./argo_login.sh) || { log_error "Failed to get ArgoCD password"; exit 1; }
+    newArgoPassword=$(date +%s | sha256sum | base64 | head -c 32)
+
+    argocd account update-password \
+        --current-password "$argoPassword" \
+        --new-password "$newArgoPassword" || { log_error "Failed to update ArgoCD password"; exit 1; }
+
+    # Update secret with new password
+    kubectl get secret argocd-initial-admin-secret \
+        --output json \
+        --namespace argocd | \
+        jq ".data[\"password\"]=\"$newArgoPassword\"" | \
+        kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
+
+    log_info "- New argocd password: $newArgoPassword"
+    log_info "- ArgoCD UI: http://localhost:8080"
+    log_info "- Login with username 'admin' and new password, to update it in password manager"
+}
+
+setup_repository() {
+    log_info "Adding repository to ArgoCD..."
+    argocd repo add https://github.com/Cupprum/MediaServer.git \
+        --name 'MediaServer' \
+        --project 'default' \
+        --username "$(git config user.name)" \
+        --password "$GH_TOKEN" || { log_error "Failed to add repository to ArgoCD"; exit 1; }
+}
+
+###############################################################################
+# Main Script Execution
+###############################################################################
+
+main() {
+    check_prerequisites
+    install_k3s
+    install_kubectl
+    install_helm
+    install_argocd_cli
+    setup_kubeconfig
+    wait_for_k8s
+    install_argocd
+    setup_argocd
+    setup_repository
+    log_info "Setup completed successfully"
+}
+
+# Execute main function
+main
