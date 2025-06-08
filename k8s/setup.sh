@@ -26,8 +26,6 @@ fi
 export KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
 sudo chmod +r "$KUBECONFIG"
 
-# TODO: maybe i should wait until k3s is up and running
-
 # Install ArgoCD
 kubectl create namespace argocd
 kubectl apply -n argocd \
