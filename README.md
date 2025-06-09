@@ -4,7 +4,7 @@
 
 * Install the Kubernetes cluster, read more in the `k8s` folder.
 
-* Install the whole Jellyfin setup, read more in the `jellyfin_setup` folder.
+* Install the whole Media server Jellyfin setup, read more in the `server` folder.
 
 // TODO
 * Install Grafana, read more in the `monitoring` folder.
