@@ -2,9 +2,9 @@
 
 The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Heimdall.
 
-## Installation process
+## Installation and configuration
 
-* Install the ArgoCD applications, which configure the services using `install.sh` shell script.
+* Install the ArgoCD applications, which configure the services using `setup.sh` shell script, specifically `./setup.sh install`.
 
 * Access Jellyfin: [http://192.168.0.100:8096](http://192.168.0.100:8096)
 
@@ -39,4 +39,4 @@ The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Heimdall.
 
 ## Deletion process
 
-Delete the argocd apps with their configuration: `./delete.sh`
+Delete the argocd apps with their configuration: `./setup.sh delete`
