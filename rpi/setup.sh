@@ -34,6 +34,7 @@ update_system() {
 }
 
 install_docker() {
+    # TODO: check if docker is already installed
     log_info "Installing Docker..."
     curl -sSL https://get.docker.com | sh || { log_error "Docker installation failed"; exit 1; }
     usermod -aG docker "$USER" || { log_error "Failed to add user to docker group"; exit 1; }
@@ -60,6 +61,8 @@ enable_vnc() {
 }
 
 install_pia() {
+    # TODO: i should somehow check for newer versions of PIA
+    # TODO: check if PIA is already installed
     local PIA_INSTALLER_URL="https://installers.privateinternetaccess.com/download/pia-linux-arm64-3.6-08303.run"
     local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
 
