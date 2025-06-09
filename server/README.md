@@ -1,5 +1,6 @@
-# Configure Jellyfin setup
+# Configure Media Server
 
+The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Heimdall.
 
 ## Installation process
 
