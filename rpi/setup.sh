@@ -5,6 +5,7 @@
 #
 # This script automates the initial setup of a Raspberry Pi including:
 # - System updates
+# - Installation of required tools
 # - Docker installation
 # - K3s preconfiguration
 # - WiFi disable
@@ -31,6 +32,11 @@ update_system() {
     log_info "Updating system packages..."
     apt update || { log_error "Failed to update package list"; exit 1; }
     apt upgrade -y || { log_error "Failed to upgrade packages"; exit 1; }
+}
+
+install_tools() {
+    log_info "Installing required tools..."
+    apt install -y jq || { log_error "Failed to install required tools"; exit 1; }
 }
 
 install_docker() {
@@ -115,6 +121,7 @@ main() {
     check_root
     log_info "Starting Raspberry Pi setup process..."
     update_system
+    install_tools
     install_docker
     configure_k3s
     disable_wifi
