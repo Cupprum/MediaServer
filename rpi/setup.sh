@@ -74,30 +74,14 @@ install_pia() {
     if command -v piactl &>/dev/null; then
         log_info "PIA is already installed, skipping installation"
     else
-        # Get latest PIA installer URL for arm64
         log_info "Finding latest PIA installer version..."
+
         local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
         local PIA_INSTALLER_URL
-        
-        # Use curl and jq to parse GitHub API response and find the arm64 installer
-        if ! command -v jq &>/dev/null; then
-            log_info "Installing jq..."
-            apt install -y jq || { log_error "Failed to install jq"; exit 1; }
-        fi
-        
-        # Extract download URL for the arm64 installer from the latest release
-        PIA_INSTALLER_URL=$(curl -s "$PIA_RELEASES_URL" | \
-            jq -r '.assets[] | select(.name | test("pia-linux-arm64.*\\.run$")) | .browser_download_url')
-        
-        if [[ -z "$PIA_INSTALLER_URL" ]]; then
-            log_error "Failed to find latest PIA installer for arm64"
-            # Fallback to a known version
-            PIA_INSTALLER_URL="https://installers.privateinternetaccess.com/download/pia-linux-arm64-3.6-08303.run"
-            log_warn "Using fallback PIA installer version"
-        else
-            log_info "Found latest PIA installer: $(basename "$PIA_INSTALLER_URL")"
-        fi
+        PIA_INSTALLER_URL=$(curl -s "${PIA_RELEASES_URL}" | \
+            jq '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')        
         local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
+        echo "Latest PIA installer URL: $PIA_INSTALLER_URL"
 
         log_info "Downloading PIA installer..."
         curl -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL" || { log_error "Failed to download PIA installer"; exit 1; }
