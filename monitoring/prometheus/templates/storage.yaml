@@ -1,0 +1,33 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: prometheus
+provisioner: rancher.io/local-path
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prometheus
+spec:
+  storageClassName: prometheus
+  capacity:
+    storage: 100Mi # Required value, but is ignored by local-path-provisioner
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.storage.source | quote }}
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus
+spec:
+  storageClassName: prometheus
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi # Required value, but is ignored by local-path-provisioner

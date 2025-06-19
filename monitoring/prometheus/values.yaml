@@ -1,0 +1,23 @@
+storage:
+  source: /media/x42/T5/MediaServer/provision/prometheus
+
+prometheus:
+  alertmanager:
+    enabled: false
+
+  prometheus-pushgateway:
+    enabled: false
+
+  server:
+    persistentVolume:
+      existingClaim: prometheus
+
+    securityContext:
+      runAsUser: 1000
+      runAsNonRoot: false
+      runAsGroup: 1000
+      fsGroup: 1000
+
+  configmapReload:
+    prometheus:
+      enabled: false
