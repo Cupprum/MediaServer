@@ -18,6 +18,9 @@ prometheus:
       runAsGroup: 1000
       fsGroup: 1000
 
+    service:
+      servicePort: 9090
+
   configmapReload:
     prometheus:
       enabled: false
