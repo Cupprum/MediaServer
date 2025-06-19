@@ -24,3 +24,9 @@ prometheus:
   configmapReload:
     prometheus:
       enabled: false
+
+grafana:
+  service:
+    enabled: true
+    type: NodePort
+    port: 3000
