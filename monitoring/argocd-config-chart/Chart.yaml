@@ -1,0 +1,6 @@
+apiVersion: v2
+name: argocd-config-chart
+description: A Helm chart configuring ArgoCD to deploy the monitoring stack
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
