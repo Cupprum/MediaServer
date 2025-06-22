@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Cupprum/MediaServer.git
-    path: jellyfin_setup/service-chart
+    path: server/service-chart
     helm:
       valueFiles:
         - values/{{ .Values.service }}.yaml
