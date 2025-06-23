@@ -71,7 +71,6 @@ install_monitoring() {
         log_info "Creating grafana-credentials secret..."
         kubectl create secret generic grafana-credentials \
             --namespace monitoring \
-            --create-namespace \
             --from-literal=admin-user="${GRAFANA_USERNAME}" \
             --from-literal=admin-password="${GRAFANA_PASSWORD}" \
             --dry-run=client -o yaml | kubectl apply -f - || {
@@ -84,8 +83,7 @@ install_monitoring() {
     log_info "Installing ArgoCD application for monitoring..."
     kubectl apply \
         --filename ./monitoring_app.yaml \
-        --namespace monitoring \
-        --create-namespace || {
+        --namespace monitoring || {
             log_error "Failed to create ArgoCD application for monitoring"
             exit 1
     }
