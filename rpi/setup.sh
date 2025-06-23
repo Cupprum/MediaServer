@@ -36,7 +36,7 @@ update_system() {
 
 install_tools() {
     log_info "Installing required tools..."
-    apt install -y jq || { log_error "Failed to install required tools"; exit 1; }
+    apt install -y jq tmux || { log_error "Failed to install required tools"; exit 1; }
 }
 
 install_docker() {
