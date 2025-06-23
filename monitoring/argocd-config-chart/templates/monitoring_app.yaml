@@ -4,7 +4,7 @@ metadata:
   name: monitoring-app
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io/background
 spec:
   project: default
   source:
@@ -12,4 +12,6 @@ spec:
     path: monitoring/monitoring-chart
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: monitoring
+  syncPolicy:
+    automated: {}
