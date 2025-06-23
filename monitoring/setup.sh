@@ -12,6 +12,10 @@ helm repo update
 
 helm dependency build
 
+set -a # automatically export all variables
+source .env
+set +a
+
 helm install monitoring . \
     --namespace monitoring \
     --set "grafanaAdminUser=${GRAFANA_USERNAME:?'Error: Missing GRAFANA_USERNAME variable'}" \
