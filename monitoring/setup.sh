@@ -14,6 +14,8 @@ helm dependency build
 
 helm install monitoring . \
     --namespace monitoring \
+    --set "grafanaAdminUser=${GRAFANA_USERNAME:?'Error: Missing GRAFANA_USERNAME variable'}" \
+    --set "grafanaAdminPassword=${GRAFANA_PASSWORD:?'Error: Missing GRAFANA_PASSWORD variable'}" \
     --create-namespace
 
 helm uninstall monitoring \
