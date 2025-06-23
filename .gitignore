@@ -6,3 +6,5 @@ kubeconfig.yaml
 
 # Helm
 *.tgz
+
+.env
