@@ -62,6 +62,7 @@ install_apps() {
         log_info "Installing $service..."
         helm install "$service" ./argocd-config-chart \
             --namespace server \
+            --create-namespace \
             --set "service=$service" || {
                 log_error "Failed to install $service"
                 exit 1
