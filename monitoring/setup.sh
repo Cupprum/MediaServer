@@ -64,20 +64,20 @@ install_monitoring() {
         log_info "Monitoring namespace created successfully"
     fi
 
-    log_info "Checking if grafana-credentials secret already exists..."
-    if kubectl get secret grafana-credentials --namespace monitoring &>/dev/null; then
-        log_info "grafana-credentials secret already exists, skipping creation"
+    log_info "Checking if grafana-admin-credentials secret already exists..."
+    if kubectl get secret grafana-admin-credentials --namespace monitoring &>/dev/null; then
+        log_info "grafana-admin-credentials secret already exists, skipping creation"
     else
-        log_info "Creating grafana-credentials secret..."
-        kubectl create secret generic grafana-credentials \
+        log_info "Creating grafana-admin-credentials secret..."
+        kubectl create secret generic grafana-admin-credentials \
             --namespace monitoring \
             --from-literal=admin-user="${GRAFANA_USERNAME}" \
             --from-literal=admin-password="${GRAFANA_PASSWORD}" \
             --dry-run=client -o yaml | kubectl apply -f - || {
-                log_error "Failed to create grafana-credentials secret"
+                log_error "Failed to create grafana-admin-credentials secret"
                 exit 1
         }
-        log_info "grafana-credentials secret created successfully"
+        log_info "grafana-admin-credentials secret was created successfully"
     fi
 
     log_info "Installing ArgoCD application for monitoring..."
@@ -98,12 +98,12 @@ delete_monitoring() {
     }
     log_info "ArgoCD application for monitoring was removed successfully"
 
-    log_info "Cleaning up secrets..."
-    kubectl delete secret grafana-credentials --namespace monitoring || {
-        log_error "grafana-credentials secret was not deleted"
+    log_info "Cleaning up grafana-admin-credentials secret..."
+    kubectl delete secret grafana-admin-credentials --namespace monitoring || {
+        log_error "grafana-admin-credentials secret was not deleted"
         exit 1
     }
-    log_info "grafana-credentials secret was deleted successfully"
+    log_info "grafana-admin-credentials secret was deleted successfully"
 }
 
 ###############################################################################
