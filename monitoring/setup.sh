@@ -1,33 +1,134 @@
-# Install Prometheus
+#!/usr/bin/env bash
 
-KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
-sudo chmod +r "$KUBECONFIG"
+###############################################################################
+# ArgoCD Monitoring App Management Script
+#
+# This script manages the ArgoCD application for the monitoring stack
+#
+# Usage: ./script.sh [install|delete]
+###############################################################################
 
-# Install Prometheus
-cd './monitoring-chart' || exit 1
+# Source common utilities
+# shellcheck source=../utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../utils.sh"
 
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
+###############################################################################
+# Functions
+###############################################################################
 
-helm dependency build
+show_help() {
+    cat << EOF
+Usage: $(basename "$0") [MODE]
 
-set -a # automatically export all variables
-source .env
-set +a
+Modes:
+    install     Install monitoring ArgoCD application
+    delete      Remove monitoring ArgoCD application
 
-helm install monitoring . \
-    --namespace monitoring \
-    --set "grafanaAdminUser=${GRAFANA_USERNAME:?'Error: Missing GRAFANA_USERNAME variable'}" \
-    --set "grafanaAdminPassword=${GRAFANA_PASSWORD:?'Error: Missing GRAFANA_PASSWORD variable'}" \
-    --create-namespace
+Environment variables required:
+    GRAFANA_USERNAME    Username for Grafana admin
+    GRAFANA_PASSWORD    Password for Grafana admin
 
-helm uninstall monitoring \
-    --namespace monitoring
+Example:
+    $(basename "$0") install    # Install monitoring application
+    $(basename "$0") delete     # Remove monitoring application
+EOF
+}
 
-# Get Grafana admin password
-kubectl get secrets monitoring-grafana \
-    --namespace monitoring \
-    --output jsonpath="{.data.admin-password}" | base64 -d
+verify_kube_config() {
+    if ! kubectl cluster-info &> /dev/null; then
+        log_error "Failed to contact k8s cluster, is KUBECONFIG configured properly?"
+        exit 1
+    fi
+}
 
-# TODO: ArgoCD
+install_monitoring() {
+    log_info "Source environment variables..."
+    set -a # automatically export all variables
+    source .env
+    set +a
+    if [ -z "$GRAFANA_USERNAME" ] || [ -z "$GRAFANA_PASSWORD" ]; then
+        log_error "GRAFANA_USERNAME and GRAFANA_PASSWORD must be present in the environment"
+        exit 1
+    fi
+    log_info "Environment variables loaded successfully"
+
+    log_info "Checking if grafana-credentials secret already exists..."
+    if kubectl get secret grafana-credentials --namespace monitoring &>/dev/null; then
+        log_info "grafana-credentials secret already exists, skipping creation"
+    else
+        log_info "Creating grafana-credentials secret..."
+        kubectl create secret generic grafana-credentials \
+            --namespace monitoring \
+            --create-namespace \
+            --from-literal=admin-user="${GRAFANA_USERNAME}" \
+            --from-literal=admin-password="${GRAFANA_PASSWORD}" \
+            --dry-run=client -o yaml | kubectl apply -f - || {
+                log_error "Failed to create grafana-credentials secret"
+                exit 1
+        }
+        log_info "grafana-credentials secret created successfully"
+    fi
+
+    log_info "Installing ArgoCD application for monitoring..."
+    kubectl apply \
+        --filename ./monitoring_app.yaml \
+        --namespace monitoring \
+        --create-namespace || {
+            log_error "Failed to create ArgoCD application for monitoring"
+            exit 1
+    }
+    log_info "ArgoCD application for monitoring was installed successfully"
+}
+
+delete_monitoring() {
+    log_info "Removing ArgoCD application for monitoring..."
+    kubectl delete \
+        --filename ./monitoring_app.yaml \
+        --namespace monitoring || {
+            log_error "Failed to remove ArgoCD application for monitoring"
+            exit 1
+    }
+    log_info "ArgoCD application for monitoring was removed successfully"
+
+    log_info "Cleaning up secrets..."
+    kubectl delete secret grafana-credentials --namespace monitoring || {
+        log_error "grafana-credentials secret was not deleted"
+        exit 1
+    }
+    log_info "grafana-credentials secret was deleted successfully"
+}
+
+###############################################################################
+# Main Script Execution
+###############################################################################
+
+main() {
+    if [ $# -ne 1 ]; then
+        log_error "Invalid number of arguments"
+        show_help
+        exit 1
+    fi
+
+    verify_kube_config
+
+    case "$1" in
+        "install")
+            install_monitoring
+            ;;
+        "delete")
+            delete_monitoring
+            ;;
+        "help"|"--help"|"-h")
+            show_help
+            exit 0
+            ;;
+        *)
+            log_error "Invalid mode: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+# Execute main function
+main "$@"
