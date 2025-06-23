@@ -81,11 +81,9 @@ install_monitoring() {
     fi
 
     log_info "Installing ArgoCD application for monitoring..."
-    kubectl apply \
-        --filename ./monitoring_app.yaml \
-        --namespace monitoring || {
-            log_error "Failed to create ArgoCD application for monitoring"
-            exit 1
+    kubectl apply --filename ./monitoring_app.yaml || {
+        log_error "Failed to create ArgoCD application for monitoring"
+        exit 1
     }
     log_info "ArgoCD application for monitoring was installed successfully"
 }
