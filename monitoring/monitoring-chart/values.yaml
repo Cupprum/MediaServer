@@ -40,6 +40,8 @@ prometheus:
       enabled: false
 
 grafana:
+  admin:
+    existingSecret: "grafana-admin-credentials"
   service:
     enabled: true
     type: NodePort
