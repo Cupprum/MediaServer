@@ -60,12 +60,9 @@ install_apps() {
     
     for service in "${SERVICES[@]}"; do
         log_info "Installing $service..."
-        helm install "$service" ./argocd-config-chart \
-            --namespace server \
-            --create-namespace \
-            --set "service=$service" || {
-                log_error "Failed to install $service"
-                exit 1
+        helm install "$service" ./argocd-config-chart --set "service=$service" || {
+            log_error "Failed to install $service"
+            exit 1
         }
     done
     
@@ -77,10 +74,9 @@ delete_apps() {
     
     for service in "${SERVICES[@]}"; do
         log_info "Removing $service..."
-        helm uninstall "$service" \
-            --namespace server || {
-                log_error "Failed to remove $service"
-                exit 1
+        helm uninstall "$service" || {
+            log_error "Failed to remove $service"
+            exit 1
         }
     done
     
