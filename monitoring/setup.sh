@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ###############################################################################
-# ArgoCD Monitoring App Management Script
+# ArgoCD App for Monitoring Management Script
 #
 # This script manages the ArgoCD application for the monitoring stack
 #
