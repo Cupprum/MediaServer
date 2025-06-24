@@ -29,3 +29,9 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
+verify_kube_config() {
+    if ! kubectl cluster-info &> /dev/null; then
+        log_error "Failed to contact k8s cluster, is KUBECONFIG configured properly?"
+        exit 1
+    fi
+}
