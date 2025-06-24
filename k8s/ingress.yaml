@@ -6,10 +6,10 @@ spec:
   rules:
   - http:
       paths:
-      - path: /heimdall
+      - path: /qbittorrent
         pathType: Prefix
         backend:
           service:
-            name: heimdall
+            name: qbittorrent
             port:
-              number: 8088
+              number: 8080
