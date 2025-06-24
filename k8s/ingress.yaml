@@ -6,10 +6,10 @@ spec:
   rules:
   - http:
       paths:
-      - path: /argocd
+      - path: /heimdall
         pathType: Prefix
         backend:
           service:
-            name: argocd-server
+            name: heimdall
             port:
-              number: 80
+              number: 8088
