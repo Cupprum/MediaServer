@@ -45,7 +45,7 @@ grafana:
   service:
     enabled: true
     type: NodePort
-    port: 3000
+    port: 8501
 
   datasources:
     datasources.yaml:
