@@ -13,4 +13,5 @@ spec:
         backend:
           service:
             name: grafana
-            servicePort: 80
+            port:
+              number: 80
