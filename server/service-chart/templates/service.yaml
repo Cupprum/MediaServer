@@ -1,5 +1,4 @@
 {{- $serviceName := .Values.serviceName }}
-{{- $port := .Values.port }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -68,7 +67,7 @@ spec:
           service:
             name: {{ $serviceName }}
             port:
-              number: {{ $port }}
+              number: {{ .Values.port }}
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
