@@ -1,5 +1,6 @@
 {{- $serviceName := .Values.serviceName }}
 {{- $port := .Values.port }}
+{{- $route := .Values.route }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -62,7 +63,7 @@ spec:
   - host: "pi.local"
     http:
       paths:
-      - path: {{ .Values.route | quote }}
+      - path: {{ $route | quote }}
         pathType: Prefix
         backend:
           service:
