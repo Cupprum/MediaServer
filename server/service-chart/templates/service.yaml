@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.serviceName }}
+  name: {{ $serviceName }}
   labels:
-    app: {{ .Values.serviceName }}
+    app: {{ $serviceName }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.serviceName }}
+      app: {{ $serviceName }}
   template:
     metadata:
       labels:
-        app: {{ .Values.serviceName }}
+        app: {{ $serviceName }}
     spec:
       containers:
-        - name: {{ .Values.serviceName }}
+        - name: {{ $serviceName }}
           image: {{ .Values.image }}
           env:
             - name: TZ
@@ -43,10 +43,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.serviceName }}
+  name: {{ $serviceName }}
 spec:
   selector:
-    app: {{ .Values.serviceName }}
+    app: {{ $serviceName }}
   ports:
     - port: {{ .Values.port }}
       protocol: TCP
@@ -60,11 +60,11 @@ spec:
   rules:
   - http:
       paths:
-      - path: pi.local/{{ .Values.serviceName }}
+      - path: pi.local/{{ $serviceName }}
         pathType: Prefix
         backend:
           service:
-            name: {{ .Values.serviceName }}
+            name: {{ $serviceName }}
             port:
               number: {{ .Values.port }}
 ---
