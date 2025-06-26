@@ -83,5 +83,9 @@ grafana:
   ingress:
     enabled: true
     hosts:
-      - "grafana.pi.local"
-    path: /
+      - "pi.local"
+    path: "/grafana"
+
+  env:
+    GF_SERVER_ROOT_URL: http://pi.local/grafana
+    GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
