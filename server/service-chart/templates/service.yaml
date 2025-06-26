@@ -61,7 +61,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: pi.local/{{ $serviceName }}
+      - path: "http://pi.local/{{ $serviceName }}"
         pathType: Prefix
         backend:
           service:
