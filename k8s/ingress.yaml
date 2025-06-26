@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: grafana
+            name: monitoring-app-grafana
             port:
               number: 80
