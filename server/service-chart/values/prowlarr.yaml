@@ -1,6 +1,6 @@
 serviceName: prowlarr
 image: linuxserver/prowlarr:latest
-servicePort: 9696
+port: 9696
 mountPoints:
   - name: config
     source: /media/x42/T5/MediaServer/provision/prowlarr/config

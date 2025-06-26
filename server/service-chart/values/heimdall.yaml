@@ -1,7 +1,6 @@
 serviceName: heimdall
 image: linuxserver/heimdall:latest
-servicePort: 80
-hostPort: 8088
+port: 80
 mountPoints:
   - name: config
     source: /media/x42/T5/MediaServer/provision/heimdall/config
