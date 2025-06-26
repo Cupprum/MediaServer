@@ -83,5 +83,5 @@ grafana:
   ingress:
     enabled: true
     hosts:
-      - "192.168.0.100"
+      - "pi.local"
     path: /grafana
