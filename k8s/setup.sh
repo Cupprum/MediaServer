@@ -114,6 +114,9 @@ setup_argocd() {
         jq ".data[\"password\"]=\"$newArgoPassword\"" | \
         kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
 
+    # Expose ArgoCD through Ingress
+    kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
+
     log_info "- New argocd password: $newArgoPassword"
     log_info "- ArgoCD UI: http://localhost:8080"
     log_info "- Login with username 'admin' and new password, to update it in password manager"
