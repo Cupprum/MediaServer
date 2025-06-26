@@ -26,8 +26,7 @@ spec:
             - name: PGID
               value: "1000"
           ports:
-            - containerPort: {{ .Values.servicePort }}
-              hostPort: {{ .Values.hostPort | default .Values.servicePort }}
+            - containerPort: {{ .Values.port }}
               protocol: TCP
           volumeMounts:
             {{- range .Values.mountPoints }}
@@ -46,14 +45,28 @@ kind: Service
 metadata:
   name: {{ .Values.serviceName }}
 spec:
-  type: NodePort
   selector:
     app: {{ .Values.serviceName }}
   ports:
-    - port: {{ .Values.hostPort | default .Values.servicePort }}
+    - port: {{ .Values.port }}
       protocol: TCP
-      targetPort: {{ .Values.hostPort | default .Values.servicePort }}
 {{- range .Values.mountPoints }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.serviceName }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: pi.local/{{ .Values.serviceName }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.serviceName }}
+            port:
+              number: {{ .Values.port }}
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
