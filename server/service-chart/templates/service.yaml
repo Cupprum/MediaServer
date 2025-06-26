@@ -59,7 +59,7 @@ kind: Ingress
 metadata:
   name: {{ $serviceName }}
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-{{ $serviceName }}-strip-prefix@kubernetescrd
 spec:
   rules:
   - host: "pi.local"
@@ -72,6 +72,15 @@ spec:
             name: {{ $serviceName }}
             port:
               number: {{ $port }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ $serviceName }}-strip-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /{{ $serviceName }}
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
