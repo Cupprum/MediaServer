@@ -62,7 +62,7 @@ spec:
   - host: "pi.local"
     http:
       paths:
-      - path: {{ $serviceName }}
+      - path: "/{{ $serviceName }}"
         pathType: Prefix
         backend:
           service:
