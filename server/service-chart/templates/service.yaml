@@ -61,8 +61,7 @@ metadata:
   namespace: server
 spec:
   replacePath:
-    regex: ^/{{ $serviceName }}(.*)
-    replacement: /$1
+    path: /{{ $serviceName }}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
