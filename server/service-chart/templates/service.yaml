@@ -1,4 +1,5 @@
 {{- $serviceName := .Values.serviceName }}
+{{- $port := .Values.port }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,7 +49,7 @@ spec:
   selector:
     app: {{ $serviceName }}
   ports:
-    - port: {{ .Values.port }}
+    - port: {{ $port }}
       protocol: TCP
 {{- range .Values.mountPoints }}
 ---
