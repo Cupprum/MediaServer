@@ -55,15 +55,6 @@ spec:
 {{- range .Values.mountPoints }}
 ---
 apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: {{ $serviceName }}-path-rewrite
-  namespace: server
-spec:
-  replacePath:
-    path: /{{ $serviceName }}
----
-apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ $serviceName }}
@@ -72,10 +63,7 @@ spec:
     - web
   routes:
   - kind: Rule
-    match: Host(`pi.local`) && PathPrefix(`/{{ $serviceName }}`)
-    middlewares:
-    - name: {{ $serviceName }}-path-rewrite
-      namespace: server
+    match: Host(`{{ $serviceName }}.pi.local`)
     services:
     - kind: Service
       name: {{ $serviceName }}
