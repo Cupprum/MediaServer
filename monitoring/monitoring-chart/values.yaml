@@ -82,7 +82,4 @@ grafana:
 
   ingress:
     enabled: true
-    pathType: Prefix
-    hosts:
-      - paths:
-        - /grafana
+    path: /grafana
