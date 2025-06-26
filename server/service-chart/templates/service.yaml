@@ -59,7 +59,7 @@ metadata:
   name: {{ $serviceName }}
 spec:
   rules:
-  - host: "{{ $serviceName }}.pi.local"
+  - host: "pi.local.{{ $serviceName }}"
     http:
       paths:
       - path: "/"
