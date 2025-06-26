@@ -1,6 +1,5 @@
 serviceName: qbittorrent
 image: lscr.io/linuxserver/qbittorrent:latest
-route: /qbittorrent
 port: 8080
 mountPoints:
   - name: config

@@ -1,6 +1,5 @@
 serviceName: jellyfin
 image: jellyfin/jellyfin:latest
-route: /jellyfin
 port: 8096
 mountPoints:
   - name: config

@@ -1,6 +1,5 @@
 serviceName: prowlarr
 image: linuxserver/prowlarr:latest
-route: /prowlarr
 port: 9696
 mountPoints:
   - name: config
