@@ -59,7 +59,7 @@ kind: Ingress
 metadata:
   name: {{ $serviceName }}
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-{{ $serviceName }}-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: server-{{ $serviceName }}-strip-prefix@kubernetescrd
 spec:
   rules:
   - host: "pi.local"
