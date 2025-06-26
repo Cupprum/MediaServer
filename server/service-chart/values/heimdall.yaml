@@ -1,5 +1,6 @@
 serviceName: heimdall
 image: linuxserver/heimdall:latest
+route: /
 port: 80
 mountPoints:
   - name: config
