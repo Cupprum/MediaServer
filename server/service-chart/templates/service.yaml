@@ -59,10 +59,10 @@ metadata:
   name: {{ $serviceName }}
 spec:
   rules:
-  - host: "pi.local.{{ $serviceName }}"
+  - host: "pi.local"
     http:
       paths:
-      - path: "/"
+      - path: "/{{ $serviceName }}"
         pathType: Prefix
         backend:
           service:
