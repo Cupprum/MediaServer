@@ -44,7 +44,6 @@ grafana:
     existingSecret: "grafana-admin-credentials"
   service:
     enabled: true
-    type: NodePort
 
   datasources:
     datasources.yaml:
