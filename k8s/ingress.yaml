@@ -16,8 +16,8 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: test-stripprefix
-  namespace: server
+  name: strip-prefix
+  namespace: default
 spec:
   stripPrefix:
     prefixes:
