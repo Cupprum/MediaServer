@@ -33,7 +33,7 @@ EOF
 install_ingress() {
     log_info "Installing Ingress..."
     
-    kubectl apply --filename "./ingress.yaml" -n monitoring
+    kubectl apply --filename "./ingress.yaml"
     
     log_info "Ingress installed successfully"
 }
@@ -41,7 +41,7 @@ install_ingress() {
 delete_ingress() {
     log_info "Removing Ingress..."
 
-    kubectl delete --filename "./ingress.yaml" -n monitoring
+    kubectl delete --filename "./ingress.yaml"
     
     log_info "Ingress removed successfully"
 }
