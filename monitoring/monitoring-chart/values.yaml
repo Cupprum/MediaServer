@@ -12,12 +12,6 @@ prometheus:
     persistentVolume:
       existingClaim: prometheus
 
-    securityContext:
-      runAsUser: 1000
-      runAsNonRoot: false
-      runAsGroup: 1000
-      fsGroup: 1000
-
     service:
       servicePort: 9090
 
