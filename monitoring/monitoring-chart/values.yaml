@@ -45,7 +45,7 @@ grafana:
       datasources:
         - name: Prometheus
           type: prometheus
-          url: http://monitoring-prometheus-server.monitoring.svc.cluster.local:9090
+          url: http://monitoring-prometheus-server:9090
           access: proxy
           isDefault: true
 
