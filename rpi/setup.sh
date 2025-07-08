@@ -57,6 +57,43 @@ configure_k3s() {
     fi
 }
 
+configure_avahi() {
+    log_info "Installing go-avahi-cname..."
+    log_info "Finding latest go-avahi-cname release..."
+    # [1:] used in jq removes the leading 'v' from the version string
+    local latestAvahiVersion avahiUrl
+    latestAvahiVersion=$(curl -sL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
+    if [[ -z "$latestAvahiVersion" ]]; then
+        log_error "Failed to retrieve the latest go-avahi-cname version"
+        exit 1
+    fi
+    log_info "Latest go-avahi-cname release found: ${latestAvahiVersion}"
+    
+    log_info "Download the latest release of go-avahi-cname..."
+    avahiUrl="https://github.com/grishy/go-avahi-cname/releases/download/v${latestAvahiVersion}/go-avahi-cname_${latestAvahiVersion}_linux_arm64.tar.gz"
+    curl -sSL -o go-avahi-cname.tar.gz "${avahiUrl}" || { log_error "Failed to download go-avahi-cname"; exit 1; }
+    tar -xzf go-avahi-cname.tar.gz
+    # Clean up the tarball and other files
+    rm go-avahi-cname.tar.gz LICENSE README.md
+
+    log_info "Moving go-avahi-cname to /usr/local/bin..."
+    mv go-avahi-cname /usr/local/bin/go-avahi-cname || { log_error "Failed to move go-avahi-cname to /usr/local/bin"; exit 1; }
+
+    log_info "Setting permissions for go-avahi-cname..."
+    chmod +x /usr/local/bin/go-avahi-cname
+
+    log_info "Creating systemd service for go-avahi-cname..."
+    cp go-avahi-cname.service /etc/systemd/system/go-avahi-cname.service || { log_error "Failed to copy service file"; exit 1; }
+
+    log_info "Enabling and starting go-avahi-cname service..."
+    systemctl daemon-reload
+    systemctl enable go-avahi-cname.service
+    systemctl start go-avahi-cname.service
+    log_info "go-avahi-cname systemd service started successfully"
+
+    log_info "go-avahi-cname installed successfully"
+}
+
 disable_wifi() {
     log_info "Disabling WiFi..."
     if ! grep -q "dtoverlay=disable-wifi" /boot/firmware/config.txt; then
@@ -107,6 +144,7 @@ main() {
     update_system
     install_tools
     install_docker
+    configure_avahi
     configure_k3s
     disable_wifi
     enable_vnc
