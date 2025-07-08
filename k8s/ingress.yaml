@@ -25,6 +25,3 @@ spec:
       namespace: argocd
       port: 80
       scheme: h2c
-  tls:
-    certResolver: default
-    options: {}
