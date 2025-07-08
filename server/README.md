@@ -6,6 +6,8 @@ The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Heimdall.
 
 * Install the ArgoCD applications, which configure the services using `setup.sh` shell script, specifically `./setup.sh install`.
 
+  TODO: change IPs to routes
+
 * Access Jellyfin: [http://192.168.0.100:8096](http://192.168.0.100:8096)
 
 * Enroll Jellyfin as a server, configure movie directory and so on.
