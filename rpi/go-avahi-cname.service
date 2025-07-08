@@ -7,7 +7,7 @@ After=update-hostname.service
 
 [Service]
 Type=exec
-ExecStart=/usr/local/bin/go-avahi-cname subdomain
+ExecStart=/usr/local/bin/go-avahi-cname cname heimdall prowlarr qbittorrent jellyfin
 
 [Install]
 WantedBy=multi-user.target
