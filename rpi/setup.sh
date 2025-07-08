@@ -77,18 +77,18 @@ configure_avahi() {
     rm go-avahi-cname.tar.gz LICENSE README.md
 
     log_info "Moving go-avahi-cname to /usr/local/bin..."
-    mv go-avahi-cname /usr/local/bin/go-avahi-cname || { log_error "Failed to move go-avahi-cname to /usr/local/bin"; exit 1; }
+    sudo mv go-avahi-cname /usr/local/bin/go-avahi-cname || { log_error "Failed to move go-avahi-cname to /usr/local/bin"; exit 1; }
 
     log_info "Setting permissions for go-avahi-cname..."
     chmod +x /usr/local/bin/go-avahi-cname
 
     log_info "Creating systemd service for go-avahi-cname..."
-    cp go-avahi-cname.service /etc/systemd/system/go-avahi-cname.service || { log_error "Failed to copy service file"; exit 1; }
+    sudo cp go-avahi-cname.service /etc/systemd/system/go-avahi-cname.service || { log_error "Failed to copy service file"; exit 1; }
 
     log_info "Enabling and starting go-avahi-cname service..."
-    systemctl daemon-reload
-    systemctl enable go-avahi-cname.service
-    systemctl start go-avahi-cname.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable go-avahi-cname.service
+    sudo systemctl start go-avahi-cname.service
     log_info "go-avahi-cname systemd service started successfully"
 
     log_info "go-avahi-cname installed successfully"
