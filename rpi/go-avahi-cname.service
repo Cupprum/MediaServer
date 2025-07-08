@@ -1,0 +1,13 @@
+[Unit]
+Description=MDNS Configuration to accept subdomains
+Wants=avahi-daemon.service
+After=avahi-daemon.service
+Wants=avahi-daemon.socket
+After=update-hostname.service
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/go-avahi-cname subdomain
+
+[Install]
+WantedBy=multi-user.target
