@@ -15,6 +15,11 @@ prometheus:
     service:
       servicePort: 9090
 
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+
     serverFiles:
       prometheus.yml:
         global:
@@ -36,8 +41,14 @@ prometheus:
 grafana:
   admin:
     existingSecret: "grafana-admin-credentials"
+
   service:
     enabled: true
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
 
   datasources:
     datasources.yaml:
