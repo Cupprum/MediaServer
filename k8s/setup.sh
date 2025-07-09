@@ -117,8 +117,13 @@ setup_argocd() {
     # Expose ArgoCD through Ingress
     kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
 
+    # Configure ArgoCD server to allow insecure connections
+    kubectl patch configmap argocd-cmd-params-cm -n argocd \
+        --type merge \
+        -p '{"data":{"server.insecure":"true"}}'
+
     log_info "- New argocd password: $newArgoPassword"
-    log_info "- ArgoCD UI: http://localhost:8080"
+    log_info "- ArgoCD UI: http://argocd.pi.local/"
     log_info "- Login with username 'admin' and new password, to update it in password manager"
 }
 
