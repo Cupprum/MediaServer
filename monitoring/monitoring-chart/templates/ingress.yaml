@@ -14,4 +14,4 @@ spec:
     - kind: Service
       name: monitoring-app-grafana
       namespace: monitoring
-      port: 3000
+      port: 80
