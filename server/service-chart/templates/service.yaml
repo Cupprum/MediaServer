@@ -83,7 +83,7 @@ metadata:
 spec:
   storageClassName: {{ $serviceName }}-{{ .name }}
   capacity:
-    storage: {{ if eq $serviceName "jellyfin" }}150Gb{{ else }}10Gb{{ end }} # Required value, but is ignored by local-path-provisioner
+    storage: {{ if eq $serviceName "jellyfin" }}150Gi{{ else }}10Gi{{ end }} # Required value, but is ignored by local-path-provisioner
   accessModes:
     - ReadWriteOnce
   hostPath:
@@ -101,5 +101,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ if eq $serviceName "jellyfin" }}150Gb{{ else }}10Gb{{ end }} # Required value, but is ignored by local-path-provisioner
+      storage: {{ if eq $serviceName "jellyfin" }}150Gi{{ else }}10Gi{{ end }} # Required value, but is ignored by local-path-provisioner
 {{- end }}
