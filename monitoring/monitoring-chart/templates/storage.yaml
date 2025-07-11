@@ -12,7 +12,7 @@ metadata:
 spec:
   storageClassName: prometheus
   capacity:
-    storage: 100Gi # Required value, but is ignored by local-path-provisioner
+    storage: 100Mi # Required value, but is ignored by local-path-provisioner
   accessModes:
     - ReadWriteOnce
   hostPath:
@@ -30,4 +30,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi # Required value, but is ignored by local-path-provisioner
+      storage: 100Mi # Required value, but is ignored by local-path-provisioner
