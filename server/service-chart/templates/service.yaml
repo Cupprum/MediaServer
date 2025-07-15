@@ -74,7 +74,7 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: {{ $serviceName }}-{{ .name }}
-provisioner: rancher.io/local-path
+# provisioner: rancher.io/local-path
 ---
 apiVersion: v1
 kind: PersistentVolume
