@@ -86,7 +86,7 @@ metadata:
 spec:
   storageClassName: {{ $serviceName }}-{{ .name }}
   capacity:
-    storage: 100Mi # Required value, but is ignored by local-path-provisioner
+    storage: 100Mi # Required value, but is ignored
   accessModes:
     - ReadWriteOnce
   local:
@@ -111,5 +111,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi # Required value, but is ignored by local-path-provisioner
+      storage: 100Mi # Required value, but is ignored
 {{- end }}
