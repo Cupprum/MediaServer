@@ -18,7 +18,7 @@ spec:
         app: {{ $serviceName }}
     spec:
       nodeSelector:
-        kubernetes.io/hostname: rpi
+        kubernetes.io/hostname: pi
       containers:
         - name: {{ $serviceName }}
           image: {{ .Values.image }}
@@ -96,7 +96,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - rpi
+          - pi
   persistentVolumeReclaimPolicy: Delete
 ---
 apiVersion: v1
