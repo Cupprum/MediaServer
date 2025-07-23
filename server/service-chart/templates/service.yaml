@@ -17,6 +17,8 @@ spec:
       labels:
         app: {{ $serviceName }}
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: rpi
       containers:
         - name: {{ $serviceName }}
           image: {{ .Values.image }}
@@ -74,7 +76,6 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: {{ $serviceName }}-{{ .name }}
-# provisioner: rancher.io/local-path
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -86,9 +87,16 @@ spec:
     storage: 100Mi # Required value, but is ignored by local-path-provisioner
   accessModes:
     - ReadWriteOnce
-  hostPath:
+  local:
     path: {{ .source | quote }}
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - rpi
   persistentVolumeReclaimPolicy: Delete
 ---
 apiVersion: v1
