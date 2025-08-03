@@ -1,9 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Get the deployment names in the "server" namespace
-deployments=$(kubectl get deployments -n server -o jsonpath='{.items[*].metadata.name}')
+###############################################################################
+# Restart deployments in server namespace
+###############################################################################
 
-# Iterate over the deployments and print them line by line
-for deployment in $deployments; do
-  echo "$deployment"
-done
+main() {
+    log_info "Retrieving deployment names in the 'server' namespace..."
+    local deployments
+    deployments=$(kubectl get deployments -n server -o jsonpath='{.items[*].metadata.name}')
+
+    # Check if there are any deployments
+    if [ -z "$deployments" ]; then
+        log_error "No deployments found in the 'server' namespace."
+        exit 1
+    fi
+
+    log_info "Restarting all deployments in 'server' namespace..."
+    for deployment in $deployments; do
+        log_info "Restarting: $deployment"
+        kubectl rollout restart "deployment/$deployment" -n server
+    done
+    log_info "Deployments were restarted"
+}
+
+main
