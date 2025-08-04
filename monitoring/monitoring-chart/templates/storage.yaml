@@ -3,7 +3,8 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: prometheus
-provisioner: rancher.io/local-path
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -12,12 +13,19 @@ metadata:
 spec:
   storageClassName: prometheus
   capacity:
-    storage: 100Mi # Required value, but is ignored by local-path-provisioner
+    storage: 100Mi # Required value, but is ignored
   accessModes:
     - ReadWriteOnce
-  hostPath:
+  local:
     path: {{ .Values.storage.source | quote }}
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi
   persistentVolumeReclaimPolicy: Delete
 ---
 apiVersion: v1
