@@ -5,3 +5,5 @@ mountPoints:
   - name: config
     source: /home/x42/MediaServer/config/prowlarr/config
     destination: /config
+uid: 1000
+gid: 1000

@@ -5,3 +5,5 @@ mountPoints:
   - name: config
     source: /home/x42/MediaServer/config/heimdall/config
     destination: /config
+uid: 0
+gid: 0

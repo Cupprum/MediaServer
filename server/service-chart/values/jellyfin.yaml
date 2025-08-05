@@ -11,3 +11,5 @@ mountPoints:
   - name: cache
     source: /home/x42/MediaServer/config/jellyfin/cache
     destination: /cache
+uid: 1000
+gid: 1000

@@ -26,9 +26,9 @@ spec:
             - name: TZ
               value: Europe/Copenhagen
             - name: PUID
-              value: "1000"
+              value: {{ .Values.uid | quote }}
             - name: PGID
-              value: "1000"
+              value: {{ .Values.gid | quote }}
           ports:
             - containerPort: {{ .Values.port }}
               protocol: TCP
@@ -44,9 +44,9 @@ spec:
             claimName: {{ $serviceName }}-{{ .name }}
         {{- end }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: {{ .Values.uid }}
+        runAsGroup: {{ .Values.gid }}
+        fsGroup: {{ .Values.uid }}
 ---
 apiVersion: v1
 kind: Service
