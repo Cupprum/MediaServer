@@ -8,5 +8,3 @@ mountPoints:
   - name: data
     source: /media/x42/T5/media/movies
     destination: /data/torrents
-uid: 1000
-gid: 1000
