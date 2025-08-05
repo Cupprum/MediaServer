@@ -3,8 +3,8 @@ image: lscr.io/linuxserver/qbittorrent:latest
 port: 8080
 mountPoints:
   - name: config
-    source: /media/x42/T5/MediaServer/provision/qbittorrent/config
+    source: /home/x42/MediaServer/config/qbittorrent/config
     destination: /config
   - name: data
-    source: /media/x42/T5/MediaServer/media/movies
+    source: /media/x42/T5/media/movies
     destination: /data/torrents

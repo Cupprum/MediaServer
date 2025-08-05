@@ -3,5 +3,5 @@ image: linuxserver/prowlarr:latest
 port: 9696
 mountPoints:
   - name: config
-    source: /media/x42/T5/MediaServer/provision/prowlarr/config
+    source: /home/x42/MediaServer/config/prowlarr/config
     destination: /config

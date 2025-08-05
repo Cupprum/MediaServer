@@ -1,5 +1,5 @@
 storage:
-  source: /media/x42/T5/MediaServer/provision/prometheus
+  source: /home/x42/MediaServer/config/prometheus
 
 prometheus:
   alertmanager:

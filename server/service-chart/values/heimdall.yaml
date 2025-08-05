@@ -3,5 +3,5 @@ image: linuxserver/heimdall:latest
 port: 80
 mountPoints:
   - name: config
-    source: /media/x42/T5/MediaServer/provision/heimdall/config
+    source: /home/x42/MediaServer/config/heimdall/config
     destination: /config
