@@ -35,13 +35,14 @@ spec:
           volumeMounts:
             {{- range .Values.mountPoints }}
             - mountPath: {{ .destination | quote }}
-              name: {{ $serviceName }}-{{ .name }}-claim
+              name: {{ $serviceName }}-{{ .name }}
+              mountPropagation: HostToContainer
             {{- end }}
       volumes:
         {{- range .Values.mountPoints }}
-        - name: {{ $serviceName }}-{{ .name }}-claim
-          persistentVolumeClaim:
-            claimName: {{ $serviceName }}-{{ .name }}
+        - name: {{ $serviceName }}-{{ .name }}
+          hostPath:
+            path: {{ .source | quote }}
         {{- end }}
       securityContext:
         runAsUser: 0
@@ -73,45 +74,4 @@ spec:
       name: {{ $serviceName }}
       namespace: server
       port: {{ $port }}
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: {{ $serviceName }}-{{ .name }}
-provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ $serviceName }}-{{ .name }}
-spec:
-  storageClassName: {{ $serviceName }}-{{ .name }}
-  capacity:
-    storage: 100Mi # Required value, but is ignored
-  accessModes:
-    - ReadWriteOnce
-  local:
-    path: {{ .source | quote }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - pi
-  persistentVolumeReclaimPolicy: Delete
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ $serviceName }}-{{ .name }}
-spec:
-  storageClassName: {{ $serviceName }}-{{ .name }}
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi # Required value, but is ignored
 {{- end }}
