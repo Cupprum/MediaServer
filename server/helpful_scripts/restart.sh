@@ -4,6 +4,11 @@
 # Restart deployments in server namespace
 ###############################################################################
 
+# Source common utilities
+# shellcheck source=../../utils.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../../utils.sh"
+
+
 main() {
     log_info "Retrieving deployment names in the 'server' namespace..."
     local deployments
