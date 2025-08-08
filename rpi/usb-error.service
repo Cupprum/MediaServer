@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for USB errors and restart services if needed
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/check_usb_errors
+
+[Install]
+WantedBy=multi-user.target

@@ -94,6 +94,30 @@ configure_avahi() {
     log_info "go-avahi-cname installed successfully"
 }
 
+configure_usb_errors_hook() {
+    log_info "Configuring USB Error hook"
+
+    log_info "Moving 'check_usb_errors.sh' and 'restart_media_accessors' to /usr/local/bin..."
+    sudo cp check_usb_errors.sh /usr/local/bin/check_usb_errors
+    sudo cp restart_media_accessors.sh /usr/local/bin/restart_media_accessors
+
+    log_info "Setting permissions for 'check_usb_errors' and 'restart_media_accessors'..."
+    chmod +x /usr/local/bin/check_usb_errors
+    chmod +x /usr/local/bin/restart_media_accessors
+
+    log_info "Creating systemd service and timer for checking for usb errors..."
+    sudo cp usb-error.service /etc/systemd/system/usb-error.service
+    sudo cp usb-error.timer /etc/systemd/system/usb-error.timer
+
+    log_info "Enabling and starting timer..."
+    sudo systemctl daemon-reload
+    sudo systemctl enable usb-error.timer
+    sudo systemctl start usb-error.timer
+    log_info "systemd timer for verifying usb errors started successfully"
+
+    log_info "USB Error hook configured successfully"
+}
+
 disable_wifi() {
     log_info "Disabling WiFi..."
     if ! grep -q "dtoverlay=disable-wifi" /boot/firmware/config.txt; then
@@ -145,6 +169,7 @@ main() {
     install_tools
     install_docker
     configure_avahi
+    configure_usb_errors_hook
     configure_k3s
     disable_wifi
     enable_vnc

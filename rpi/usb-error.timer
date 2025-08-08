@@ -1,0 +1,11 @@
+[Unit]
+Description=Run USB error check every minute
+Requires=usb-error.service
+
+[Timer]
+Unit=usb-error.service
+OnBootSec=1min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
