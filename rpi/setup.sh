@@ -97,13 +97,11 @@ configure_avahi() {
 configure_usb_errors_hook() {
     log_info "Configuring USB Error hook"
 
-    log_info "Moving 'check_usb_errors.sh' and 'restart_media_accessors' to /usr/local/bin..."
+    log_info "Moving 'check_usb_errors.sh' to /usr/local/bin ..."
     sudo cp check_usb_errors.sh /usr/local/bin/check_usb_errors
-    sudo cp restart_media_accessors.sh /usr/local/bin/restart_media_accessors
 
-    log_info "Setting permissions for 'check_usb_errors' and 'restart_media_accessors'..."
+    log_info "Setting permissions for 'check_usb_errors' ..."
     chmod +x /usr/local/bin/check_usb_errors
-    chmod +x /usr/local/bin/restart_media_accessors
 
     log_info "Creating systemd service and timer for checking for usb errors..."
     sudo cp usb-error.service /etc/systemd/system/usb-error.service
