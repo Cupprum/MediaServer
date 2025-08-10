@@ -58,29 +58,35 @@ configure_k3s() {
 }
 
 configure_avahi() {
-    log_info "Installing go-avahi-cname..."
-    log_info "Finding latest go-avahi-cname release..."
-    # [1:] used in jq removes the leading 'v' from the version string
-    local latestAvahiVersion avahiUrl
-    latestAvahiVersion=$(curl -sL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
-    if [[ -z "$latestAvahiVersion" ]]; then
-        log_error "Failed to retrieve the latest go-avahi-cname version"
-        exit 1
+    log_info "Checking if go-avahi-cname is already installed"
+
+    if command -v go-avahi-cname &>/dev/null; then
+        log_info "go-avahi-cname is already installed, skipping installation"
+    else
+        log_info "Installing go-avahi-cname..."
+        log_info "Finding latest go-avahi-cname release..."
+        # [1:] used in jq removes the leading 'v' from the version string
+        local latestAvahiVersion avahiUrl
+        latestAvahiVersion=$(curl -sL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
+        if [[ -z "$latestAvahiVersion" ]]; then
+            log_error "Failed to retrieve the latest go-avahi-cname version"
+            exit 1
+        fi
+        log_info "Latest go-avahi-cname release found: ${latestAvahiVersion}"
+        
+        log_info "Download the latest release of go-avahi-cname..."
+        avahiUrl="https://github.com/grishy/go-avahi-cname/releases/download/v${latestAvahiVersion}/go-avahi-cname_${latestAvahiVersion}_linux_arm64.tar.gz"
+        curl -sSL -o go-avahi-cname.tar.gz "${avahiUrl}" || { log_error "Failed to download go-avahi-cname"; exit 1; }
+        tar -xzf go-avahi-cname.tar.gz
+        # Clean up the tarball and other files
+        rm go-avahi-cname.tar.gz LICENSE README.md
+
+        log_info "Moving go-avahi-cname to /usr/local/bin..."
+        sudo mv go-avahi-cname /usr/local/bin/go-avahi-cname
+
+        log_info "Setting permissions for go-avahi-cname..."
+        sudo chmod +x /usr/local/bin/go-avahi-cname
     fi
-    log_info "Latest go-avahi-cname release found: ${latestAvahiVersion}"
-    
-    log_info "Download the latest release of go-avahi-cname..."
-    avahiUrl="https://github.com/grishy/go-avahi-cname/releases/download/v${latestAvahiVersion}/go-avahi-cname_${latestAvahiVersion}_linux_arm64.tar.gz"
-    curl -sSL -o go-avahi-cname.tar.gz "${avahiUrl}" || { log_error "Failed to download go-avahi-cname"; exit 1; }
-    tar -xzf go-avahi-cname.tar.gz
-    # Clean up the tarball and other files
-    rm go-avahi-cname.tar.gz LICENSE README.md
-
-    log_info "Moving go-avahi-cname to /usr/local/bin..."
-    sudo mv go-avahi-cname /usr/local/bin/go-avahi-cname
-
-    log_info "Setting permissions for go-avahi-cname..."
-    chmod +x /usr/local/bin/go-avahi-cname
 
     log_info "Creating systemd service for go-avahi-cname..."
     sudo cp go-avahi-cname.service /etc/systemd/system/go-avahi-cname.service
@@ -101,7 +107,7 @@ configure_usb_errors_hook() {
     sudo cp check_usb_errors.sh /usr/local/bin/check_usb_errors
 
     log_info "Setting permissions for 'check_usb_errors' ..."
-    chmod +x /usr/local/bin/check_usb_errors
+    sudo chmod +x /usr/local/bin/check_usb_errors
 
     log_info "Creating systemd service and timer for checking for usb errors..."
     sudo cp usb-error.service /etc/systemd/system/usb-error.service
