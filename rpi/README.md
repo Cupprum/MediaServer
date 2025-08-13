@@ -1,11 +1,11 @@
-# Configure Raspberry PI
+# Configure Raspberry Pi
 
-Note: Raspberry PI should be accessible on `pi.local` address from the browser.
+Note: Raspberry Pi should be accessible on `pi.local` address from the browser.
 
 **Steps:**
 * Install the latest Raspbian OS using `Raspberry Pi Imager.app`.
 
-* Pin the desired IP Address of `raspberrpi` in admin console of router, specifically `LAN` setting tab. I want the Raspberry PI be accessible under `192.168.0.100`.
+* Pin the desired IP Address of `raspberrpi` in admin console of router, specifically `LAN` setting tab. I want the Raspberry Pi be accessible under `192.168.0.100`.
 
 * Execute the `setup.sh` shell script to update the system, install Docker, minikube and disable wifi.
 

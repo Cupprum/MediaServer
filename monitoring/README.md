@@ -1,9 +1,9 @@
 # Configure monitoring
 
-Configure Monitoring setup for Raspberry PI: 
+Configure Monitoring setup for Raspberry Pi: 
 
 * Setup `Promethes Server` with local storage for storing metrics.
-* Export metrics about Raspberri PI using `Prometheus Node Exporter`.
+* Export metrics about Raspberri Pi using `Prometheus Node Exporter`.
 * Export metrics about Kubernetes using `Kube State Metrics`.
 
 ## Helm charts:
