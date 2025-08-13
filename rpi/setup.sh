@@ -30,7 +30,7 @@ check_root() {
 
 update_system() {
     log_info "Updating system packages..."
-    apt update || { log_error "Failed to update package list"; exit 1; }
+    apt update -y || { log_error "Failed to update package list"; exit 1; }
     apt upgrade -y || { log_error "Failed to upgrade packages"; exit 1; }
 }
 
