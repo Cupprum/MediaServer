@@ -67,7 +67,7 @@ configure_avahi() {
         log_info "Finding latest go-avahi-cname release..."
         # [1:] used in jq removes the leading 'v' from the version string
         local latestAvahiVersion avahiUrl
-        latestAvahiVersion=$(curl -sL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
+        latestAvahiVersion=$(curl -sSL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
         if [[ -z "$latestAvahiVersion" ]]; then
             log_error "Failed to retrieve the latest go-avahi-cname version"
             exit 1
@@ -143,13 +143,13 @@ install_pia() {
 
         local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
         local PIA_INSTALLER_URL
-        PIA_INSTALLER_URL=$(curl -s "${PIA_RELEASES_URL}" | \
-            jq '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')        
+        PIA_INSTALLER_URL=$(curl -sSL "${PIA_RELEASES_URL}" | \
+            jq -r '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')
         local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
-        echo "Latest PIA installer URL: $PIA_INSTALLER_URL"
+        log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
 
         log_info "Downloading PIA installer..."
-        curl -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL" || { log_error "Failed to download PIA installer"; exit 1; }
+        curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL" || { log_error "Failed to download PIA installer"; exit 1; }
         chmod +x "$PIA_INSTALLER_PATH" || { log_error "Failed to make PIA installer executable"; exit 1; }
         log_info "Running PIA installer..."
         "$PIA_INSTALLER_PATH" || { log_error "PIA installation failed"; exit 1; }
