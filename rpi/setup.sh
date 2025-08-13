@@ -149,11 +149,11 @@ install_pia() {
         log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
 
         log_info "Downloading PIA installer..."
-        curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL" || { log_error "Failed to download PIA installer"; exit 1; }
-        chmod +x "$PIA_INSTALLER_PATH" || { log_error "Failed to make PIA installer executable"; exit 1; }
+        curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
+        chmod +x "$PIA_INSTALLER_PATH"
         log_info "Running PIA installer..."
-        "$PIA_INSTALLER_PATH" || { log_error "PIA installation failed"; exit 1; }
-        rm "$PIA_INSTALLER_PATH" || log_warn "Failed to remove PIA installer"
+        "$PIA_INSTALLER_PATH"
+        rm "$PIA_INSTALLER_PATH"
         log_info "PIA installation completed"
         
         log_info "Enabling PIA background service..."
