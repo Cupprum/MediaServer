@@ -1,13 +1,15 @@
 # Setup Raspberry PI to host torrent downloading docker based media center
 
-* Start with setting up Raspberry PI, read more in `rpi` folder.
+* Setup SSH key and add it to GitHub.
 
-* Install the Kubernetes cluster, read more in the `k8s` folder.
+* Clone the project: `git clone git@github.com:Cupprum/MediaServer.git`
 
-* Install the whole Media server Jellyfin setup, read more in the `server` folder.
+* Execute the `setup.sh` shell script located in the root folder of the project, or setup each part manually from the raspberry pi by going through the following steps:
 
-// TODO
-* Install Grafana, read more in the `monitoring` folder.
+    * Start with setting up Raspberry PI, read more in `rpi` folder.
 
-// TODO
-* Install pi-hole, read more in the `dns` folder.
+    * Install the Kubernetes cluster, read more in the `k8s` folder.
+
+    * Install the whole Media server Jellyfin setup, read more in the `server` folder.
+
+    * Install Grafana, read more in the `monitoring` folder.
