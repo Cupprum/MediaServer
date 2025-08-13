@@ -149,10 +149,11 @@ install_pia() {
         log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
 
         log_info "Downloading PIA installer..."
+        rm "$PIA_INSTALLER_PATH"
         curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
         chmod +x "$PIA_INSTALLER_PATH"
         log_info "Running PIA installer..."
-        "$PIA_INSTALLER_PATH"
+        su x42 -c "$PIA_INSTALLER_PATH"
         rm "$PIA_INSTALLER_PATH"
         log_info "PIA installation completed"
         
