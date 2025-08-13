@@ -1,12 +1,12 @@
-# Setup Raspberry PI to host torrent downloading docker based media center
+# Setup Raspberry Pi to host torrent downloading docker based media center
 
-* Setup SSH key and add it to GitHub.
+* Copy over public SSH key of my main device to Raspberry Pi: `ssh-copy-id -i ~/.ssh/id_rsa.pub x42@pi.local`
 
-* Clone the project: `git clone git@github.com:Cupprum/MediaServer.git`
+* SSH to Raspberry Pi and setup SSH key: `ssh-keygen` and press enter couple of times. Copy the public key and add it to GitHub: `cat ~/.ssh/id_rsa.pub`.
 
 * Execute the `setup.sh` shell script located in the root folder of the project, or setup each part manually from the raspberry pi by going through the following steps:
 
-    * Start with setting up Raspberry PI, read more in `rpi` folder.
+    * Start with setting up Raspberry Pi, read more in `rpi` folder.
 
     * Install the Kubernetes cluster, read more in the `k8s` folder.
 
