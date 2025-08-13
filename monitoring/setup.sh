@@ -5,7 +5,7 @@
 #
 # This script manages the ArgoCD application for the monitoring stack
 #
-# Usage: ./script.sh [install|delete]
+# Usage: ./setup.sh [install|delete]
 ###############################################################################
 
 # Source common utilities
