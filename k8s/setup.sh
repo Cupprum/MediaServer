@@ -111,10 +111,6 @@ setup_argocd() {
         --type merge \
         -p '{"data":{"server.insecure":"true"}}'
 
-    # TODO: fix this hack
-    log_info "Start port forwarding argocd to localhost"
-    kubectl port-forward svc/argocd-server -n argocd 3000:80 &
-    sleep 5
 
     log_info "Waiting for ArgoCD initial admin secret to be created..."
     until kubectl -n argocd get secret argocd-initial-admin-secret &>/dev/null; do
@@ -122,6 +118,11 @@ setup_argocd() {
         sleep 5
     done
     log_info "ArgoCD initial admin secret is ready"
+
+    # TODO: fix this hack
+    log_info "Start port forwarding argocd to localhost"
+    kubectl port-forward svc/argocd-server -n argocd 3000:80 &
+    sleep 5
 
     local argoPassword
     local newArgoPassword
