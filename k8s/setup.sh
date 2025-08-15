@@ -43,7 +43,7 @@ install_kubectl() {
     if ! command -v kubectl &> /dev/null; then
         log_info "Installing kubectl..."
         local kubectl_version
-        kubectl_version=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+        kubectl_version="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
         curl -LO "https://dl.k8s.io/release/${kubectl_version}/bin/linux/arm64/kubectl" || { log_error "Failed to download kubectl"; exit 1; }
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
         log_info "kubectl installation completed"
@@ -100,14 +100,8 @@ setup_argocd() {
     local argoPassword
     local newArgoPassword
 
-    echo "test"
-    pwd
-    echo "test"
-    ls
-    echo "test"
-
-    argoPassword=$("$(dirname "${BASH_SOURCE[0]}")/argo_login.sh") || { log_error "Failed to get ArgoCD password"; exit 1; }
-    newArgoPassword=$(date +%s | sha256sum | base64 | head -c 32)
+    argoPassword="$(./helpful_scripts/argo_login.sh)" || { log_error "Failed to get ArgoCD password"; exit 1; }
+    newArgoPassword="$(date +%s | sha256sum | base64 | head -c 32)"
 
     argocd account update-password \
         --current-password "$argoPassword" \
