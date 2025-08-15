@@ -100,6 +100,12 @@ setup_argocd() {
     local argoPassword
     local newArgoPassword
 
+    echo "test"
+    pwd
+    echo "test"
+    ls
+    echo "test"
+
     argoPassword=$("$(dirname "${BASH_SOURCE[0]}")/argo_login.sh") || { log_error "Failed to get ArgoCD password"; exit 1; }
     newArgoPassword=$(date +%s | sha256sum | base64 | head -c 32)
 
