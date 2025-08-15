@@ -102,6 +102,10 @@ install_argocd() {
 
 setup_argocd() {
     log_info "Setting up ArgoCD..."
+
+   # Expose ArgoCD through Ingress
+    kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
+
     local argoPassword
     local newArgoPassword
 
@@ -118,9 +122,6 @@ setup_argocd() {
         --namespace argocd | \
         jq ".data[\"password\"]=\"$newArgoPassword\"" | \
         kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
-
-    # Expose ArgoCD through Ingress
-    kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
 
     # Configure ArgoCD server to allow insecure connections
     kubectl patch configmap argocd-cmd-params-cm -n argocd \
