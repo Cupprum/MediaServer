@@ -28,7 +28,7 @@ get_argocd_password() {
         exit 1
     fi
     
-    echo "$password"
+    echo "$password" | base64 -d
 }
 
 login_argocd() {
