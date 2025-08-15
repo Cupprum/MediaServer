@@ -106,6 +106,9 @@ setup_argocd() {
    # Expose ArgoCD through Ingress
     kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
 
+    # TODO: fix this hack
+    kubectl port-forward svc/argocd-server -n argocd 3000:80 &
+
     local argoPassword
     local newArgoPassword
 
