@@ -100,6 +100,26 @@ configure_avahi() {
     log_info "go-avahi-cname installed successfully"
 }
 
+configure_local_dns_resolution() {
+    log_info "Configuring local DNS resolution..."
+    
+    # Check if /etc/hosts already contains pi.local entries
+    if grep -q "pi.local" /etc/hosts; then
+        log_info "pi.local entries already exist in /etc/hosts, skipping"
+    else
+        log_info "Adding pi.local entries to /etc/hosts"
+        cat << EOF >> /etc/hosts
+127.0.0.1       pi.local
+127.0.0.1       jellyfin.pi.local
+127.0.0.1       qbittorrent.pi.local
+127.0.0.1       prowlarr.pi.local
+127.0.0.1       argocd.pi.local
+127.0.0.1       grafana.pi.local
+EOF
+        log_info "pi.local entries added to /etc/hosts successfully"
+    fi
+}
+
 configure_usb_errors_hook() {
     log_info "Configuring USB Error hook"
 
@@ -174,6 +194,7 @@ main() {
     install_tools
     install_docker
     configure_avahi
+    configure_local_dns_resolution
     configure_usb_errors_hook
     configure_k3s
     disable_wifi
