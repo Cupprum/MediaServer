@@ -119,6 +119,13 @@ setup_argocd() {
     done
     log_info "ArgoCD initial admin secret is ready"
 
+    log_info "Waiting for ArgoCD server service to be available..."
+    until kubectl -n argocd get svc argocd-server -o json | jq -e '.spec.clusterIP' &>/dev/null; do
+        log_info "Waiting for ArgoCD server service..."
+        sleep 5
+    done
+    log_info "ArgoCD server service is ready"
+
     # TODO: fix this hack
     log_info "Start port forwarding argocd to localhost"
     kubectl port-forward svc/argocd-server -n argocd 3000:80 &
