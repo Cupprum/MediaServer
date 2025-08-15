@@ -91,8 +91,13 @@ wait_for_k8s() {
 
 install_argocd() {
     log_info "Installing ArgoCD..."
-    kubectl create namespace argocd || true
-    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml || { log_error "Failed to install ArgoCD"; exit 1; }
+    if ! kubectl get namespace argocd &>/dev/null; then
+        log_info "Creating argocd namespace..."
+        kubectl create namespace argocd || { log_error "Failed to create argocd namespace"; exit 1; }
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml || { log_error "Failed to install ArgoCD"; exit 1; }
+    else
+        log_info "argocd namespace already exists, skipping creation and configuration"
+    fi
 }
 
 setup_argocd() {
