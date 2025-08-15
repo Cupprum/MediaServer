@@ -4,18 +4,35 @@
 # Check for USB errors and restart services if needed
 ###############################################################################
 
-echo "Starting $0"
+set -e # Exit on fail
+set -u # Treat unset variables as an error
+set -o pipefail # Fail if any command in a pipeline fails
 
-# Source common utilities
-# shellcheck source=../utils.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../utils.sh"
+# Color definitions
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly NC='\033[0m' # No Color
 
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
+
+# TODO: clean old log files every once in a while
 # Log also to a file
 LogFile="/tmp/check_usb_errors/check_usb_errors.log"
 exec > >(stdbuf -o0 sed 's/%/%%/g' | xargs -d '\n' -I {} date '+%F %T {}' | tee -a "$LogFile" "${LogFile}-$(date --iso-8601=seconds)")
 exec 2>&1
 
-# TODO: clean old log files every once in a while
+log_info "Starting $0"
 
 restart_deployments() {
     log_info "Restarting Jellyfin and qBittorrent deployments in the 'server' namespace..."
@@ -61,7 +78,10 @@ main() {
     
     log_info "Checking deployment timestamps..."
     
-    jellyfin_k8s_time=$(kubectl get deployment jellyfin -n server -o jsonpath='{.metadata.creationTimestamp}')
+    jellyfin_k8s_time=$(kubectl get deployment jellyfin \
+        --namespace server \
+        --output jsonpath='{.metadata.creationTimestamp}'
+    ) || { log_error "Failed to get jellyfin deployment"; exit 1; }
     jellyfin_unix_time=$(date -d "$jellyfin_k8s_time" +%s 2>/dev/null)
     log_info "Jellyfin deployment created at: $jellyfin_k8s_time (Unix timestamp: $jellyfin_unix_time)"
     
@@ -81,4 +101,4 @@ main() {
 
 main "$@"
 
-echo "Finished $0"
+log_info "Finished $0"
