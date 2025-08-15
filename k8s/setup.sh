@@ -116,6 +116,13 @@ setup_argocd() {
     kubectl port-forward svc/argocd-server -n argocd 3000:80 &
     sleep 5
 
+    log_info "Waiting for ArgoCD initial admin secret to be created..."
+    until kubectl -n argocd get secret argocd-initial-admin-secret &>/dev/null; do
+        log_info "Waiting for ArgoCD initial admin secret..."
+        sleep 5
+    done
+    log_info "ArgoCD initial admin secret is ready"
+
     local argoPassword
     local newArgoPassword
 
