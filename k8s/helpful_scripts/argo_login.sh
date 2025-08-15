@@ -34,7 +34,7 @@ get_argocd_password() {
 login_argocd() {
     local password="$1"
     log_info "Logging into ArgoCD..."
-    argocd login localhost:3000 \
+    argocd login 127.0.0.1:3000 \
         --username 'admin' \
         --password "$password" \
         --insecure > /dev/null || { log_error "Failed to login to ArgoCD"; exit 1; }
