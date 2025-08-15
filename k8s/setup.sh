@@ -106,8 +106,15 @@ setup_argocd() {
    # Expose ArgoCD through Ingress
     kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
 
+    # Configure ArgoCD server to allow insecure connections
+    kubectl patch configmap argocd-cmd-params-cm -n argocd \
+        --type merge \
+        -p '{"data":{"server.insecure":"true"}}'
+
     # TODO: fix this hack
+    log_info "Start port forwarding argocd to localhost"
     kubectl port-forward svc/argocd-server -n argocd 3000:80 &
+    sleep 5
 
     local argoPassword
     local newArgoPassword
@@ -125,11 +132,6 @@ setup_argocd() {
         --namespace argocd | \
         jq ".data[\"password\"]=\"$newArgoPassword\"" | \
         kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
-
-    # Configure ArgoCD server to allow insecure connections
-    kubectl patch configmap argocd-cmd-params-cm -n argocd \
-        --type merge \
-        -p '{"data":{"server.insecure":"true"}}'
 
     log_info "- New argocd password: $newArgoPassword"
     log_info "- ArgoCD UI: http://argocd.pi.local/"
