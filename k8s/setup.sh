@@ -12,7 +12,6 @@
 ###############################################################################
 
 # Source common utilities
-# shellcheck source=../utils.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../utils.sh"
 
 # Constants
