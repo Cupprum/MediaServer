@@ -192,7 +192,6 @@ main() {
     install_argocd_cli
     setup_kubeconfig
     wait_for_k8s
-    install_argocd
     setup_argocd
     log_info "Setup completed successfully"
 }
