@@ -17,10 +17,3 @@ Collection of scripts, used to simplify managing the server.
 Execute on Raspberry Pi; to print the Kubeconfig. The script updates the IP Address of the cluster. Copy the content of Kubeconfig to different machine on network. Don't forget to specify the location of kubeconfig before comunicating with kubernetes.
 
 Cat and update Kubeconfig: `cd ./k8s/helpful_scripts; ./get_kubeconfig.sh`
-
-
-### Login to ArgoCD
-
-Log in to ArgoCD from a machine which has `kubeconfig` properly configured.
-
-Login: `cd ./k8s/helpful_scripts; ./argo_login.sh`
