@@ -109,6 +109,7 @@ install_argocd() {
 }
 
 setup_argocd() {
+    # TODO: this should only be executed if Argo NS was created and not configured
     log_info "Setting up ArgoCD..."
 
    # Expose ArgoCD through Ingress
@@ -127,17 +128,45 @@ setup_argocd() {
     done
     log_info "ArgoCD server is ready"
     
-    local argoPassword
-    local newArgoPassword
+    local currentArgoPassword
+    local argoServerPod
 
-    # argoPassword="$(./helpful_scripts/argo_login.sh)" || { log_error "Failed to get ArgoCD password"; exit 1; }
+    log_info "Getting initial ArgoCD Server password..."
+    currentArgoPassword=$(kubectl get secret argocd-initial-admin-secret \
+        --output jsonpath="{ .data.password }" \
+        --namespace argocd | \
+            base64 --decode
+    )
+    log_info "Current ArgoCD password retrieved successfully"
 
-    # argocd account update-password \
-    #     --current-password "$argoPassword" \
-    #     --new-password "$ARGO_PASSWORD" || { log_error "Failed to update ArgoCD password"; exit 1; }
+    log_info "Getting ArgoCD server pod..."
+    argoServerPod=$(kubectl get pods \
+        --namespace argocd \
+        --selector app.kubernetes.io/name=argocd-server \
+        --output custom-columns=NAME:.metadata.name \
+        --no-headers
+    )
+    log_info "ArgoCD Server is running on pod: $argoServerPod"
 
-    # log_info "- ArgoCD UI: http://argocd.pi.local/"
-    # log_info "- Login with username 'admin' and new password, to update it in password manager"
+    log_info "Logging into ArgoCD server..."
+    kubectl exec "$argoServerPod" \
+        --namespace argocd -- \
+            argocd login 'localhost:8080' \
+                --username 'admin' \
+                --password "$currentArgoPassword" \
+                --plaintext
+    log_info "ArgoCD login successful"
+
+    log_info "Configuring ArgoCD password..."
+    kubectl exec "$argoServerPod" \
+        --namespace argocd -- \
+            argocd account update-password \
+                --current-password "$currentArgoPassword" \
+                --new-password "$ARGO_PASSWORD"
+    log_info "ArgoCD password configured"
+
+    log_info "- ArgoCD UI: http://argocd.pi.local/"
+    log_info "- Login with username 'admin' and new password, to update it in password manager"
 }
 
 setup_repository() {
@@ -163,7 +192,7 @@ main() {
     wait_for_k8s
     install_argocd
     setup_argocd
-    # setup_repository
+    setup_repository
     log_info "Setup completed successfully"
 }
 
