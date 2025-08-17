@@ -8,10 +8,10 @@ set -o pipefail
 # Bootstrap MediaServer
 #
 # This script:
-# - creates server namespace
+# - creates namespace
 # - creates required folders
 #
-# Usage: ./setup.sh
+# Usage: ./bootstrap.sh
 ###############################################################################
 
 # Source common utilities
