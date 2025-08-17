@@ -21,11 +21,16 @@ readonly KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
 # Functions
 ###############################################################################
 
-check_prerequisites() {
-    if [[ -z "${GH_TOKEN:-}" ]]; then
-        log_error "GH_TOKEN environment variable is not set"
+source_env_vars() {
+    log_info "Source environment variables..."
+    set -a # automatically export all variables
+    source ../.env
+    set +a
+    if [ -z "$GH_TOKEN" ]; then
+        log_error "GH_TOKEN must be present in the environment"
         exit 1
     fi
+    log_info "Environment variables loaded successfully"
 }
 
 install_k3s() {
