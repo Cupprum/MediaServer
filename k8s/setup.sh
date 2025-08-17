@@ -116,25 +116,13 @@ setup_argocd() {
         -p '{"data":{"server.insecure":"true"}}'
 
 
-    log_info "Waiting for ArgoCD initial admin secret to be created..."
-    until kubectl -n argocd get secret argocd-initial-admin-secret &>/dev/null; do
-        log_info "Waiting for ArgoCD initial admin secret..."
+    log_info "Waiting for ArgoCD server to be ready..."
+    until curl argocd.pi.local; do
+        log_info "Waiting for ArgoCD server..."
         sleep 5
     done
-    log_info "ArgoCD initial admin secret is ready"
-
-    log_info "Waiting for ArgoCD server service to be available..."
-    until kubectl -n argocd get svc argocd-server -o json | jq -e '.spec.clusterIP' &>/dev/null; do
-        log_info "Waiting for ArgoCD server service..."
-        sleep 5
-    done
-    log_info "ArgoCD server service is ready"
-
-    # TODO: fix this hack
-    log_info "Start port forwarding argocd to localhost"
-    kubectl port-forward svc/argocd-server -n argocd 3000:80 &
-    sleep 5
-
+    log_info "ArgoCD server is ready"
+    
     local argoPassword
     local newArgoPassword
 
