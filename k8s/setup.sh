@@ -130,23 +130,23 @@ setup_argocd() {
     local argoPassword
     local newArgoPassword
 
-    argoPassword="$(./helpful_scripts/argo_login.sh)" || { log_error "Failed to get ArgoCD password"; exit 1; }
-    newArgoPassword="$(date +%s | sha256sum | base64 | head -c 32)"
+    # argoPassword="$(./helpful_scripts/argo_login.sh)" || { log_error "Failed to get ArgoCD password"; exit 1; }
+    # newArgoPassword="$(date +%s | sha256sum | base64 | head -c 32)"
 
-    argocd account update-password \
-        --current-password "$argoPassword" \
-        --new-password "$newArgoPassword" || { log_error "Failed to update ArgoCD password"; exit 1; }
+    # argocd account update-password \
+    #     --current-password "$argoPassword" \
+    #     --new-password "$newArgoPassword" || { log_error "Failed to update ArgoCD password"; exit 1; }
 
-    # Update secret with new password
-    kubectl get secret argocd-initial-admin-secret \
-        --output json \
-        --namespace argocd | \
-        jq ".data[\"password\"]=\"$newArgoPassword\"" | \
-        kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
+    # # Update secret with new password
+    # kubectl get secret argocd-initial-admin-secret \
+    #     --output json \
+    #     --namespace argocd | \
+    #     jq ".data[\"password\"]=\"$newArgoPassword\"" | \
+    #     kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
 
-    log_info "- New argocd password: $newArgoPassword"
-    log_info "- ArgoCD UI: http://argocd.pi.local/"
-    log_info "- Login with username 'admin' and new password, to update it in password manager"
+    # log_info "- New argocd password: $newArgoPassword"
+    # log_info "- ArgoCD UI: http://argocd.pi.local/"
+    # log_info "- Login with username 'admin' and new password, to update it in password manager"
 }
 
 setup_repository() {
@@ -172,7 +172,7 @@ main() {
     wait_for_k8s
     install_argocd
     setup_argocd
-    setup_repository
+    # setup_repository
     log_info "Setup completed successfully"
 }
 
