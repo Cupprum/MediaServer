@@ -159,7 +159,7 @@ setup_repository() {
 ###############################################################################
 
 main() {
-    check_prerequisites
+    source_env_vars
     install_k3s
     install_kubectl
     install_helm
