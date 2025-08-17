@@ -36,7 +36,7 @@ EOF
 install_monitoring() {
     log_info "Source environment variables..."
     set -a # automatically export all variables
-    source .env
+    source ../.env
     set +a
     if [ -z "$GRAFANA_USERNAME" ] || [ -z "$GRAFANA_PASSWORD" ]; then
         log_error "GRAFANA_USERNAME and GRAFANA_PASSWORD must be present in the environment"
