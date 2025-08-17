@@ -48,18 +48,6 @@ install_monitoring() {
     fi
     log_info "Environment variables loaded successfully"
 
-    log_info "Checking if monitoring namespace already exists..."
-    if kubectl get namespace monitoring &>/dev/null; then
-        log_info "Monitoring namespace already exists, skipping creation"
-    else
-        log_info "Creating monitoring namespace..."
-        kubectl create namespace monitoring || {
-            log_error "Failed to create monitoring namespace"
-            exit 1
-        }
-        log_info "Monitoring namespace created successfully"
-    fi
-
     log_info "Checking if grafana-admin-credentials secret already exists..."
     if kubectl get secret grafana-admin-credentials --namespace monitoring &>/dev/null; then
         log_info "grafana-admin-credentials secret already exists, skipping creation"
