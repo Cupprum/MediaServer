@@ -4,6 +4,8 @@ The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Heimdall.
 
 ## Installation and configuration
 
+* The server required presence of some folders for storing its configuration, these can be created using the `./bootstrap.sh` shell script.
+
 * Install the ArgoCD applications, which configure the services using `setup.sh` shell script, specifically `./setup.sh install`.
 
   TODO: change IPs to routes
