@@ -30,8 +30,8 @@ source_env_vars() {
     set -a # automatically export all variables
     source ../.env
     set +a
-    if [ -z "$GH_TOKEN" ]; then
-        log_error "GH_TOKEN must be present in the environment"
+    if [ -z "$GH_TOKEN" ] || [ -z "$ARGO_PASSWORD" ]; then
+        log_error "GH_TOKEN and ARGO_PASSWORD must be present in the environment"
         exit 1
     fi
     log_info "Environment variables loaded successfully"
@@ -131,20 +131,11 @@ setup_argocd() {
     local newArgoPassword
 
     # argoPassword="$(./helpful_scripts/argo_login.sh)" || { log_error "Failed to get ArgoCD password"; exit 1; }
-    # newArgoPassword="$(date +%s | sha256sum | base64 | head -c 32)"
 
     # argocd account update-password \
     #     --current-password "$argoPassword" \
-    #     --new-password "$newArgoPassword" || { log_error "Failed to update ArgoCD password"; exit 1; }
+    #     --new-password "$ARGO_PASSWORD" || { log_error "Failed to update ArgoCD password"; exit 1; }
 
-    # # Update secret with new password
-    # kubectl get secret argocd-initial-admin-secret \
-    #     --output json \
-    #     --namespace argocd | \
-    #     jq ".data[\"password\"]=\"$newArgoPassword\"" | \
-    #     kubectl apply -f - || { log_error "Failed to update ArgoCD secret"; exit 1; }
-
-    # log_info "- New argocd password: $newArgoPassword"
     # log_info "- ArgoCD UI: http://argocd.pi.local/"
     # log_info "- Login with username 'admin' and new password, to update it in password manager"
 }
