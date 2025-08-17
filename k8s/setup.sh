@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+set -o pipefail
+
 ###############################################################################
 # K3s and ArgoCD Setup Script
 #

@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
+set -e
+set -u
+set -o pipefail
+
 ###############################################################################
 # Common Utilities
 #
 # Shared functions and settings for bash scripts
 # Meant to be sourced by other scripts
 ###############################################################################
-
-set -e # Exit on fail
-set -u # Treat unset variables as an error
-set -o pipefail # Fail if any command in a pipeline fails
 
 # Color definitions
 readonly RED='\033[0;31m'
