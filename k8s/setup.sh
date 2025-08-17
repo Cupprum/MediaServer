@@ -97,23 +97,13 @@ wait_for_k8s() {
     log_info "Kubernetes API server is ready"
 }
 
-install_argocd() {
-    log_info "Installing ArgoCD..."
-    if ! kubectl get namespace argocd &>/dev/null; then
-        log_info "Creating argocd namespace..."
-        kubectl create namespace argocd || { log_error "Failed to create argocd namespace"; exit 1; }
-        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml || { log_error "Failed to install ArgoCD"; exit 1; }
-    else
-        log_info "argocd namespace already exists, skipping creation and configuration"
-    fi
-}
+create_and_configure_argocd() {
+    log_info "Creating argocd namespace..."
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-setup_argocd() {
-    # TODO: this should only be executed if Argo NS was created and not configured
-    log_info "Setting up ArgoCD..."
-
-   # Expose ArgoCD through Ingress
-    kubectl apply --namespace argocd --filename ./ingress.yaml || { log_error "Failed to apply ArgoCD ingress"; exit 1; }
+    # Expose ArgoCD through Ingress
+    kubectl apply --namespace argocd --filename ./ingress.yaml
 
     # Configure ArgoCD server to allow insecure connections
     kubectl patch configmap argocd-cmd-params-cm -n argocd \
@@ -165,17 +155,29 @@ setup_argocd() {
                 --new-password "$ARGO_PASSWORD"
     log_info "ArgoCD password configured"
 
+    log_info "Adding MediaServer repository to ArgoCD..."
+    kubectl exec "$argoServerPod" \
+        --namespace argocd -- \
+            argocd repo add https://github.com/Cupprum/MediaServer.git \
+                --name 'MediaServer' \
+                --project 'default' \
+                --username "$(git config user.name)" \
+                --password "$GH_TOKEN"
+    log_info "MediaServer repository configured"                
+
     log_info "- ArgoCD UI: http://argocd.pi.local/"
     log_info "- Login with username 'admin' and new password, to update it in password manager"
 }
 
-setup_repository() {
-    log_info "Adding repository to ArgoCD..."
-    argocd repo add https://github.com/Cupprum/MediaServer.git \
-        --name 'MediaServer' \
-        --project 'default' \
-        --username "$(git config user.name)" \
-        --password "$GH_TOKEN" || { log_error "Failed to add repository to ArgoCD"; exit 1; }
+setup_argocd() {
+    # TODO: this should only be executed if Argo NS was created and not configured
+    log_info "Setting up ArgoCD..."
+
+    if kubectl get namespace argocd &>/dev/null; then
+        log_info "argocd namespace already exists, skipping creation and configuration"
+    else
+        create_and_configure_argocd
+    fi
 }
 
 ###############################################################################
@@ -192,7 +194,6 @@ main() {
     wait_for_k8s
     install_argocd
     setup_argocd
-    setup_repository
     log_info "Setup completed successfully"
 }
 
