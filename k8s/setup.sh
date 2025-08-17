@@ -119,7 +119,7 @@ setup_argocd() {
     log_info "Waiting for ArgoCD server to be ready..."
     until curl --fail argocd.pi.local; do
         log_info "Waiting for ArgoCD server..."
-        sleep 5
+        sleep 30
     done
     log_info "ArgoCD server is ready"
     
