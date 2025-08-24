@@ -25,7 +25,6 @@ main() {
     kubectl create namespace monitoring
 
     log_info "Creating required directories..."
-    mkdir -p /home/x42/MediaServer/config
     mkdir -p /home/x42/MediaServer/config/prometheus
 
     log_info "Monitoring bootstrap completed successfully."
