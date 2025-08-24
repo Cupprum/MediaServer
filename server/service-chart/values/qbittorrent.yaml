@@ -7,4 +7,4 @@ mountPoints:
     destination: /config
   - name: data
     source: /media/x42/T5/media/movies
-    destination: /data/torrents
+    destination: /downloads
