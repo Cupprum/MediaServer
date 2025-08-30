@@ -159,30 +159,49 @@ enable_vnc() {
 }
 
 install_pia() {
+    log_info 'Installing PIA...'
+    log_info "Finding latest PIA installer version..."
+
+    local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
+    local PIA_INSTALLER_URL
+    PIA_INSTALLER_URL=$(curl -sSL "${PIA_RELEASES_URL}" | \
+        jq -r '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')
+    local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
+    log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
+
+    log_info "Downloading PIA installer..."
+    rm "$PIA_INSTALLER_PATH"
+    curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
+    chmod +x "$PIA_INSTALLER_PATH"
+    log_info "Running PIA installer..."
+    su x42 -c "$PIA_INSTALLER_PATH"
+    rm "$PIA_INSTALLER_PATH"
+    log_info "PIA installation completed"
+}
+
+configure_pia() {
+    log_info 'Configuring PIA...'
+    piactl login .piactl_login
+    piactl background enable
+    piactl -u applysettings '{"killswitch":"on"}'
+    piactl set protocol wireguard
+
+    log_info 'Reconnecting piactl...'
+    piactl disconnect
+    while [ "$(piactl get connectionstate)" != "Disconnected" ]; do
+        log_info "Waiting for VPN to disconnect..."
+        sleep 2
+    done
+    piactl connect
+    log_info 'PIA configured'
+}
+
+setup_pia() {
     if command -v piactl &>/dev/null; then
         log_info "PIA is already installed, skipping installation"
     else
-        log_info "Finding latest PIA installer version..."
-
-        local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
-        local PIA_INSTALLER_URL
-        PIA_INSTALLER_URL=$(curl -sSL "${PIA_RELEASES_URL}" | \
-            jq -r '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')
-        local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
-        log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
-
-        log_info "Downloading PIA installer..."
-        rm "$PIA_INSTALLER_PATH"
-        curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
-        chmod +x "$PIA_INSTALLER_PATH"
-        log_info "Running PIA installer..."
-        su x42 -c "$PIA_INSTALLER_PATH"
-        rm "$PIA_INSTALLER_PATH"
-        log_info "PIA installation completed"
-        
-        log_info "Enabling PIA background service..."
-        piactl background enable || { log_error "Failed to enable PIA background service"; exit 1; }
-        log_info "PIA background service enabled"
+        install_pia
+        configure_pia
     fi
 }
 
@@ -202,7 +221,7 @@ main() {
     configure_k3s
     disable_wifi
     enable_vnc
-    install_pia
+    setup_pia
     log_info "Rebooting system..."
     reboot
 }
