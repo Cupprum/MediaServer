@@ -12,5 +12,3 @@ Note: Raspberry Pi should be accessible on `pi.local` address from the browser.
 * Configure Kill Switch in `Pia` settings.
 
 Note: Pia automatically installs systemd service, which starts it up after reboot. Because Pia can now run in background, it can enforce the Kill Switch, which disables connectivity to the internet.
-
-// TODO: piactl login file
