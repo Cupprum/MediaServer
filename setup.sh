@@ -31,7 +31,16 @@ if ssh "$Hostname" '! test -d MediaServer'; then
         log_info 'Cloning the repository again'
         ssh "$Hostname" 'git clone git@github.com:Cupprum/MediaServer.git'
     fi
-    log_success 'Repository cloned successfully'
+    log_info 'Repository cloned successfully'
+
+    log_info 'Copying secrets to MediaServer...'
+    log_info 'Copying Env vars...'
+    scp .env "$Hostname:~/MediaServer/.env"
+
+    log_info 'Copying Piactl login file...'
+    scp .piactl_login "$Hostname:~/MediaServer/.piactl_login"
+
+    log_info 'Secrets copied'
 else
     log_info 'MediaServer folder already exists'
 fi
