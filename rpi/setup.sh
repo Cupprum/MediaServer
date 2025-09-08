@@ -53,6 +53,25 @@ install_docker() {
     fi
 }
 
+install_go() {
+    if command -v go &>/dev/null; then
+        log_info "Go is already installed, skipping installation"
+    else
+        log_info "Installing go..."
+        fileName="go1.25.0.linux-arm64.tar.gz"
+        wget "https://go.dev/dl/$fileName"
+        sudo tar -C /usr/local -xzf "$fileName"
+
+        # shellcheck disable=SC2016
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+        # shellcheck disable=SC1091
+        source "$HOME/.bashrc"
+        rm "$fileName"
+        
+        log_info "Added Go to PATH in ~/.bashrc"
+    fi
+}
+
 configure_k3s() {
     log_info "Configuring k3s..."
     if ! grep -q "cgroup_enable=memory" /boot/firmware/cmdline.txt; then
@@ -215,6 +234,7 @@ main() {
     update_system
     install_tools
     install_docker
+    install_go
     configure_avahi
     configure_local_dns_resolution
     configure_usb_errors_hook
