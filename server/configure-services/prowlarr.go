@@ -16,17 +16,17 @@ type InitializeResponse struct {
 	APIKey string `json:"apiKey"`
 }
 
-func getAPIKey() error {
+func getAPIKey() (string, error) {
 	logger.Info("Retrieving Prowlarr API Key...")
 
 	respBody, err := makeRequest("GET", prowlarrBaseURL+"/initialize.json", nil, nil)
 	if err != nil {
-		return fmt.Errorf("failed to get API key: %w", err)
+		return "", fmt.Errorf("failed to get API key: %w", err)
 	}
 
 	var initResp InitializeResponse
 	if err := json.Unmarshal(respBody, &initResp); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	apiKey = initResp.APIKey
@@ -34,7 +34,7 @@ func getAPIKey() error {
 		"X-Api-Key": apiKey,
 	}
 
-	return nil
+	return apiKey, nil
 }
 
 func loadJSONFile(filename string) (map[string]interface{}, error) {
@@ -128,7 +128,8 @@ func addIndexer(filename, name string) error {
 func ConfigureProwlarr() error {
 	logger.Info("Starting Prowlarr configuration...")
 
-	if err := getAPIKey(); err != nil {
+	_, err := getAPIKey()
+	if err != nil {
 		return fmt.Errorf("failed to get API key: %w", err)
 	}
 
