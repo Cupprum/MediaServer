@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"strings"
 	"testing"
 )
@@ -12,22 +11,18 @@ type DownloadClient struct {
 }
 
 func TestQbittorrentPresent(t *testing.T) {
-	apiKey, err := getAPIKey()
+	_, err := getAPIKey()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req, _ := http.NewRequest("GET", "http://prowlarr.pi.local/api/v1/downloadclient", nil)
-	req.Header.Set("X-Api-Key", apiKey)
-
-	resp, err := http.DefaultClient.Do(req)
+	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, headers)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
 
 	var clients []DownloadClient
-	json.NewDecoder(resp.Body).Decode(&clients)
+	json.Unmarshal(respBody, &clients)
 
 	for _, client := range clients {
 		if strings.Contains(strings.ToLower(client.Name), "qbittorrent") {
