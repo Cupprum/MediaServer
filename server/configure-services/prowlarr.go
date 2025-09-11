@@ -10,31 +10,31 @@ import (
 const prowlarrBaseURL = "http://prowlarr.pi.local"
 
 var apiKey string
-var headers map[string]string
+var prowlarrHeaders map[string]string
 
 type InitializeResponse struct {
 	APIKey string `json:"apiKey"`
 }
 
-func getAPIKey() (string, error) {
+func getAPIKey() error {
 	logger.Info("Retrieving Prowlarr API Key...")
 
 	respBody, err := makeRequest("GET", prowlarrBaseURL+"/initialize.json", nil, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to get API key: %w", err)
+		return fmt.Errorf("failed to get API key: %w", err)
 	}
 
 	var initResp InitializeResponse
 	if err := json.Unmarshal(respBody, &initResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	apiKey = initResp.APIKey
-	headers = map[string]string{
+	prowlarrHeaders = map[string]string{
 		"X-Api-Key": apiKey,
 	}
 
-	return apiKey, nil
+	return nil
 }
 
 func loadJSONFile(filename string) (map[string]interface{}, error) {
@@ -74,7 +74,7 @@ func configureHostSettings() error {
 	}
 	hostConfig["apiKey"] = apiKey
 
-	_, err = makeRequest("PUT", prowlarrBaseURL+"/api/v1/config/host", hostConfig, headers)
+	_, err = makeRequest("PUT", prowlarrBaseURL+"/api/v1/config/host", hostConfig, prowlarrHeaders)
 	return err
 }
 
@@ -109,7 +109,7 @@ func configureDownloadClient() error {
 		}
 	}
 
-	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/downloadclient", downloadClient, headers)
+	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/downloadclient", downloadClient, prowlarrHeaders)
 	return err
 }
 
@@ -121,15 +121,14 @@ func addIndexer(filename, name string) error {
 		return err
 	}
 
-	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/indexer", indexer, headers)
+	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/indexer", indexer, prowlarrHeaders)
 	return err
 }
 
 func ConfigureProwlarr() error {
 	logger.Info("Starting Prowlarr configuration...")
 
-	_, err := getAPIKey()
-	if err != nil {
+	if err := getAPIKey(); err != nil {
 		return fmt.Errorf("failed to get API key: %w", err)
 	}
 

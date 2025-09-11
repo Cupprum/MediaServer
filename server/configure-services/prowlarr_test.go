@@ -11,12 +11,11 @@ type DownloadClient struct {
 }
 
 func TestQbittorrentPresent(t *testing.T) {
-	_, err := getAPIKey()
-	if err != nil {
+	if err := getAPIKey(); err != nil {
 		t.Fatal(err)
 	}
 
-	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, headers)
+	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, prowlarrHeaders)
 	if err != nil {
 		t.Fatal(err)
 	}
