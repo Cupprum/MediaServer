@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"log/slog"
+	"os"
 	"strings"
 	"testing"
 )
@@ -11,6 +13,9 @@ type DownloadClient struct {
 }
 
 func TestQbittorrentPresent(t *testing.T) {
+	logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
 	if err := getAPIKey(); err != nil {
 		t.Fatal(err)
 	}
