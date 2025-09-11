@@ -162,7 +162,7 @@
         },
         {
             "name": "info_category_8000",
-            "value":"LimeTorrents only returns category <b>Other</b> in its <i>Keywordless</i> search results page.</br>To pass your apps\' indexer TEST you will need to include the 8000(Other) category."
+            "value":"LimeTorrents only returns category."
         }
     ],
     "implementationName": "Cardigann",
