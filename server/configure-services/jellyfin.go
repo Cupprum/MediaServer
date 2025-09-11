@@ -1,19 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log/slog"
-	"net/http"
 	"os"
-	"time"
 )
 
-const baseURL = "http://jellyfin.pi.local"
-
-var logger *slog.Logger
+const jellyfinBaseURL = "http://jellyfin.pi.local"
 
 type StartupConfig struct {
 	UICulture                 string `json:"UICulture"`
@@ -52,50 +44,10 @@ type RemoteAccess struct {
 	EnableAutomaticPortMapping bool `json:"EnableAutomaticPortMapping"`
 }
 
-func makeRequest(method, url string, body interface{}) error {
-	var reqBody io.Reader
-
-	if body != nil {
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return fmt.Errorf("failed to marshal JSON: %w", err)
-		}
-		reqBody = bytes.NewBuffer(jsonData)
-	}
-
-	req, err := http.NewRequest(method, url, reqBody)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("request failed: %s - %s", resp.Status, string(respBody))
-	}
-
-	logger.Info("HTTP request completed",
-		"method", method,
-		"url", url,
-		"status", resp.Status,
-	)
-
-	return nil
-}
-
 func checkSystemInfo() error {
 	logger.Info("Checking system info...")
-	return makeRequest("GET", baseURL+"/System/Info", nil)
+	_, err := makeRequest("GET", jellyfinBaseURL+"/System/Info", nil, nil)
+	return err
 }
 
 func configureStartup() error {
@@ -105,12 +57,14 @@ func configureStartup() error {
 		MetadataCountryCode:       "US",
 		PreferredMetadataLanguage: "en",
 	}
-	return makeRequest("POST", baseURL+"/Startup/Configuration", config)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Startup/Configuration", config, nil)
+	return err
 }
 
 func checkUser() error {
 	logger.Info("Checking user status...")
-	return makeRequest("GET", baseURL+"/Startup/User", nil)
+	_, err := makeRequest("GET", jellyfinBaseURL+"/Startup/User", nil, nil)
+	return err
 }
 
 func createUser() error {
@@ -130,7 +84,8 @@ func createUser() error {
 		Name:     username,
 		Password: password,
 	}
-	return makeRequest("POST", baseURL+"/Startup/User", user)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Startup/User", user, nil)
+	return err
 }
 
 func createMoviesLibrary() error {
@@ -169,7 +124,8 @@ func createMoviesLibrary() error {
 		},
 	}
 
-	return makeRequest("POST", baseURL+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", moviesLibrary)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", moviesLibrary, nil)
+	return err
 }
 
 func createTVShowsLibrary() error {
@@ -240,7 +196,8 @@ func createTVShowsLibrary() error {
 		},
 	}
 
-	return makeRequest("POST", baseURL+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", tvLibrary)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", tvLibrary, nil)
+	return err
 }
 
 func configureRemoteAccess() error {
@@ -249,12 +206,14 @@ func configureRemoteAccess() error {
 		EnableRemoteAccess:         false,
 		EnableAutomaticPortMapping: false,
 	}
-	return makeRequest("POST", baseURL+"/Startup/RemoteAccess", remoteAccess)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Startup/RemoteAccess", remoteAccess, nil)
+	return err
 }
 
 func completeStartup() error {
 	logger.Info("Completing startup...")
-	return makeRequest("POST", baseURL+"/Startup/Complete", nil)
+	_, err := makeRequest("POST", jellyfinBaseURL+"/Startup/Complete", nil, nil)
+	return err
 }
 
 func ConfigureJellyfin() error {
@@ -285,8 +244,4 @@ func ConfigureJellyfin() error {
 
 	logger.Info("Jellyfin configuration completed!")
 	return nil
-}
-
-func setJellyfinLogger(l *slog.Logger) {
-	logger = l
 }
