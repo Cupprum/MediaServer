@@ -6,7 +6,7 @@
 
 * SSH to Raspberry Pi and setup SSH key: `ssh-keygen` and press enter couple of times. Copy the public key and add it to GitHub: `cat ~/.ssh/id_rsa.pub`.
 
-* Execute the `setup.sh` shell script located in the root folder of the project, or setup each part manually from the raspberry pi by going through the following steps:
+* Execute the `setup.sh` shell script located in the root folder of the project on developer computer, or setup each part manually from the raspberry pi by going through the following steps:
 
     * Start with setting up Raspberry Pi, read more in `rpi` folder.
 
