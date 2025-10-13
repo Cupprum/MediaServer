@@ -15,5 +15,3 @@
     * Install the whole Media server Jellyfin setup, read more in the `server` folder.
 
     * Install Grafana, read more in the `monitoring` folder.
-
-Test signing
