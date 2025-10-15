@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+if [ "$1" = "build" ]; then
+    sudo docker build --tag 'devcontainer' .
+elif [ "$1" = "run" ]; then
+    sudo docker run \
+        --interactive \
+        --tty \
+        --rm \
+        --name 'devcontainer' \
+        --network 'host' \
+        --volume '..:/workspace' \
+        --volume "$HOME/.ssh:/home/x42/.ssh" \
+        'devcontainer'
+else
+    echo "Usage: $0 [build|run]"
+    exit 1
+fi
