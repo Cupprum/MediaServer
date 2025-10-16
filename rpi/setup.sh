@@ -9,12 +9,15 @@ set -o pipefail
 #
 # This script automates the initial setup of a Raspberry Pi including:
 # - System updates
+# - VNC enablement
+# - WiFi disable
 # - Installation of required tools
 # - Docker installation
+# - Go installation
 # - K3s preconfiguration
-# - WiFi disable
-# - VNC enablement
-# - PIA VPN installation
+# - PIA VPN installation and configuration
+# - mDNS setup with go-avahi-cname
+# - Local DNS resolution configuration
 ###############################################################################
 
 # Source common utilities
@@ -33,23 +36,35 @@ check_root() {
 
 update_system() {
     log_info "Updating system packages..."
-    apt update -y || { log_error "Failed to update package list"; exit 1; }
-    apt upgrade -y || { log_error "Failed to upgrade packages"; exit 1; }
+    apt update -y
+    apt upgrade -y 
+}
+
+enable_vnc() {
+    log_info "Enabling VNC..."
+    raspi-config nonint do_vnc 0
+    log_info "VNC has been enabled"
+}
+
+disable_wifi() {
+    log_info "Disabling WiFi..."
+    if ! grep -q "dtoverlay=disable-wifi" /boot/firmware/config.txt; then
+        echo "dtoverlay=disable-wifi" | tee -a /boot/firmware/config.txt
+    fi
 }
 
 install_tools() {
     log_info "Installing required tools..."
-    apt install -y jq tmux || { log_error "Failed to install required tools"; exit 1; }
+    apt install -y jq tmux
 }
 
 install_docker() {
-    # Check if Docker is already installed
     if command -v docker &>/dev/null; then
         log_info "Docker is already installed, skipping installation"
     else
         log_info "Installing Docker..."
-        curl -sSL https://get.docker.com | sh || { log_error "Docker installation failed"; exit 1; }
-        usermod -aG docker "$USER" || { log_error "Failed to add user to docker group"; exit 1; }
+        curl -sSL https://get.docker.com | sh
+        usermod -aG docker "$USER"
     fi
 }
 
@@ -79,6 +94,53 @@ configure_k3s() {
     fi
 }
 
+install_pia() {
+    log_info 'Installing PIA...'
+    log_info "Finding latest PIA installer version..."
+
+    local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
+    local PIA_INSTALLER_URL
+    PIA_INSTALLER_URL=$(curl -sSL "${PIA_RELEASES_URL}" | \
+        jq -r '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')
+    local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
+    log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
+
+    log_info "Downloading PIA installer..."
+    rm "$PIA_INSTALLER_PATH"
+    curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
+    chmod +x "$PIA_INSTALLER_PATH"
+    log_info "Running PIA installer..."
+    su x42 -c "$PIA_INSTALLER_PATH"
+    rm "$PIA_INSTALLER_PATH"
+    log_info "PIA installation completed"
+}
+
+configure_pia() {
+    log_info 'Configuring PIA...'
+    piactl login .piactl_login
+    piactl background enable
+    piactl -u applysettings '{"killswitch":"on"}'
+    piactl set protocol wireguard
+
+    log_info 'Reconnecting piactl...'
+    piactl disconnect
+    while [ "$(piactl get connectionstate)" != "Disconnected" ]; do
+        log_info "Waiting for VPN to disconnect..."
+        sleep 2
+    done
+    piactl connect
+    log_info 'PIA configured'
+}
+
+setup_pia() {
+    if command -v piactl &>/dev/null; then
+        log_info "PIA is already installed, skipping installation"
+    else
+        install_pia
+        configure_pia
+    fi
+}
+
 configure_avahi() {
     log_info "Checking if go-avahi-cname is already installed"
 
@@ -87,7 +149,7 @@ configure_avahi() {
     else
         log_info "Installing go-avahi-cname..."
         log_info "Finding latest go-avahi-cname release..."
-        # [1:] used in jq removes the leading 'v' from the version string
+        # Note: [1:] used in jq removes the leading 'v' from the version string
         local latestAvahiVersion avahiUrl
         latestAvahiVersion=$(curl -sSL https://api.github.com/repos/grishy/go-avahi-cname/releases/latest | jq -r ".tag_name | .[1:]")
         if [[ -z "$latestAvahiVersion" ]]; then
@@ -142,83 +204,23 @@ EOF
     fi
 }
 
-disable_wifi() {
-    log_info "Disabling WiFi..."
-    if ! grep -q "dtoverlay=disable-wifi" /boot/firmware/config.txt; then
-        echo "dtoverlay=disable-wifi" | tee -a /boot/firmware/config.txt
-    fi
-}
-
-enable_vnc() {
-    log_info "Enabling VNC..."
-    raspi-config nonint do_vnc 0 || { log_error "Failed to enable VNC"; exit 1; }
-    log_info "VNC has been enabled"
-}
-
-install_pia() {
-    log_info 'Installing PIA...'
-    log_info "Finding latest PIA installer version..."
-
-    local PIA_RELEASES_URL="https://api.github.com/repos/pia-foss/desktop/releases/latest"
-    local PIA_INSTALLER_URL
-    PIA_INSTALLER_URL=$(curl -sSL "${PIA_RELEASES_URL}" | \
-        jq -r '.body | split("\r\n") | .[] | select(contains("linux_arm64")) | split(" - ")[1]')
-    local PIA_INSTALLER_PATH="/tmp/pia_installer.run"
-    log_info "Latest PIA installer URL: $PIA_INSTALLER_URL"
-
-    log_info "Downloading PIA installer..."
-    rm "$PIA_INSTALLER_PATH"
-    curl -sSL -o "$PIA_INSTALLER_PATH" "$PIA_INSTALLER_URL"
-    chmod +x "$PIA_INSTALLER_PATH"
-    log_info "Running PIA installer..."
-    su x42 -c "$PIA_INSTALLER_PATH"
-    rm "$PIA_INSTALLER_PATH"
-    log_info "PIA installation completed"
-}
-
-configure_pia() {
-    log_info 'Configuring PIA...'
-    piactl login .piactl_login
-    piactl background enable
-    piactl -u applysettings '{"killswitch":"on"}'
-    piactl set protocol wireguard
-
-    log_info 'Reconnecting piactl...'
-    piactl disconnect
-    while [ "$(piactl get connectionstate)" != "Disconnected" ]; do
-        log_info "Waiting for VPN to disconnect..."
-        sleep 2
-    done
-    piactl connect
-    log_info 'PIA configured'
-}
-
-setup_pia() {
-    if command -v piactl &>/dev/null; then
-        log_info "PIA is already installed, skipping installation"
-    else
-        install_pia
-        configure_pia
-    fi
-}
-
 ###############################################################################
 # Main Script Execution
 ###############################################################################
 
 main() {
-    check_root
     log_info "Starting Raspberry Pi setup process..."
+    check_root
     update_system
+    enable_vnc
+    disable_wifi
     install_tools
     install_docker
     install_go
+    configure_k3s
+    setup_pia
     configure_avahi
     configure_local_dns_resolution
-    configure_k3s
-    disable_wifi
-    enable_vnc
-    setup_pia
     log_info "Rebooting system..."
     reboot
 }
