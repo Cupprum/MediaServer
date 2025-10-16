@@ -8,10 +8,10 @@
 
 * Execute the `setup.sh` shell script located in the root folder of the project on developer computer, or setup each part manually from the raspberry pi by going through the following steps:
 
-    * Start with setting up Raspberry Pi, read more in `rpi` folder.
+    * Start with setting up Raspberry Pi: `rpi` folder.
 
-    * Install the Kubernetes cluster, read more in the `k8s` folder.
+    * Install the Kubernetes cluster: `k8s` folder.
 
-    * Install the whole Media server Jellyfin setup, read more in the `server` folder.
+    * Install the whole Media server Jellyfin setup: `server` folder.
 
-    * Install Grafana, read more in the `monitoring` folder.
+    * Install Grafana: `monitoring` folder.
