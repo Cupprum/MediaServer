@@ -4,6 +4,7 @@ RUN dnf update -y && \
     dnf install -y \
         kubectl \
         ssh \
+        go \
         jq
 
 RUN useradd x42
