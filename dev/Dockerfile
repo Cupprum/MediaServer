@@ -5,7 +5,8 @@ RUN dnf update -y && \
         kubectl \
         ssh \
         go \
-        jq
+        jq \
+        bind-utils
 
 RUN useradd x42
 USER x42
