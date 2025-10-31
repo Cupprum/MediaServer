@@ -26,8 +26,9 @@ func getJellyfinAuthorization() (string, error) {
 		Pw       string `json:"Pw"`
 	}{u, pw}
 
+	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="12345", Version="10.8.0"`
 	h := map[string]string{
-		"Authorization": `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="12345", Version="10.8.0"`,
+		"Authorization": defaultAuth,
 	}
 
 	rb, err := makeRequest("POST", jellyfinBaseURL+"/Users/AuthenticateByName", b, h)
@@ -46,7 +47,7 @@ func getJellyfinAuthorization() (string, error) {
 	return fmt.Sprintf(`MediaBrowser Token="%s", Client="Jellyfin", Device="TestScript", DeviceId="12345", Version="10.8.0"`, r.AccessToken), nil
 }
 
-func getJellyfinMediaFolders() ([]string, error) {
+func getJellyfinItems(path string) ([]string, error) {
 	auth, err := getJellyfinAuthorization()
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func getJellyfinMediaFolders() ([]string, error) {
 		"Authorization": auth,
 	}
 
-	rb, err := makeRequest("GET", jellyfinBaseURL+"/Library/MediaFolders", nil, h)
+	rb, err := makeRequest("GET", jellyfinBaseURL+path, nil, h)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,11 @@ func getJellyfinMediaFolders() ([]string, error) {
 	return items, nil
 }
 
-func TestJellyfinShouldContainMovies(t *testing.T) {
+func getJellyfinMediaFolders() ([]string, error) {
+	return getJellyfinItems("/Library/MediaFolders")
+}
+
+func TestJellyfinShouldContainMoviesLibrary(t *testing.T) {
 	items, err := getJellyfinMediaFolders()
 	if err != nil {
 		t.Error(err)
@@ -88,13 +93,36 @@ func TestJellyfinShouldContainMovies(t *testing.T) {
 	}
 }
 
-func TestJellyfinShouldContainShows(t *testing.T) {
+func TestJellyfinLibraryShouldContainMovies(t *testing.T) {
+	items, err := getJellyfinItems("/Items?IncludeItemTypes=Movie&Recursive=true")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(items) == 0 {
+		t.Error("No movies found in Jellyfin library")
+	}
+}
+
+func TestJellyfinShouldContainSeriesLibrary(t *testing.T) {
 	items, err := getJellyfinMediaFolders()
 	if err != nil {
 		t.Error(err)
 	}
 
+	// Series are apparently called "Shows" in Jellyfin
 	if !slices.Contains(items, "Shows") {
 		t.Error("Shows library not found in Jellyfin")
+	}
+}
+
+func TestJellyfinLibraryShouldContainSeries(t *testing.T) {
+	items, err := getJellyfinItems("/Items?IncludeItemTypes=Series&Recursive=true")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(items) == 0 {
+		t.Error("No series found in Jellyfin library")
 	}
 }
