@@ -8,17 +8,24 @@ import (
 	"testing"
 )
 
-func getJellyfinAuthorization() (string, error) {
+// Used to cache the Jellyfin authorization token
+var jellyfinAuthorization string = ""
+
+func getJellyfinHeaders() (map[string]string, error) {
+	if jellyfinAuthorization != "" {
+		return map[string]string{"Authorization": jellyfinAuthorization}, nil
+	}
+
 	logger.Info("Getting Jellyfin authorization...")
 
 	u := os.Getenv("JELLYFIN_USERNAME")
 	if u == "" {
-		return "", fmt.Errorf("JELLYFIN_USERNAME environment variable not set")
+		return nil, fmt.Errorf("JELLYFIN_USERNAME environment variable not set")
 	}
 
 	pw := os.Getenv("JELLYFIN_PASSWORD")
 	if pw == "" {
-		return "", fmt.Errorf("JELLYFIN_PASSWORD environment variable not set")
+		return nil, fmt.Errorf("JELLYFIN_PASSWORD environment variable not set")
 	}
 
 	b := struct {
@@ -26,34 +33,31 @@ func getJellyfinAuthorization() (string, error) {
 		Pw       string `json:"Pw"`
 	}{u, pw}
 
-	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="12345", Version="10.8.0"`
-	h := map[string]string{
-		"Authorization": defaultAuth,
-	}
+	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
+	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
+	h := map[string]string{"Authorization": defaultAuth}
 
 	rb, err := makeRequest("POST", jellyfinBaseURL+"/Users/AuthenticateByName", b, h)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var r struct {
 		AccessToken string `json:"AccessToken"`
 	}
 	if err := json.Unmarshal(rb, &r); err != nil {
-		return "", fmt.Errorf("failed to parse auth response: %v", err)
+		return nil, fmt.Errorf("failed to parse auth response: %v", err)
 	}
 
-	// TODO: can i just extend the previous header?
-	return fmt.Sprintf(`MediaBrowser Token="%s", Client="Jellyfin", Device="TestScript", DeviceId="12345", Version="10.8.0"`, r.AccessToken), nil
+	// Add token to the initial auth header
+	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, r.AccessToken)
+	return map[string]string{"Authorization": jellyfinAuthorization}, nil
 }
 
 func getJellyfinItems(path string) ([]string, error) {
-	auth, err := getJellyfinAuthorization()
+	h, err := getJellyfinHeaders()
 	if err != nil {
 		return nil, err
-	}
-	h := map[string]string{
-		"Authorization": auth,
 	}
 
 	rb, err := makeRequest("GET", jellyfinBaseURL+path, nil, h)

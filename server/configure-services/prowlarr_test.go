@@ -2,35 +2,23 @@ package main
 
 import (
 	"encoding/json"
-	"log/slog"
-	"os"
+	"slices"
 	"testing"
 )
 
-type DownloadClient struct {
-	Name string `json:"name"`
-}
-
-type Indexer struct {
-	Name string `json:"name"`
-}
-
-func TestMain(m *testing.M) {
-	logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
-
-	getAPIKey()
-	m.Run()
-}
-
 func TestDownloadClients(t *testing.T) {
-	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, prowlarrHeaders)
+	h, err := getProwlarrHeaders()
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, h)
+	if err != nil {
+		t.Error(err)
 	}
 
-	var clients []DownloadClient
+	var clients []struct {
+		Name string `json:"name"`
+	}
 	json.Unmarshal(respBody, &clients)
 
 	for _, client := range clients {
@@ -42,12 +30,18 @@ func TestDownloadClients(t *testing.T) {
 }
 
 func TestIndexers(t *testing.T) {
-	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/indexer", nil, prowlarrHeaders)
+	h, err := getProwlarrHeaders()
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+	respBody, err := makeRequest("GET", prowlarrBaseURL+"/api/v1/indexer", nil, h)
+	if err != nil {
+		t.Error(err)
 	}
 
-	var indexerDetails []Indexer
+	var indexerDetails []struct {
+		Name string `json:"name"`
+	}
 	json.Unmarshal(respBody, &indexerDetails)
 
 	// Expected indexer names
@@ -64,15 +58,8 @@ func TestIndexers(t *testing.T) {
 	}
 
 	for _, ei := range eIndexers {
-		found := false
-		for _, i := range indexers {
-			if ei == i {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected indexer '%s' not found in actual indexers", expectedName)
+		if !slices.Contains(indexers, ei) {
+			t.Errorf("Expected indexer '%s' not found in actual indexers", ei)
 		}
 	}
 }
