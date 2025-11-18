@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -57,4 +59,19 @@ func makeRequest(method, url string, body interface{}, headers map[string]string
 	)
 
 	return respBody, nil
+}
+
+func loadJSONFile(service string, filename string) (map[string]interface{}, error) {
+	filePath := filepath.Join("req_bodies", service, filename)
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
+	}
+
+	var jsonData map[string]interface{}
+	if err := json.Unmarshal(data, &jsonData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON from %s: %w", filename, err)
+	}
+
+	return jsonData, nil
 }

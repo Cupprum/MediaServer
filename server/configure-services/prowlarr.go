@@ -4,84 +4,73 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
 const prowlarrBaseURL = "http://prowlarr.pi.local"
 
-var apiKey string
-var prowlarrHeaders map[string]string
+// Used to cache the Prowlarr API Key
+var prowlarrApiKey string = ""
 
-type InitializeResponse struct {
-	APIKey string `json:"apiKey"`
-}
-
-func getAPIKey() error {
+func getProwlarrHeaders() (map[string]string, error) {
+	if prowlarrApiKey != "" {
+		return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
+	}
 	logger.Info("Retrieving Prowlarr API Key...")
 
-	respBody, err := makeRequest("GET", prowlarrBaseURL+"/initialize.json", nil, nil)
+	rb, err := makeRequest("GET", prowlarrBaseURL+"/initialize.json", nil, nil)
 	if err != nil {
-		return fmt.Errorf("failed to get API key: %w", err)
+		return nil, fmt.Errorf("failed to get API key: %w", err)
 	}
 
-	var initResp InitializeResponse
-	if err := json.Unmarshal(respBody, &initResp); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+	var r struct {
+		APIKey string `json:"apiKey"`
+	}
+	if err := json.Unmarshal(rb, &r); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	apiKey = initResp.APIKey
-	prowlarrHeaders = map[string]string{
-		"X-Api-Key": apiKey,
-	}
+	prowlarrApiKey = r.APIKey
 
-	return nil
-}
-
-func loadJSONFile(filename string) (map[string]interface{}, error) {
-	filePath := filepath.Join("prowlarr_req_bodies", filename)
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
-	}
-
-	var jsonData map[string]interface{}
-	if err := json.Unmarshal(data, &jsonData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON from %s: %w", filename, err)
-	}
-
-	return jsonData, nil
+	return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
 }
 
 func configureHostSettings() error {
 	logger.Info("Configuring host with login details...")
 
-	hostConfig, err := loadJSONFile("host_config.json")
+	// Update host config with environment variables
+	u := os.Getenv("PROWLARR_USERNAME")
+	if u == "" {
+		return fmt.Errorf("missing env var: PROWLARR_USERNAME")
+	}
+
+	pw := os.Getenv("PROWLARR_PASSWORD")
+	if pw == "" {
+		return fmt.Errorf("missing env var: PROWLARR_PASSWORD")
+	}
+
+	h, err := getProwlarrHeaders() // Fetch headers with API key
 	if err != nil {
 		return err
 	}
 
-	// Update host config with environment variables
-	if username := os.Getenv("PROWLARR_USERNAME"); username == "" {
-		return fmt.Errorf("missing env var: PROWLARR_USERNAME")
-	} else {
-		hostConfig["username"] = username
+	hostConfig, err := loadJSONFile("prowlarr", "host_config.json")
+	if err != nil {
+		return err
 	}
-	if password := os.Getenv("PROWLARR_PASSWORD"); password == "" {
-		return fmt.Errorf("missing env var: PROWLARR_PASSWORD")
-	} else {
-		hostConfig["password"] = password
-		hostConfig["passwordConfirmation"] = password
-	}
-	hostConfig["apiKey"] = apiKey
 
-	_, err = makeRequest("PUT", prowlarrBaseURL+"/api/v1/config/host", hostConfig, prowlarrHeaders)
+	hostConfig["username"] = u
+	hostConfig["password"] = pw
+	hostConfig["passwordConfirmation"] = pw
+	hostConfig["apiKey"] = h["X-Api-Key"] // Set API key from headers
+
+	_, err = makeRequest("PUT", prowlarrBaseURL+"/api/v1/config/host", hostConfig, h)
 	return err
 }
 
 func configureDownloadClient() error {
 	logger.Info("Configuring Download Client...")
 
-	downloadClient, err := loadJSONFile("qbittorrent_downloadclient.json")
+	downloadClient, err := loadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
 	if err != nil {
 		return err
 	}
@@ -109,28 +98,32 @@ func configureDownloadClient() error {
 		}
 	}
 
-	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/downloadclient", downloadClient, prowlarrHeaders)
+	h, err := getProwlarrHeaders()
+	if err != nil {
+		return err
+	}
+	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/downloadclient", downloadClient, h)
 	return err
 }
 
 func addIndexer(filename, name string) error {
 	logger.Info("Adding indexer", "name", name)
 
-	indexer, err := loadJSONFile(filename)
+	indexer, err := loadJSONFile("prowlarr", filename)
 	if err != nil {
 		return err
 	}
 
-	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/indexer", indexer, prowlarrHeaders)
+	h, err := getProwlarrHeaders()
+	if err != nil {
+		return err
+	}
+	_, err = makeRequest("POST", prowlarrBaseURL+"/api/v1/indexer", indexer, h)
 	return err
 }
 
 func ConfigureProwlarr() error {
 	logger.Info("Starting Prowlarr configuration...")
-
-	if err := getAPIKey(); err != nil {
-		return fmt.Errorf("failed to get API key: %w", err)
-	}
 
 	steps := []struct {
 		name string
