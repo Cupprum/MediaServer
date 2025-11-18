@@ -3,6 +3,7 @@ FROM fedora:42
 RUN dnf update -y && \
     dnf install -y \
         kubectl \
+        helm \
         ssh \
         go \
         jq \
