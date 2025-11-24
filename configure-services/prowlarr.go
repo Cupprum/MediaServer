@@ -10,7 +10,7 @@ type ProwlarrConfig struct {
 	Url                 string
 	Username            string
 	Password            string
-	QBittorrentUrl      string
+	QBittorrentHostname string
 	QBittorrentUsername string
 	QBittorrentPassword string
 }
@@ -33,8 +33,8 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
 	}
 
-	qbittorrentUrl := os.Getenv("QBITTORRENT_URL")
-	if qbittorrentUrl == "" {
+	QBittorrentHostname := os.Getenv("QBITTORRENT_URL")
+	if QBittorrentHostname == "" {
 		return nil, fmt.Errorf("missing env var: `QBITTORRENT_URL`")
 	}
 
@@ -52,7 +52,7 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 		Url:                 url,
 		Username:            username,
 		Password:            password,
-		QBittorrentUrl:      qbittorrentUrl,
+		QBittorrentHostname: QBittorrentHostname,
 		QBittorrentUsername: qbittorrentUsername,
 		QBittorrentPassword: qbittorrentPassword,
 	}, nil
@@ -87,7 +87,7 @@ func (c *ProwlarrConfig) getProwlarrHeaders() (map[string]string, error) {
 func (c *ProwlarrConfig) configureHostSettings() error {
 	fmt.Println("-- Configuring host with login details...")
 
-	// Need to get headers to obtain API key, which is used in body
+	// Get headers first, as API Key is needed in body
 	h, err := c.getProwlarrHeaders()
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func (c *ProwlarrConfig) configureDownloadClient() error {
 				name, _ := fieldMap["name"].(string)
 				switch name {
 				case "host":
-					fieldMap["value"] = c.QBittorrentUrl
+					fieldMap["value"] = c.QBittorrentHostname
 				case "username":
 					fieldMap["value"] = c.QBittorrentUsername
 				case "password":
