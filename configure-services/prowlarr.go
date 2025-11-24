@@ -33,9 +33,9 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
 	}
 
-	QBittorrentHostname := os.Getenv("QBITTORRENT_URL")
+	QBittorrentHostname := os.Getenv("QBITTORRENT_HOSTNAME")
 	if QBittorrentHostname == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_URL`")
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_HOSTNAME`")
 	}
 
 	qbittorrentUsername := os.Getenv("QBITTORRENT_USERNAME")
