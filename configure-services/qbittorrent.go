@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -109,13 +111,26 @@ func (c *QBittorrentConfig) changePassword() error {
 
 	b := struct {
 		Username string `json:"web_ui_username"`
-		Pw       string `json:"web_ui_password"`
-	}{c.Username, c.Password}
+		Password string `json:"web_ui_password"`
+	}{
+		Username: c.Username,
+		Password: c.Password,
+	}
 
-	_, err := Request("POST", c.Url+"/api/v2/app/setPreferences", b, nil, c.Client)
+	// Convert map to JSON string for form encoding
+	jsonBytes, err := json.Marshal(b)
+	if err != nil {
+		return fmt.Errorf("failed to marshal preferences to JSON: %w", err)
+	}
+
+	// Send as form-encoded data with json parameter
+	formData := fmt.Sprintf("json=%s", url.QueryEscape(string(jsonBytes)))
+
+	_, err = Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
