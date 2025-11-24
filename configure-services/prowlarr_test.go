@@ -16,7 +16,7 @@ func TestDownloadClients(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	respBody, err := Request("GET", c.Url+"/api/v1/downloadclient", nil, h)
+	respBody, err := Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,7 +44,7 @@ func TestIndexers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	respBody, err := Request("GET", c.Url+"/api/v1/indexer", nil, h)
+	respBody, err := Request("GET", c.Url+"/api/v1/indexer", nil, h, nil)
 	if err != nil {
 		t.Error(err)
 	}

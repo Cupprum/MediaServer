@@ -11,15 +11,21 @@ import (
 	"time"
 )
 
-func Request(method, url string, body interface{}, headers map[string]string) ([]byte, error) {
+func Request(method, url string, body interface{}, headers map[string]string, client *http.Client) ([]byte, error) {
 	var reqBody io.Reader
 
 	if body != nil {
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal JSON: %w", err)
+		if _, ok := body.(string); ok {
+			// If body is string, use it directly (Form data)
+			reqBody = bytes.NewBufferString(body.(string))
+		} else {
+			// Otherwise marshal as JSON
+			jsonData, err := json.Marshal(body)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal JSON: %w", err)
+			}
+			reqBody = bytes.NewBuffer(jsonData)
 		}
-		reqBody = bytes.NewBuffer(jsonData)
 	}
 
 	req, err := http.NewRequest(method, url, reqBody)
@@ -28,7 +34,11 @@ func Request(method, url string, body interface{}, headers map[string]string) ([
 	}
 
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		if _, ok := body.(string); ok {
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		} else {
+			req.Header.Set("Content-Type", "application/json")
+		}
 	}
 
 	// Set additional headers
@@ -36,7 +46,9 @@ func Request(method, url string, body interface{}, headers map[string]string) ([
 		req.Header.Set(key, value)
 	}
 
-	client := &http.Client{Timeout: 30 * time.Second}
+	if client == nil {
+		client = &http.Client{Timeout: 30 * time.Second}
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)

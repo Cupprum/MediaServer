@@ -67,7 +67,7 @@ func (c *ProwlarrConfig) getProwlarrHeaders() (map[string]string, error) {
 	}
 	fmt.Println("-- Retrieving Prowlarr API Key...")
 
-	rb, err := Request("GET", c.Url+"/initialize.json", nil, nil)
+	rb, err := Request("GET", c.Url+"/initialize.json", nil, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API key: %w", err)
 	}
@@ -103,7 +103,7 @@ func (c *ProwlarrConfig) configureHostSettings() error {
 	b["passwordConfirmation"] = c.Password
 	b["apiKey"] = h["X-Api-Key"] // Set API key from headers
 
-	_, err = Request("PUT", c.Url+"/api/v1/config/host", b, h)
+	_, err = Request("PUT", c.Url+"/api/v1/config/host", b, h, nil)
 	return err
 }
 
@@ -136,7 +136,7 @@ func (c *ProwlarrConfig) configureDownloadClient() error {
 	if err != nil {
 		return err
 	}
-	_, err = Request("POST", c.Url+"/api/v1/downloadclient", b, h)
+	_, err = Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
 	return err
 }
 
@@ -152,7 +152,7 @@ func (c *ProwlarrConfig) addIndexer(filename, name string) error {
 	if err != nil {
 		return err
 	}
-	_, err = Request("POST", c.Url+"/api/v1/indexer", b, h)
+	_, err = Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
 	return err
 }
 

@@ -31,7 +31,7 @@ func getJellyfinHeaders() (map[string]string, error) {
 	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
 	h := map[string]string{"Authorization": defaultAuth}
 
-	rb, err := Request("POST", c.Url+"/Users/AuthenticateByName", b, h)
+	rb, err := Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func getJellyfinItems(path string) ([]string, error) {
 		return nil, fmt.Errorf("JELLYFIN_URL environment variable not set")
 	}
 
-	rb, err := Request("GET", url+path, nil, h)
+	rb, err := Request("GET", url+path, nil, h, nil)
 	if err != nil {
 		return nil, err
 	}

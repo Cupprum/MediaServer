@@ -39,7 +39,7 @@ func getJellyfinConfig() (*JellyfinConfig, error) {
 
 func (c *JellyfinConfig) checkSystemInfo() error {
 	fmt.Println("-- Checking system info...")
-	_, err := Request("GET", c.Url+"/System/Info", nil, nil)
+	_, err := Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
@@ -48,7 +48,7 @@ func (c *JellyfinConfig) configureStartup() error {
 
 	url := c.Url + "/Startup/Configuration"
 
-	rconfig, err := Request("GET", url, nil, nil)
+	rconfig, err := Request("GET", url, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -58,13 +58,13 @@ func (c *JellyfinConfig) configureStartup() error {
 		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	_, err = Request("POST", url, config, nil)
+	_, err = Request("POST", url, config, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) checkUser() error {
 	fmt.Println("-- Checking user status...")
-	_, err := Request("GET", c.Url+"/Startup/User", nil, nil)
+	_, err := Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
@@ -78,7 +78,7 @@ func (c *JellyfinConfig) createUser() error {
 		Name:     c.Username,
 		Password: c.Password,
 	}
-	_, err := Request("POST", c.Url+"/Startup/User", b, nil)
+	_, err := Request("POST", c.Url+"/Startup/User", b, nil, nil)
 	return err
 }
 
@@ -90,7 +90,7 @@ func (c *JellyfinConfig) createMoviesLibrary() error {
 		return err
 	}
 
-	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil)
+	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil)
 	return err
 }
 
@@ -102,7 +102,7 @@ func (c *JellyfinConfig) createTVShowsLibrary() error {
 		return err
 	}
 
-	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil)
+	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil)
 	return err
 }
 
@@ -114,13 +114,13 @@ func (c *JellyfinConfig) configureRemoteAccess() error {
 		ERA bool `json:"EnableRemoteAccess"`
 	}{false}
 
-	_, err := Request("POST", c.Url+"/Startup/RemoteAccess", b, nil)
+	_, err := Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) completeStartup() error {
 	fmt.Println("-- Completing startup...")
-	_, err := Request("POST", c.Url+"/Startup/Complete", nil, nil)
+	_, err := Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
 }
 

@@ -1,0 +1,166 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/cookiejar"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+)
+
+type QBittorrentConfig struct {
+	Url      string
+	Username string
+	Password string
+	Client   *http.Client
+}
+
+func getQBittorrentConfig() (*QBittorrentConfig, error) {
+	fmt.Println("-- Create qBittorrent config based on Environment Variables...")
+
+	url := os.Getenv("QBITTORRENT_URL")
+	if url == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_URL`")
+	}
+
+	username := os.Getenv("QBITTORRENT_USERNAME")
+	if username == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_USERNAME`")
+	}
+
+	password := os.Getenv("QBITTORRENT_PASSWORD")
+	if password == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
+	}
+
+	// Create a cookie jar for persisting cookies across requests
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cookie jar: %w", err)
+	}
+
+	client := &http.Client{
+		Jar:     jar,
+		Timeout: 30 * time.Second,
+	}
+
+	return &QBittorrentConfig{
+		Url:      url,
+		Username: username,
+		Password: password,
+		Client:   client,
+	}, nil
+}
+
+func getQbittorrentPasswordFromLogs() (string, error) {
+	fmt.Println("-- Get initial qBittorrent password from logs...")
+
+	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
+	o, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to filter for qbittorrent container id: %v", err)
+	}
+
+	containerId := strings.TrimSpace(string(o))
+
+	cmd = exec.Command("docker", "logs", containerId)
+	o, err = cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get logs: %v", err)
+	}
+
+	passwordLine := "A temporary password is provided for this session:"
+
+	logs := string(o)
+	lines := strings.Split(logs, "\n")
+	for _, line := range lines {
+		if strings.Contains(line, passwordLine) {
+			parts := strings.SplitN(line, passwordLine, 2)
+			if len(parts) == 2 {
+				password := strings.TrimSpace(parts[1])
+				return password, nil
+			}
+		}
+	}
+
+	return "", nil
+}
+
+func (c *QBittorrentConfig) login() error {
+	fmt.Println("-- Log in to qBittorrent to get auth cookie...")
+
+	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
+
+	r, err := Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client)
+	if err != nil {
+		return err
+	}
+
+	if string(r) != "Ok." {
+		return fmt.Errorf("login failed, unexpected response: %s", string(r))
+	}
+	return nil
+}
+
+func (c *QBittorrentConfig) changePassword() error {
+	fmt.Println("-- Change qBittorrent password...")
+
+	b := struct {
+		Username string `json:"web_ui_username"`
+		Pw       string `json:"web_ui_password"`
+	}{c.Username, c.Password}
+
+	_, err := Request("POST", c.Url+"/api/v2/app/setPreferences", b, nil, c.Client)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ConfigureQBittorrent() error {
+	fmt.Println("- Starting qBittorrent configuration...")
+
+	c, err := getQBittorrentConfig()
+	if err != nil {
+		return err
+	}
+
+	// Try to login
+	if err = c.login(); err != nil {
+		fmt.Println("  * Login failed, getting temporary password")
+		pw := c.Password
+
+		// On failure, get temp password from logs
+		tempPw, err := getQbittorrentPasswordFromLogs()
+		if err != nil {
+			return err
+		}
+		if tempPw == "" {
+			return fmt.Errorf("failed to retrieve temporary password from logs")
+		}
+		c.Password = tempPw
+
+		// Retry login with temp password
+		if err = c.login(); err != nil {
+			return err
+		}
+
+		// Set password back to original value
+		c.Password = pw
+
+		// Change password to desired value
+		if err = c.changePassword(); err != nil {
+			return err
+		}
+
+		// Retry login with original password
+		if err = c.login(); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("- qBittorrent configured successfully!")
+	return nil
+}
