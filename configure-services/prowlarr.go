@@ -6,18 +6,68 @@ import (
 	"os"
 )
 
-const prowlarrBaseURL = "http://prowlarr.pi.local"
+type ProwlarrConfig struct {
+	Url                 string
+	Username            string
+	Password            string
+	QBittorrentUrl      string
+	QBittorrentUsername string
+	QBittorrentPassword string
+}
+
+func getProwlarrConfig() (*ProwlarrConfig, error) {
+	fmt.Println("-- Create Prowlarr config based on Environment Variables...")
+
+	url := os.Getenv("PROWLARR_URL")
+	if url == "" {
+		return nil, fmt.Errorf("missing env var: `PROWLARR_URL`")
+	}
+
+	username := os.Getenv("PROWLARR_USERNAME")
+	if username == "" {
+		return nil, fmt.Errorf("missing env var: `PROWLARR_USERNAME`")
+	}
+
+	password := os.Getenv("PROWLARR_PASSWORD")
+	if password == "" {
+		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
+	}
+
+	qbittorrentUrl := os.Getenv("QBITTORRENT_URL")
+	if qbittorrentUrl == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_URL`")
+	}
+
+	qbittorrentUsername := os.Getenv("QBITTORRENT_USERNAME")
+	if qbittorrentUsername == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_USERNAME`")
+	}
+
+	qbittorrentPassword := os.Getenv("QBITTORRENT_PASSWORD")
+	if qbittorrentPassword == "" {
+		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
+	}
+
+	return &ProwlarrConfig{
+		Url:                 url,
+		Username:            username,
+		Password:            password,
+		QBittorrentUrl:      qbittorrentUrl,
+		QBittorrentUsername: qbittorrentUsername,
+		QBittorrentPassword: qbittorrentPassword,
+	}, nil
+}
 
 // Used to cache the Prowlarr API Key
 var prowlarrApiKey string = ""
 
-func getProwlarrHeaders() (map[string]string, error) {
+func (c *ProwlarrConfig) getProwlarrHeaders() (map[string]string, error) {
 	if prowlarrApiKey != "" {
 		return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
 	}
-	fmt.Println("Retrieving Prowlarr API Key...")
+	fmt.Println("-- Retrieving Prowlarr API Key...")
 
-	rb, err := Request("GET", prowlarrBaseURL+"/initialize.json", nil, nil)
+	rb, err := Request("GET", c.Url+"/initialize.json", nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API key: %w", err)
 	}
@@ -34,118 +84,105 @@ func getProwlarrHeaders() (map[string]string, error) {
 	return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
 }
 
-func configureHostSettings() error {
-	fmt.Println("Configuring host with login details...")
+func (c *ProwlarrConfig) configureHostSettings() error {
+	fmt.Println("-- Configuring host with login details...")
 
-	// Update host config with environment variables
-	u := os.Getenv("PROWLARR_USERNAME")
-	if u == "" {
-		return fmt.Errorf("missing env var: PROWLARR_USERNAME")
-	}
-
-	pw := os.Getenv("PROWLARR_PASSWORD")
-	if pw == "" {
-		return fmt.Errorf("missing env var: PROWLARR_PASSWORD")
-	}
-
-	h, err := getProwlarrHeaders() // Fetch headers with API key
+	// Need to get headers to obtain API key, which is used in body
+	h, err := c.getProwlarrHeaders()
 	if err != nil {
 		return err
 	}
 
-	hostConfig, err := loadJSONFile("prowlarr", "host_config.json")
+	b, err := loadJSONFile("prowlarr", "host_config.json")
 	if err != nil {
 		return err
 	}
 
-	hostConfig["username"] = u
-	hostConfig["password"] = pw
-	hostConfig["passwordConfirmation"] = pw
-	hostConfig["apiKey"] = h["X-Api-Key"] // Set API key from headers
+	b["username"] = c.Username
+	b["password"] = c.Password
+	b["passwordConfirmation"] = c.Password
+	b["apiKey"] = h["X-Api-Key"] // Set API key from headers
 
-	_, err = Request("PUT", prowlarrBaseURL+"/api/v1/config/host", hostConfig, h)
+	_, err = Request("PUT", c.Url+"/api/v1/config/host", b, h)
 	return err
 }
 
-func configureDownloadClient() error {
-	fmt.Println("Configuring Download Client...")
+func (c *ProwlarrConfig) configureDownloadClient() error {
+	fmt.Println("-- Configuring Download Client...")
 
-	downloadClient, err := loadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
+	b, err := loadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
 	if err != nil {
 		return err
 	}
 
-	// Update download client config with environment variables
-	if fields, ok := downloadClient["fields"].([]interface{}); ok {
+	// Update download client config
+	if fields, ok := b["fields"].([]interface{}); ok {
 		for _, field := range fields {
 			if fieldMap, ok := field.(map[string]interface{}); ok {
 				name, _ := fieldMap["name"].(string)
 				switch name {
 				case "host":
-					if host := os.Getenv("QBITTORRENT_HOST"); host != "" {
-						fieldMap["value"] = host
-					}
+					fieldMap["value"] = c.QBittorrentUrl
 				case "username":
-					if username := os.Getenv("QBITTORRENT_USERNAME"); username != "" {
-						fieldMap["value"] = username
-					}
+					fieldMap["value"] = c.QBittorrentUsername
 				case "password":
-					if password := os.Getenv("QBITTORRENT_PASSWORD"); password != "" {
-						fieldMap["value"] = password
-					}
+					fieldMap["value"] = c.QBittorrentPassword
 				}
 			}
 		}
 	}
 
-	h, err := getProwlarrHeaders()
+	h, err := c.getProwlarrHeaders()
 	if err != nil {
 		return err
 	}
-	_, err = Request("POST", prowlarrBaseURL+"/api/v1/downloadclient", downloadClient, h)
+	_, err = Request("POST", c.Url+"/api/v1/downloadclient", b, h)
 	return err
 }
 
-func addIndexer(filename, name string) error {
-	fmt.Println("Adding indexer", "name", name)
+func (c *ProwlarrConfig) addIndexer(filename, name string) error {
+	fmt.Println("-- Adding indexer:", name)
 
-	indexer, err := loadJSONFile("prowlarr", filename)
+	b, err := loadJSONFile("prowlarr", filename)
 	if err != nil {
 		return err
 	}
 
-	h, err := getProwlarrHeaders()
+	h, err := c.getProwlarrHeaders()
 	if err != nil {
 		return err
 	}
-	_, err = Request("POST", prowlarrBaseURL+"/api/v1/indexer", indexer, h)
+	_, err = Request("POST", c.Url+"/api/v1/indexer", b, h)
 	return err
 }
 
 func ConfigureProwlarr() error {
-	fmt.Println("Starting Prowlarr configuration...")
+	fmt.Println("- Starting Prowlarr configuration...")
 
-	steps := []struct {
-		name string
-		fn   func() error
-	}{
-		{"Configure Host Settings", configureHostSettings},
-		{"Configure Download Client", configureDownloadClient},
-		{"Add Pirate Bay Indexer", func() error { return addIndexer("pirate_bay_indexer.json", "Pirate Bay") }},
-		{"Add EZTV Indexer", func() error { return addIndexer("eztv_indexer.json", "EZTV") }},
-		{"Add Limetorrents Indexer", func() error { return addIndexer("limetorrents_indexer.json", "Limetorrents") }},
-		{"Add YTS Indexer", func() error { return addIndexer("yts_indexer.json", "YTS") }},
+	c, err := getProwlarrConfig()
+	if err != nil {
+		return err
 	}
 
-	for _, step := range steps {
-		fmt.Println("Executing step", "step", step.name)
-		if err := step.fn(); err != nil {
-			logger.Error("Step failed", "step", step.name, "error", err)
-			return err
-		}
-		fmt.Println("Step completed successfully", "step", step.name)
+	if err = c.configureHostSettings(); err != nil {
+		return err
+	}
+	if err = c.configureDownloadClient(); err != nil {
+		return err
+	}
+	if err = c.addIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
+		return err
+	}
+	if err = c.addIndexer("eztv_indexer.json", "EZTV"); err != nil {
+		return err
+	}
+	if err = c.addIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
+		return err
+	}
+	if err = c.addIndexer("yts_indexer.json", "YTS"); err != nil {
+		return err
 	}
 
-	fmt.Println("Prowlarr configuration completed!")
+	fmt.Println("- Prowlarr configured successfully!")
 	return nil
 }

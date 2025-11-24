@@ -7,11 +7,16 @@ import (
 )
 
 func TestDownloadClients(t *testing.T) {
-	h, err := getProwlarrHeaders()
+	c, err := getProwlarrConfig()
 	if err != nil {
 		t.Error(err)
 	}
-	respBody, err := Request("GET", prowlarrBaseURL+"/api/v1/downloadclient", nil, h)
+
+	h, err := c.getProwlarrHeaders()
+	if err != nil {
+		t.Error(err)
+	}
+	respBody, err := Request("GET", c.Url+"/api/v1/downloadclient", nil, h)
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,11 +35,16 @@ func TestDownloadClients(t *testing.T) {
 }
 
 func TestIndexers(t *testing.T) {
-	h, err := getProwlarrHeaders()
+	c, err := getProwlarrConfig()
 	if err != nil {
 		t.Error(err)
 	}
-	respBody, err := Request("GET", prowlarrBaseURL+"/api/v1/indexer", nil, h)
+
+	h, err := c.getProwlarrHeaders()
+	if err != nil {
+		t.Error(err)
+	}
+	respBody, err := Request("GET", c.Url+"/api/v1/indexer", nil, h)
 	if err != nil {
 		t.Error(err)
 	}
