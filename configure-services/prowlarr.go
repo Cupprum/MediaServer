@@ -164,6 +164,8 @@ func ConfigureProwlarr() error {
 		return err
 	}
 
+	// TODO: check if already configured
+
 	if err = c.configureHostSettings(); err != nil {
 		return err
 	}

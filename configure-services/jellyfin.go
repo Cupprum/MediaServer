@@ -132,6 +132,8 @@ func ConfigureJellyfin() error {
 		return err
 	}
 
+	// TODO: check if already configured
+
 	if err = c.checkSystemInfo(); err != nil {
 		return err
 	}
