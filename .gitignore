@@ -10,3 +10,6 @@ kubeconfig.yaml
 .env
 config
 .piactl_login
+
+cache
+media

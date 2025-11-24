@@ -1,0 +1,113 @@
+{
+    "LibraryOptions": {
+        "Enabled": true,
+        "EnableArchiveMediaFiles": false,
+        "EnablePhotos": true,
+        "EnableRealtimeMonitor": true,
+        "EnableLUFSScan": true,
+        "ExtractTrickplayImagesDuringLibraryScan": false,
+        "SaveTrickplayWithMedia": false,
+        "EnableTrickplayImageExtraction": false,
+        "ExtractChapterImagesDuringLibraryScan": false,
+        "EnableChapterImageExtraction": false,
+        "EnableInternetProviders": true,
+        "SaveLocalMetadata": false,
+        "EnableAutomaticSeriesGrouping": false,
+        "PreferredMetadataLanguage": "",
+        "MetadataCountryCode": "",
+        "SeasonZeroDisplayName": "Specials",
+        "AutomaticRefreshIntervalDays": 0,
+        "EnableEmbeddedTitles": false,
+        "EnableEmbeddedExtrasTitles": false,
+        "EnableEmbeddedEpisodeInfos": false,
+        "AllowEmbeddedSubtitles": "AllowAll",
+        "SkipSubtitlesIfEmbeddedSubtitlesPresent": false,
+        "SkipSubtitlesIfAudioTrackMatches": false,
+        "SaveSubtitlesWithMedia": true,
+        "SaveLyricsWithMedia": false,
+        "RequirePerfectSubtitleMatch": true,
+        "AutomaticallyAddToCollection": false,
+        "PreferNonstandardArtistsTag": false,
+        "UseCustomTagDelimiters": false,
+        "MetadataSavers": [],
+        "TypeOptions": [
+            {
+                "Type": "Series",
+                "MetadataFetchers": [
+                    "TheMovieDb",
+                    "The Open Movie Database"
+                ],
+                "MetadataFetcherOrder": [
+                    "TheMovieDb",
+                    "The Open Movie Database"
+                ],
+                "ImageFetchers": [
+                    "TheMovieDb"
+                ],
+                "ImageFetcherOrder": [
+                    "TheMovieDb"
+                ]
+            },
+            {
+                "Type": "Season",
+                "MetadataFetchers": [
+                    "TheMovieDb"
+                ],
+                "MetadataFetcherOrder": [
+                    "TheMovieDb"
+                ],
+                "ImageFetchers": [
+                    "TheMovieDb"
+                ],
+                "ImageFetcherOrder": [
+                    "TheMovieDb"
+                ]
+            },
+            {
+                "Type": "Episode",
+                "MetadataFetchers": [
+                    "TheMovieDb",
+                    "The Open Movie Database"
+                ],
+                "MetadataFetcherOrder": [
+                    "TheMovieDb",
+                    "The Open Movie Database"
+                ],
+                "ImageFetchers": [
+                    "TheMovieDb",
+                    "The Open Movie Database",
+                    "Embedded Image Extractor",
+                    "Screen Grabber"
+                ],
+                "ImageFetcherOrder": [
+                    "TheMovieDb",
+                    "The Open Movie Database",
+                    "Embedded Image Extractor",
+                    "Screen Grabber"
+                ]
+            }
+        ],
+        "LocalMetadataReaderOrder": [
+            "Nfo"
+        ],
+        "SubtitleDownloadLanguages": [],
+        "CustomTagDelimiters": [
+            "/",
+            "|",
+            ";",
+            "\\"
+        ],
+        "DelimiterWhitelist": [],
+        "DisabledSubtitleFetchers": [],
+        "SubtitleFetcherOrder": [],
+        "DisabledLyricFetchers": [],
+        "LyricFetcherOrder": [],
+        "DisabledMediaSegmentProviders": [],
+        "MediaSegmentProviderOrder": [],
+        "PathInfos": [
+            {
+                "Path": "/media/series"
+            }
+        ]
+    }
+}

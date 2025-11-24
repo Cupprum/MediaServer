@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+
+if [ $# -eq 0 ] || { [ "$1" != "run" ] && [ "$1" != "test" ]; }; then
+    echo "Usage: $0 [run|test]"
+    exit 1
+fi
+
+echo "- Loading environment variables from .env file..."
+if [ -f ".env" ]; then
+    set -a
+    source .env
+    set +a
+else
+    echo "- .env file not found. Skipping loading environment variables."
+fi
+
+if [ "$1" = "run" ]; then
+    echo "- Running configuration services..."
+    go run .
+elif [ "$1" = "test" ]; then
+    echo "- Running tests..."
+    go test
+fi
