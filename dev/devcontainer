@@ -18,7 +18,7 @@ elif [ "$1" = "run" ]; then
         --rm \
         --name 'devcontainer' \
         --network 'host' \
-        --volume '..:/workspace' \
-        --volume "$HOME/.ssh:/home/x42/.ssh" \
+        --volume '..:/workspace:z' \
+        --volume "$HOME/.ssh:/home/x42/.ssh:z" \
         'devcontainer'
 fi

@@ -196,10 +196,14 @@ configure_local_dns_resolution() {
 127.0.0.1       pi.local
 127.0.0.1       jellyfin.pi.local
 127.0.0.1       qbittorrent.pi.local
+127.0.0.1       heimdall.pi.local
+127.0.0.1       homepage.pi.local
 127.0.0.1       prowlarr.pi.local
 127.0.0.1       argocd.pi.local
 127.0.0.1       grafana.pi.local
 EOF
+
+# NOTE: maybe argocd.pi.local should be pointing to IP of RPI?
         log_info "pi.local entries added to /etc/hosts successfully"
     fi
 }
