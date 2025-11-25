@@ -69,7 +69,6 @@ func getQbittorrentPasswordFromLogs() (string, error) {
 
 	cmd = exec.Command("bash", "-c",
 		"docker logs "+containerId+" | grep 'temporary password' | awk '{print $NF}'")
-	fmt.Println(cmd)
 	o, err = cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get logs: %v", err)
@@ -132,7 +131,7 @@ func ConfigureQBittorrent() error {
 
 	// Try to login
 	if err = c.login(); err != nil {
-		fmt.Println("  * Login failed, getting temporary password")
+		fmt.Println(" * Login failed, getting temporary password")
 		pw := c.Password
 
 		// On failure, get temp password from logs
