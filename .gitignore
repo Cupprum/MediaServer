@@ -7,9 +7,14 @@ kubeconfig.yaml
 # Helm
 *.tgz
 
+# Environment files
 .env
-config
 .piactl_login
 
+# Runtime storage
+config
 cache
 media
+
+# Files which are generated from templates
+services.yaml
