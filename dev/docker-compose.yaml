@@ -1,14 +1,4 @@
 services:
-  homepage:
-    image: ghcr.io/gethomepage/homepage:latest
-    container_name: homepage
-    ports:
-      - "3000:3000"
-    environment:
-      HOMEPAGE_ALLOWED_HOSTS: "gethomepage.dev" # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
-    volumes:
-      - "/home/x42/PP/MediaServer/config/homepage:/app/config:z"
-
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
@@ -32,10 +22,6 @@ services:
     container_name: prowlarr
     ports:
       - "9696:9696"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Copenhagen
     volumes:
       - "/home/x42/PP/MediaServer/config/prowlarr:/config:z"
 
@@ -44,10 +30,22 @@ services:
     container_name: qbittorrent
     ports:
       - "8080:8080"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Copenhagen
     volumes:
       - "/home/x42/PP/MediaServer/config/qbittorrent:/config:z"
       - "/home/x42/PP/MediaServer/media/movies:/downloads:z"
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - "3000:3000"
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "gethomepage.dev" # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+    configs:
+      - source: services.yaml
+        target: /app/config/services.yaml
+    volumes:
+      - type: bind
+        source: "/home/x42/PP/MediaServer/dev/services.yaml"
+        target: "/app/config/services.yaml"
+      - "/home/x42/PP/MediaServer/config/homepage:/app/config:z"
