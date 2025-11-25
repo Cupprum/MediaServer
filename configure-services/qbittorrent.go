@@ -67,27 +67,15 @@ func getQbittorrentPasswordFromLogs() (string, error) {
 
 	containerId := strings.TrimSpace(string(o))
 
-	cmd = exec.Command("docker", "logs", containerId)
+	cmd = exec.Command("bash", "-c",
+		"docker logs "+containerId+" | grep 'temporary password' | awk '{print $NF}'")
+	fmt.Println(cmd)
 	o, err = cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get logs: %v", err)
 	}
 
-	passwordLine := "A temporary password is provided for this session:"
-
-	logs := string(o)
-	lines := strings.Split(logs, "\n")
-	for _, line := range lines {
-		if strings.Contains(line, passwordLine) {
-			parts := strings.SplitN(line, passwordLine, 2)
-			if len(parts) == 2 {
-				password := strings.TrimSpace(parts[1])
-				return password, nil
-			}
-		}
-	}
-
-	return "", nil
+	return strings.TrimSpace(string(o)), nil
 }
 
 func (c *QBittorrentConfig) login() error {
