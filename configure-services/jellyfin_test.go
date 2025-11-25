@@ -22,29 +22,16 @@ func getJellyfinHeaders() (map[string]string, error) {
 		return nil, err
 	}
 
-	b := struct {
-		Username string `json:"Username"`
-		Pw       string `json:"Pw"`
-	}{c.Username, c.Password}
-
 	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
 	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
-	h := map[string]string{"Authorization": defaultAuth}
 
-	rb, err := Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
+	accessToken, err := c.jellyfinLogin()
 	if err != nil {
 		return nil, err
 	}
 
-	var r struct {
-		AccessToken string `json:"AccessToken"`
-	}
-	if err := json.Unmarshal(rb, &r); err != nil {
-		return nil, fmt.Errorf("failed to parse auth response: %v", err)
-	}
-
 	// Add token to the initial auth header
-	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, r.AccessToken)
+	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, accessToken)
 	return map[string]string{"Authorization": jellyfinAuthorization}, nil
 }
 

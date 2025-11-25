@@ -10,7 +10,7 @@ func TestQbittorrentLogin(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = c.login()
+	err = c.qbittorrentLogin()
 	if err != nil {
 		t.Error(err)
 	}

@@ -77,7 +77,7 @@ func getQbittorrentPasswordFromLogs() (string, error) {
 	return strings.TrimSpace(string(o)), nil
 }
 
-func (c *QBittorrentConfig) login() error {
+func (c *QBittorrentConfig) qbittorrentLogin() error {
 	fmt.Println("-- Log in to qBittorrent to get auth cookie...")
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
@@ -130,37 +130,42 @@ func ConfigureQBittorrent() error {
 	}
 
 	// Try to login
-	if err = c.login(); err != nil {
-		fmt.Println(" * Login failed, getting temporary password")
-		pw := c.Password
+	if err = c.qbittorrentLogin(); err == nil {
+		// If login is successful, assume already configured
+		fmt.Println("- qBittorrent already configured, skipping...")
+		return nil
+	}
 
-		// On failure, get temp password from logs
-		tempPw, err := getQbittorrentPasswordFromLogs()
-		if err != nil {
-			return err
-		}
-		if tempPw == "" {
-			return fmt.Errorf("failed to retrieve temporary password from logs")
-		}
-		c.Password = tempPw
+	// Otherwise, proceed with configuration
+	fmt.Println(" * Getting temporary password")
+	pw := c.Password
 
-		// Retry login with temp password
-		if err = c.login(); err != nil {
-			return err
-		}
+	// On failure, get temp password from logs
+	tempPw, err := getQbittorrentPasswordFromLogs()
+	if err != nil {
+		return err
+	}
+	if tempPw == "" {
+		return fmt.Errorf("failed to retrieve temporary password from logs")
+	}
+	c.Password = tempPw
 
-		// Set password back to original value
-		c.Password = pw
+	// Retry login with temp password
+	if err = c.qbittorrentLogin(); err != nil {
+		return err
+	}
 
-		// Change password to desired value
-		if err = c.changePassword(); err != nil {
-			return err
-		}
+	// Set password back to original value
+	c.Password = pw
 
-		// Retry login with original password
-		if err = c.login(); err != nil {
-			return err
-		}
+	// Change password to desired value
+	if err = c.changePassword(); err != nil {
+		return err
+	}
+
+	// Retry login with original password
+	if err = c.qbittorrentLogin(); err != nil {
+		return err
 	}
 
 	fmt.Println("- qBittorrent configured successfully!")

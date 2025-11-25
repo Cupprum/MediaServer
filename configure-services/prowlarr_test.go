@@ -6,6 +6,18 @@ import (
 	"testing"
 )
 
+func TestProwlarrLogin(t *testing.T) {
+	c, err := getProwlarrConfig()
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = c.prowlarrLogin()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestDownloadClients(t *testing.T) {
 	c, err := getProwlarrConfig()
 	if err != nil {

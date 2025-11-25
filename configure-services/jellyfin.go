@@ -37,6 +37,31 @@ func getJellyfinConfig() (*JellyfinConfig, error) {
 	}, nil
 }
 
+func (c *JellyfinConfig) jellyfinLogin() (string, error) {
+	b := struct {
+		Username string `json:"Username"`
+		Pw       string `json:"Pw"`
+	}{c.Username, c.Password}
+
+	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
+	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
+	h := map[string]string{"Authorization": defaultAuth}
+
+	rb, err := Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
+	if err != nil {
+		return "", err
+	}
+
+	var r struct {
+		AccessToken string `json:"AccessToken"`
+	}
+	if err := json.Unmarshal(rb, &r); err != nil {
+		return "", fmt.Errorf("failed to parse auth response: %v", err)
+	}
+
+	return r.AccessToken, nil
+}
+
 func (c *JellyfinConfig) checkSystemInfo() error {
 	fmt.Println("-- Checking system info...")
 	_, err := Request("GET", c.Url+"/System/Info", nil, nil, nil)
@@ -132,8 +157,14 @@ func ConfigureJellyfin() error {
 		return err
 	}
 
-	// TODO: check if already configured
+	// Check if Jellyfin was already configured
+	if _, err := c.jellyfinLogin(); err == nil {
+		// If login is successful, assume already configured
+		fmt.Println("- Jellyfin already configured, skipping...")
+		return nil
+	}
 
+	// Otherwise, proceed with configuration
 	if err = c.checkSystemInfo(); err != nil {
 		return err
 	}

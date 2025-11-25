@@ -58,6 +58,23 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 	}, nil
 }
 
+func (c *ProwlarrConfig) prowlarrLogin() error {
+	b := struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{
+		Username: c.Username,
+		Password: c.Password,
+	}
+
+	_, err := Request("POST", c.Url+"/login", b, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to login to Prowlarr: %w", err)
+	}
+
+	return nil
+}
+
 // Used to cache the Prowlarr API Key
 var prowlarrApiKey string = ""
 
@@ -164,8 +181,14 @@ func ConfigureProwlarr() error {
 		return err
 	}
 
-	// TODO: check if already configured
+	// Try to login
+	if err = c.prowlarrLogin(); err == nil {
+		// On successful login, assume already configured
+		fmt.Println("- Prowlarr seems to be already configured, skipping...")
+		return nil
+	}
 
+	// Otherwise, proceed with configuration
 	if err = c.configureHostSettings(); err != nil {
 		return err
 	}
