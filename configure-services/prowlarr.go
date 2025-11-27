@@ -119,7 +119,7 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 
 	key := "PROWLARR_APIKEY"
 	re := regexp.MustCompile("(?m)^" + key + "=.*")
-	replacement := []byte(key + "=" + c.Apikey)
+	replacement := []byte(key + "='" + c.Apikey + "'")
 
 	if re.Match(data) {
 		data = re.ReplaceAll(data, replacement)
