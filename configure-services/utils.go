@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Request(method, url string, body interface{}, headers map[string]string, client *http.Client) ([]byte, error) {
+func requestBuilder(method, url string, body interface{}, headers map[string]string) (*http.Request, error) {
 	var reqBody io.Reader
 
 	if body != nil {
@@ -46,6 +46,16 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 		req.Header.Set(key, value)
 	}
 
+	return req, nil
+}
+
+func Request(method, url string, body interface{}, headers map[string]string, client *http.Client) ([]byte, error) {
+	req, err := requestBuilder(method, url, body, headers)
+	if err != nil {
+		return nil, err
+	}
+
+	// Request execution
 	if client == nil {
 		client = &http.Client{Timeout: 30 * time.Second}
 	}
@@ -60,6 +70,7 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	// Response verification
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("request failed: %s - %s", resp.Status, string(respBody))
 	}
