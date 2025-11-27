@@ -18,16 +18,13 @@ func TestProwlarrLogin(t *testing.T) {
 	}
 }
 
-func TestDownloadClients(t *testing.T) {
+func TestProwlarrDownloadClients(t *testing.T) {
 	c, err := getProwlarrConfig()
 	if err != nil {
 		t.Error(err)
 	}
 
-	h, err := c.getProwlarrHeaders()
-	if err != nil {
-		t.Error(err)
-	}
+	h := map[string]string{"X-Api-Key": c.Apikey}
 	respBody, err := Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil)
 	if err != nil {
 		t.Error(err)
@@ -46,16 +43,13 @@ func TestDownloadClients(t *testing.T) {
 	t.Error("qbittorrent download client not found in the response")
 }
 
-func TestIndexers(t *testing.T) {
+func TestProwlarrIndexers(t *testing.T) {
 	c, err := getProwlarrConfig()
 	if err != nil {
 		t.Error(err)
 	}
 
-	h, err := c.getProwlarrHeaders()
-	if err != nil {
-		t.Error(err)
-	}
+	h := map[string]string{"X-Api-Key": c.Apikey}
 	respBody, err := Request("GET", c.Url+"/api/v1/indexer", nil, h, nil)
 	if err != nil {
 		t.Error(err)

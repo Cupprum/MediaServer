@@ -131,7 +131,7 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 	return nil
 }
 
-func (c *ProwlarrConfig) configureHostSettings() error {
+func (c *ProwlarrConfig) configureProwlarrHostSettings() error {
 	fmt.Println("-- Configuring Prowlarr with login details...")
 
 	b, err := loadJSONFile("prowlarr", "host_config.json")
@@ -150,7 +150,7 @@ func (c *ProwlarrConfig) configureHostSettings() error {
 	return err
 }
 
-func (c *ProwlarrConfig) configureDownloadClient() error {
+func (c *ProwlarrConfig) configureProwlarrDownloadClient() error {
 	fmt.Println("-- Configuring Download Client...")
 
 	b, err := loadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
@@ -180,7 +180,7 @@ func (c *ProwlarrConfig) configureDownloadClient() error {
 	return err
 }
 
-func (c *ProwlarrConfig) addIndexer(filename, name string) error {
+func (c *ProwlarrConfig) addProwlarrIndexer(filename, name string) error {
 	fmt.Println("-- Adding indexer:", name)
 
 	b, err := loadJSONFile("prowlarr", filename)
@@ -209,22 +209,22 @@ func ConfigureProwlarr() error {
 	}
 
 	// // Otherwise, proceed with configuration
-	if err = c.configureHostSettings(); err != nil {
+	if err = c.configureProwlarrHostSettings(); err != nil {
 		return err
 	}
-	if err = c.configureDownloadClient(); err != nil {
+	if err = c.configureProwlarrDownloadClient(); err != nil {
 		return err
 	}
-	if err = c.addIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
+	if err = c.addProwlarrIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
 		return err
 	}
-	// if err = c.addIndexer("eztv_indexer.json", "EZTV"); err != nil {
+	// if err = c.addProwlarrIndexer("eztv_indexer.json", "EZTV"); err != nil {
 	// 	return err
 	// }
-	if err = c.addIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
+	if err = c.addProwlarrIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
 		return err
 	}
-	if err = c.addIndexer("yts_indexer.json", "YTS"); err != nil {
+	if err = c.addProwlarrIndexer("yts_indexer.json", "YTS"); err != nil {
 		return err
 	}
 

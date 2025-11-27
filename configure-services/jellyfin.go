@@ -62,13 +62,13 @@ func (c *JellyfinConfig) jellyfinLogin() (string, error) {
 	return r.AccessToken, nil
 }
 
-func (c *JellyfinConfig) checkSystemInfo() error {
+func (c *JellyfinConfig) checkJellyfinSystemInfo() error {
 	fmt.Println("-- Checking system info...")
 	_, err := Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
-func (c *JellyfinConfig) configureStartup() error {
+func (c *JellyfinConfig) configureJellyfinStartup() error {
 	fmt.Println("-- Configuring startup settings...")
 
 	url := c.Url + "/Startup/Configuration"
@@ -87,13 +87,13 @@ func (c *JellyfinConfig) configureStartup() error {
 	return err
 }
 
-func (c *JellyfinConfig) checkUser() error {
+func (c *JellyfinConfig) checkJellyfinUser() error {
 	fmt.Println("-- Checking user status...")
 	_, err := Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
-func (c *JellyfinConfig) createUser() error {
+func (c *JellyfinConfig) createJellyfinUser() error {
 	fmt.Println("-- Creating admin user...")
 
 	b := struct {
@@ -107,7 +107,7 @@ func (c *JellyfinConfig) createUser() error {
 	return err
 }
 
-func (c *JellyfinConfig) createMoviesLibrary() error {
+func (c *JellyfinConfig) createJellyfinMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
 	b, err := loadJSONFile("jellyfin", "library_movies.json")
@@ -119,7 +119,7 @@ func (c *JellyfinConfig) createMoviesLibrary() error {
 	return err
 }
 
-func (c *JellyfinConfig) createTVShowsLibrary() error {
+func (c *JellyfinConfig) createJellyfinTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
 	b, err := loadJSONFile("jellyfin", "library_tv.json")
@@ -131,7 +131,7 @@ func (c *JellyfinConfig) createTVShowsLibrary() error {
 	return err
 }
 
-func (c *JellyfinConfig) configureRemoteAccess() error {
+func (c *JellyfinConfig) configureJellyfinRemoteAccess() error {
 	fmt.Println("-- Configuring remote access...")
 
 	// Too small to store this req body as a file
@@ -143,7 +143,7 @@ func (c *JellyfinConfig) configureRemoteAccess() error {
 	return err
 }
 
-func (c *JellyfinConfig) completeStartup() error {
+func (c *JellyfinConfig) completeJellyfinStartup() error {
 	fmt.Println("-- Completing startup...")
 	_, err := Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
@@ -166,28 +166,28 @@ func ConfigureJellyfin() error {
 	}
 
 	// Otherwise, proceed with configuration
-	if err = c.checkSystemInfo(); err != nil {
+	if err = c.checkJellyfinSystemInfo(); err != nil {
 		return err
 	}
-	if err = c.configureStartup(); err != nil {
+	if err = c.configureJellyfinStartup(); err != nil {
 		return err
 	}
-	if err = c.checkUser(); err != nil {
+	if err = c.checkJellyfinUser(); err != nil {
 		return err
 	}
-	if err = c.createUser(); err != nil {
+	if err = c.createJellyfinUser(); err != nil {
 		return err
 	}
-	if err = c.createMoviesLibrary(); err != nil {
+	if err = c.createJellyfinMoviesLibrary(); err != nil {
 		return err
 	}
-	if err = c.createTVShowsLibrary(); err != nil {
+	if err = c.createJellyfinTVShowsLibrary(); err != nil {
 		return err
 	}
-	if err = c.configureRemoteAccess(); err != nil {
+	if err = c.configureJellyfinRemoteAccess(); err != nil {
 		return err
 	}
-	if err = c.completeStartup(); err != nil {
+	if err = c.completeJellyfinStartup(); err != nil {
 		return err
 	}
 

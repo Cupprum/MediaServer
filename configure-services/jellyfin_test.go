@@ -68,12 +68,8 @@ func getJellyfinItems(path string) ([]string, error) {
 	return items, nil
 }
 
-func getJellyfinMediaFolders() ([]string, error) {
-	return getJellyfinItems("/Library/MediaFolders")
-}
-
 func TestJellyfinShouldContainMoviesLibrary(t *testing.T) {
-	items, err := getJellyfinMediaFolders()
+	items, err := getJellyfinItems("/Library/MediaFolders")
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,7 +91,7 @@ func TestJellyfinLibraryShouldContainMovies(t *testing.T) {
 }
 
 func TestJellyfinShouldContainSeriesLibrary(t *testing.T) {
-	items, err := getJellyfinMediaFolders()
+	items, err := getJellyfinItems("/Library/MediaFolders")
 	if err != nil {
 		t.Error(err)
 	}
