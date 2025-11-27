@@ -161,6 +161,7 @@ func ConfigureJellyfin() error {
 	if _, err := c.jellyfinLogin(); err == nil {
 		// If login is successful, assume already configured
 		fmt.Println("- Jellyfin already configured, skipping...")
+		fmt.Println()
 		return nil
 	}
 
@@ -191,5 +192,6 @@ func ConfigureJellyfin() error {
 	}
 
 	fmt.Println("- Jellyfin configured successfully!")
+	fmt.Println()
 	return nil
 }

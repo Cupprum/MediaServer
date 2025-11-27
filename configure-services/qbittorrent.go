@@ -20,7 +20,7 @@ type QBittorrentConfig struct {
 }
 
 func getQBittorrentConfig() (*QBittorrentConfig, error) {
-	fmt.Println("-- Create qBittorrent config based on Environment Variables...")
+	fmt.Println("-- Loading qBittorrent config...")
 
 	url := os.Getenv("QBITTORRENT_URL")
 	if url == "" {
@@ -56,8 +56,24 @@ func getQBittorrentConfig() (*QBittorrentConfig, error) {
 	}, nil
 }
 
+func (c *QBittorrentConfig) qbittorrentLogin() error {
+	fmt.Println("-- Logging in to qBittorrent...")
+
+	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
+
+	r, err := Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client)
+	if err != nil {
+		return err
+	}
+
+	if string(r) != "Ok." {
+		return fmt.Errorf("login failed, unexpected response: %s", string(r))
+	}
+	return nil
+}
+
 func getQbittorrentPasswordFromLogs() (string, error) {
-	fmt.Println("-- Get initial qBittorrent password from logs...")
+	fmt.Println("-- Getting initial qBittorrent password...")
 
 	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
 	o, err := cmd.Output()
@@ -74,27 +90,16 @@ func getQbittorrentPasswordFromLogs() (string, error) {
 		return "", fmt.Errorf("failed to get logs: %v", err)
 	}
 
-	return strings.TrimSpace(string(o)), nil
-}
-
-func (c *QBittorrentConfig) qbittorrentLogin() error {
-	fmt.Println("-- Log in to qBittorrent to get auth cookie...")
-
-	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
-
-	r, err := Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client)
-	if err != nil {
-		return err
+	pw := strings.TrimSpace(string(o))
+	if pw == "" {
+		return "", fmt.Errorf("failed to retrieve temporary password from logs")
 	}
 
-	if string(r) != "Ok." {
-		return fmt.Errorf("login failed, unexpected response: %s", string(r))
-	}
-	return nil
+	return pw, nil
 }
 
 func (c *QBittorrentConfig) changePassword() error {
-	fmt.Println("-- Change qBittorrent password...")
+	fmt.Println("-- Changing qBittorrent password...")
 
 	b := struct {
 		Username string `json:"web_ui_username"`
@@ -123,7 +128,6 @@ func (c *QBittorrentConfig) changePassword() error {
 
 func ConfigureQBittorrent() error {
 	fmt.Println("- Starting qBittorrent configuration...")
-
 	c, err := getQBittorrentConfig()
 	if err != nil {
 		return err
@@ -133,20 +137,17 @@ func ConfigureQBittorrent() error {
 	if err = c.qbittorrentLogin(); err == nil {
 		// If login is successful, assume already configured
 		fmt.Println("- qBittorrent already configured, skipping...")
+		fmt.Println()
 		return nil
 	}
 
 	// Otherwise, proceed with configuration
-	fmt.Println(" * Getting temporary password")
 	pw := c.Password
 
 	// On failure, get temp password from logs
 	tempPw, err := getQbittorrentPasswordFromLogs()
 	if err != nil {
 		return err
-	}
-	if tempPw == "" {
-		return fmt.Errorf("failed to retrieve temporary password from logs")
 	}
 	c.Password = tempPw
 
@@ -169,5 +170,6 @@ func ConfigureQBittorrent() error {
 	}
 
 	fmt.Println("- qBittorrent configured successfully!")
+	fmt.Println()
 	return nil
 }
