@@ -3,20 +3,26 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
+	"regexp"
+	"strings"
+	"time"
 )
 
 type ProwlarrConfig struct {
 	Url                 string
 	Username            string
 	Password            string
+	Apikey              string
 	QBittorrentHostname string
 	QBittorrentUsername string
 	QBittorrentPassword string
 }
 
 func getProwlarrConfig() (*ProwlarrConfig, error) {
-	fmt.Println("-- Create Prowlarr config based on Environment Variables...")
+	fmt.Println("-- Loading Prowlarr config...")
 
 	url := os.Getenv("PROWLARR_URL")
 	if url == "" {
@@ -31,6 +37,11 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 	password := os.Getenv("PROWLARR_PASSWORD")
 	if password == "" {
 		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
+	}
+
+	apikey := os.Getenv("PROWLARR_APIKEY")
+	if apikey == "" {
+		fmt.Println(" * env var: `PROWLARR_APIKEY` is not defined, this is expected during first run")
 	}
 
 	QBittorrentHostname := os.Getenv("QBITTORRENT_HOSTNAME")
@@ -52,6 +63,7 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 		Url:                 url,
 		Username:            username,
 		Password:            password,
+		Apikey:              apikey,
 		QBittorrentHostname: QBittorrentHostname,
 		QBittorrentUsername: qbittorrentUsername,
 		QBittorrentPassword: qbittorrentPassword,
@@ -59,56 +71,68 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 }
 
 func (c *ProwlarrConfig) prowlarrLogin() error {
-	b := struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}{
-		Username: c.Username,
-		Password: c.Password,
+	fmt.Println("-- Logging in to Prowlarr...")
+
+	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
+
+	req, err := requestBuilder("POST", c.Url+"/login", b, nil)
+	if err != nil {
+		return err
 	}
 
-	_, err := Request("POST", c.Url+"/login", b, nil, nil)
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to login to Prowlarr: %w", err)
+		return fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Response verification
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("request failed: %s", resp.Status)
+	}
+
+	if string(resp.Request.URL.RawQuery) != url.PathEscape("returnUrl=/") {
+		return fmt.Errorf("request failed: error 401: invalid returnUrl")
 	}
 
 	return nil
 }
 
-// Used to cache the Prowlarr API Key
-var prowlarrApiKey string = ""
-
-func (c *ProwlarrConfig) getProwlarrHeaders() (map[string]string, error) {
-	if prowlarrApiKey != "" {
-		return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
-	}
+func (c *ProwlarrConfig) prowlarrInitialize() error {
 	fmt.Println("-- Retrieving Prowlarr API Key...")
-
 	rb, err := Request("GET", c.Url+"/initialize.json", nil, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API key: %w", err)
+		return fmt.Errorf("failed to get API key: %w", err)
 	}
 
 	var r struct {
 		APIKey string `json:"apiKey"`
 	}
 	if err := json.Unmarshal(rb, &r); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	prowlarrApiKey = r.APIKey
+	c.Apikey = r.APIKey
 
-	return map[string]string{"X-Api-Key": prowlarrApiKey}, nil
+	data, _ := os.ReadFile(".env")
+
+	key := "PROWLARR_APIKEY"
+	re := regexp.MustCompile("(?m)^" + key + "=.*")
+	replacement := []byte(key + "=" + c.Apikey)
+
+	if re.Match(data) {
+		data = re.ReplaceAll(data, replacement)
+	} else {
+		data = append(data, []byte("\n"+string(replacement))...)
+	}
+	os.WriteFile(".env", data, 0644)
+
+	return nil
 }
 
 func (c *ProwlarrConfig) configureHostSettings() error {
-	fmt.Println("-- Configuring host with login details...")
-
-	// Get headers first, as API Key is needed in body
-	h, err := c.getProwlarrHeaders()
-	if err != nil {
-		return err
-	}
+	fmt.Println("-- Configuring Prowlarr with login details...")
 
 	b, err := loadJSONFile("prowlarr", "host_config.json")
 	if err != nil {
@@ -116,9 +140,11 @@ func (c *ProwlarrConfig) configureHostSettings() error {
 	}
 
 	b["username"] = c.Username
-	b["password"] = c.Password
-	b["passwordConfirmation"] = c.Password
-	b["apiKey"] = h["X-Api-Key"] // Set API key from headers
+	b["password"] = strings.TrimSpace(c.Password)
+	b["passwordConfirmation"] = strings.TrimSpace(c.Password)
+	b["apiKey"] = c.Apikey
+
+	h := map[string]string{"X-Api-Key": c.Apikey}
 
 	_, err = Request("PUT", c.Url+"/api/v1/config/host", b, h, nil)
 	return err
@@ -149,10 +175,7 @@ func (c *ProwlarrConfig) configureDownloadClient() error {
 		}
 	}
 
-	h, err := c.getProwlarrHeaders()
-	if err != nil {
-		return err
-	}
+	h := map[string]string{"X-Api-Key": c.Apikey}
 	_, err = Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
 	return err
 }
@@ -165,10 +188,7 @@ func (c *ProwlarrConfig) addIndexer(filename, name string) error {
 		return err
 	}
 
-	h, err := c.getProwlarrHeaders()
-	if err != nil {
-		return err
-	}
+	h := map[string]string{"X-Api-Key": c.Apikey}
 	_, err = Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
 	return err
 }
@@ -181,14 +201,14 @@ func ConfigureProwlarr() error {
 		return err
 	}
 
-	// Try to login
-	if err = c.prowlarrLogin(); err == nil {
-		// On successful login, assume already configured
-		fmt.Println("- Prowlarr seems to be already configured, skipping...")
+	err = c.prowlarrInitialize()
+	if err != nil {
+		fmt.Println("- Prowlarr already configured, skipping...")
+		fmt.Println()
 		return nil
 	}
 
-	// Otherwise, proceed with configuration
+	// // Otherwise, proceed with configuration
 	if err = c.configureHostSettings(); err != nil {
 		return err
 	}
@@ -198,9 +218,9 @@ func ConfigureProwlarr() error {
 	if err = c.addIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
 		return err
 	}
-	if err = c.addIndexer("eztv_indexer.json", "EZTV"); err != nil {
-		return err
-	}
+	// if err = c.addIndexer("eztv_indexer.json", "EZTV"); err != nil {
+	// 	return err
+	// }
 	if err = c.addIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
 		return err
 	}
@@ -209,5 +229,6 @@ func ConfigureProwlarr() error {
 	}
 
 	fmt.Println("- Prowlarr configured successfully!")
+	fmt.Println()
 	return nil
 }
