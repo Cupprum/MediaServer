@@ -1,16 +1,22 @@
 - MediaServer:
     - qBittorrent:
+        icon: https://a.fsdn.com/allura/p/qbittorrent/icon?1724097660?&w=90
+        href: http://localhost:8080/
         widget:
             type: "qbittorrent"
             url: "http://qbittorrent:8080"
             username: "$QBITTORRENT_USERNAME"
             password: "$QBITTORRENT_PASSWORD"
     - Prowlarr:
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/prowlarr.png
+        href: http://localhost:9696/
         widget:
             type: "prowlarr"
             url: "http://prowlarr:9696"
             key: "$PROWLARR_APIKEY"
     - Jellyfin:
+        icon: https://images.icon-icons.com/3912/PNG/512/jellyfin_logo_icon_247973.png
+        href: http://localhost:8096/
         widget:
             type: jellyfin
             url: "http://jellyfin:8096"
