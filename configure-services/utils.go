@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
@@ -97,4 +98,26 @@ func loadJSONFile(service string, filename string) (map[string]interface{}, erro
 	}
 
 	return jsonData, nil
+}
+
+func updateDotEnv(key, value string) error {
+	data, err := os.ReadFile(".env")
+	if err != nil {
+		return fmt.Errorf("failed to read .env file: %w", err)
+	}
+
+	re := regexp.MustCompile("(?m)^" + key + "=.*")
+	replacement := []byte(key + "='" + value + "'")
+
+	if re.Match(data) {
+		data = re.ReplaceAll(data, replacement)
+	} else {
+		data = append(data, []byte("\n"+string(replacement))...)
+	}
+	err = os.WriteFile(".env", data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write .env file: %w", err)
+	}
+
+	return nil
 }

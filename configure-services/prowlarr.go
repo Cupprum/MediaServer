@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -115,18 +114,7 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 
 	c.Apikey = r.APIKey
 
-	data, _ := os.ReadFile(".env")
-
-	key := "PROWLARR_APIKEY"
-	re := regexp.MustCompile("(?m)^" + key + "=.*")
-	replacement := []byte(key + "='" + c.Apikey + "'")
-
-	if re.Match(data) {
-		data = re.ReplaceAll(data, replacement)
-	} else {
-		data = append(data, []byte("\n"+string(replacement))...)
-	}
-	os.WriteFile(".env", data, 0644)
+	updateDotEnv("PROWLARR_APIKEY", c.Apikey)
 
 	return nil
 }
