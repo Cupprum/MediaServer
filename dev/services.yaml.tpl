@@ -10,3 +10,8 @@
             type: "prowlarr"
             url: "http://prowlarr:9696"
             key: "$PROWLARR_APIKEY"
+    - Jellyfin:
+        widget:
+            type: jellyfin
+            url: "http://jellyfin:8096"
+            key: "$JELLYFIN_APIKEY"
