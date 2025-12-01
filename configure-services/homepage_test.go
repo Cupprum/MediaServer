@@ -19,6 +19,6 @@ func TestHomepageSite(t *testing.T) {
 
 	// TODO: change to check for Grafana, Qbittorrent and other services
 	if strings.Contains(string(rb), "qBittorrent") == false {
-		t.Error("QBittorrent service widget not found")
+		t.Error("qBittorrent service widget not found")
 	}
 }
