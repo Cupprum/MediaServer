@@ -8,33 +8,6 @@ import (
 	"testing"
 )
 
-// Used to cache the Jellyfin authorization token
-var jellyfinAuthorization string = ""
-
-func getJellyfinHeaders() (map[string]string, error) {
-	if jellyfinAuthorization != "" {
-		return map[string]string{"Authorization": jellyfinAuthorization}, nil
-	}
-
-	fmt.Println("-- Getting Jellyfin authorization token...")
-	c, err := getJellyfinConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
-	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
-
-	accessToken, err := c.jellyfinLogin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Add token to the initial auth header
-	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, accessToken)
-	return map[string]string{"Authorization": jellyfinAuthorization}, nil
-}
-
 func getJellyfinItems(path string) ([]string, error) {
 	h, err := getJellyfinHeaders()
 	if err != nil {

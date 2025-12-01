@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 type JellyfinConfig struct {
@@ -35,6 +36,33 @@ func getJellyfinConfig() (*JellyfinConfig, error) {
 		Username: username,
 		Password: password,
 	}, nil
+}
+
+// Used to cache the Jellyfin authorization token
+var jellyfinAuthorization string = ""
+
+func getJellyfinHeaders() (map[string]string, error) {
+	if jellyfinAuthorization != "" {
+		return map[string]string{"Authorization": jellyfinAuthorization}, nil
+	}
+
+	fmt.Println("-- Getting Jellyfin authorization token...")
+	c, err := getJellyfinConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
+	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
+
+	accessToken, err := c.jellyfinLogin()
+	if err != nil {
+		return nil, err
+	}
+
+	// Add token to the initial auth header
+	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, accessToken)
+	return map[string]string{"Authorization": jellyfinAuthorization}, nil
 }
 
 func (c *JellyfinConfig) jellyfinLogin() (string, error) {
@@ -149,6 +177,53 @@ func (c *JellyfinConfig) completeJellyfinStartup() error {
 	return err
 }
 
+func (c *JellyfinConfig) getJellyfinApiKey() error {
+	fmt.Println("-- Getting Jellyfin Api Key...")
+	h, err := getJellyfinHeaders()
+	if err != nil {
+		return err
+	}
+
+	_, err = Request("POST", c.Url+"/Auth/Keys?app=JELLYFIN_APIKEY", nil, h, nil)
+	if err != nil {
+		return err
+	}
+
+	for tries := 0; tries < 5; tries++ {
+		time.Sleep(5 * time.Second)
+		rb, err := Request("GET", c.Url+"/Auth/Keys", nil, h, nil)
+		if err != nil {
+			return err
+		}
+
+		var r struct {
+			Items []struct {
+				AppName     string `json:"AppName"`
+				AccessToken string `json:"AccessToken"`
+			} `json:"Items"`
+		}
+		if err := json.Unmarshal(rb, &r); err != nil {
+			return fmt.Errorf("failed to parse API key response: %v", err)
+		}
+
+		if len(r.Items) == 0 {
+			continue
+		}
+
+		for _, item := range r.Items {
+			if item.AppName == "JELLYFIN_APIKEY" {
+				err = updateDotEnv("JELLYFIN_APIKEY", item.AccessToken)
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+		}
+	}
+
+	return fmt.Errorf("missing token: 'JELLYFIN_APIKEY' not found")
+}
+
 func ConfigureJellyfin() error {
 	fmt.Println("- Starting Jellyfin configuration...")
 
@@ -188,6 +263,9 @@ func ConfigureJellyfin() error {
 		return err
 	}
 	if err = c.completeJellyfinStartup(); err != nil {
+		return err
+	}
+	if err = c.getJellyfinApiKey(); err != nil {
 		return err
 	}
 
