@@ -86,7 +86,7 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 }
 
 func LoadJSONFile(service string, filename string) (map[string]interface{}, error) {
-	filePath := filepath.Join("req_bodies", service, filename)
+	filePath := filepath.Join(service, "req_bodies", filename)
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
