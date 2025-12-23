@@ -1,16 +1,18 @@
-package main
+package qbittorrent_test
 
 import (
 	"testing"
+
+	"MediaServer/configuration/qbittorrent"
 )
 
 func TestQbittorrentLogin(t *testing.T) {
-	c, err := getQBittorrentConfig()
+	c, err := qbittorrent.GetConfig()
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = c.qbittorrentLogin()
+	err = c.Login()
 	if err != nil {
 		t.Error(err)
 	}

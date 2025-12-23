@@ -1,4 +1,4 @@
-package main
+package qbittorrent
 
 import (
 	"encoding/json"
@@ -10,16 +10,18 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"MediaServer/configuration/utils"
 )
 
-type QBittorrentConfig struct {
+type config struct {
 	Url      string
 	Username string
 	Password string
 	Client   *http.Client
 }
 
-func getQBittorrentConfig() (*QBittorrentConfig, error) {
+func GetConfig() (*config, error) {
 	fmt.Println("-- Loading qBittorrent config...")
 
 	url := os.Getenv("QBITTORRENT_URL")
@@ -48,7 +50,7 @@ func getQBittorrentConfig() (*QBittorrentConfig, error) {
 		Timeout: 30 * time.Second,
 	}
 
-	return &QBittorrentConfig{
+	return &config{
 		Url:      url,
 		Username: username,
 		Password: password,
@@ -56,12 +58,12 @@ func getQBittorrentConfig() (*QBittorrentConfig, error) {
 	}, nil
 }
 
-func (c *QBittorrentConfig) qbittorrentLogin() error {
+func (c *config) Login() error {
 	fmt.Println("-- Logging in to qBittorrent...")
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
 
-	r, err := Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client)
+	r, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client)
 	if err != nil {
 		return err
 	}
@@ -72,7 +74,7 @@ func (c *QBittorrentConfig) qbittorrentLogin() error {
 	return nil
 }
 
-func getQbittorrentPasswordFromLogs() (string, error) {
+func getPasswordFromLogs() (string, error) {
 	fmt.Println("-- Getting initial qBittorrent password...")
 
 	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
@@ -98,7 +100,7 @@ func getQbittorrentPasswordFromLogs() (string, error) {
 	return pw, nil
 }
 
-func (c *QBittorrentConfig) changePassword() error {
+func (c *config) changePassword() error {
 	fmt.Println("-- Changing qBittorrent password...")
 
 	b := struct {
@@ -118,7 +120,7 @@ func (c *QBittorrentConfig) changePassword() error {
 	// Send as form-encoded data with json parameter
 	formData := fmt.Sprintf("json=%s", url.QueryEscape(string(jsonBytes)))
 
-	_, err = Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client)
+	_, err = utils.Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client)
 	if err != nil {
 		return err
 	}
@@ -126,15 +128,15 @@ func (c *QBittorrentConfig) changePassword() error {
 	return nil
 }
 
-func ConfigureQBittorrent() error {
+func Configure() error {
 	fmt.Println("- Starting qBittorrent configuration...")
-	c, err := getQBittorrentConfig()
+	c, err := GetConfig()
 	if err != nil {
 		return err
 	}
 
 	// Try to login
-	if err = c.qbittorrentLogin(); err == nil {
+	if err = c.Login(); err == nil {
 		// If login is successful, assume already configured
 		fmt.Println("- qBittorrent already configured, skipping...")
 		fmt.Println()
@@ -145,14 +147,14 @@ func ConfigureQBittorrent() error {
 	pw := c.Password
 
 	// On failure, get temp password from logs
-	tempPw, err := getQbittorrentPasswordFromLogs()
+	tempPw, err := getPasswordFromLogs()
 	if err != nil {
 		return err
 	}
 	c.Password = tempPw
 
 	// Retry login with temp password
-	if err = c.qbittorrentLogin(); err != nil {
+	if err = c.Login(); err != nil {
 		return err
 	}
 
@@ -165,7 +167,7 @@ func ConfigureQBittorrent() error {
 	}
 
 	// Retry login with original password
-	if err = c.qbittorrentLogin(); err != nil {
+	if err = c.Login(); err != nil {
 		return err
 	}
 

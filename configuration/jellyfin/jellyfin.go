@@ -1,10 +1,12 @@
-package main
+package jellyfin
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"time"
+
+	"MediaServer/configuration/utils"
 )
 
 type JellyfinConfig struct {
@@ -41,7 +43,7 @@ func getJellyfinConfig() (*JellyfinConfig, error) {
 // Used to cache the Jellyfin authorization token
 var jellyfinAuthorization string = ""
 
-func getJellyfinHeaders() (map[string]string, error) {
+func Headers() (map[string]string, error) {
 	if jellyfinAuthorization != "" {
 		return map[string]string{"Authorization": jellyfinAuthorization}, nil
 	}
@@ -75,7 +77,7 @@ func (c *JellyfinConfig) jellyfinLogin() (string, error) {
 	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
 	h := map[string]string{"Authorization": defaultAuth}
 
-	rb, err := Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
+	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
 	if err != nil {
 		return "", err
 	}
@@ -92,7 +94,7 @@ func (c *JellyfinConfig) jellyfinLogin() (string, error) {
 
 func (c *JellyfinConfig) checkJellyfinSystemInfo() error {
 	fmt.Println("-- Checking system info...")
-	_, err := Request("GET", c.Url+"/System/Info", nil, nil, nil)
+	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
@@ -101,7 +103,7 @@ func (c *JellyfinConfig) configureJellyfinStartup() error {
 
 	url := c.Url + "/Startup/Configuration"
 
-	rconfig, err := Request("GET", url, nil, nil, nil)
+	rconfig, err := utils.Request("GET", url, nil, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -111,13 +113,13 @@ func (c *JellyfinConfig) configureJellyfinStartup() error {
 		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	_, err = Request("POST", url, config, nil, nil)
+	_, err = utils.Request("POST", url, config, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) checkJellyfinUser() error {
 	fmt.Println("-- Checking user status...")
-	_, err := Request("GET", c.Url+"/Startup/User", nil, nil, nil)
+	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
@@ -131,31 +133,31 @@ func (c *JellyfinConfig) createJellyfinUser() error {
 		Name:     c.Username,
 		Password: c.Password,
 	}
-	_, err := Request("POST", c.Url+"/Startup/User", b, nil, nil)
+	_, err := utils.Request("POST", c.Url+"/Startup/User", b, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) createJellyfinMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
-	b, err := loadJSONFile("jellyfin", "library_movies.json")
+	b, err := utils.LoadJSONFile("jellyfin", "library_movies.json")
 	if err != nil {
 		return err
 	}
 
-	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil)
+	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) createJellyfinTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
-	b, err := loadJSONFile("jellyfin", "library_tv.json")
+	b, err := utils.LoadJSONFile("jellyfin", "library_tv.json")
 	if err != nil {
 		return err
 	}
 
-	_, err = Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil)
+	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil)
 	return err
 }
 
@@ -167,31 +169,31 @@ func (c *JellyfinConfig) configureJellyfinRemoteAccess() error {
 		ERA bool `json:"EnableRemoteAccess"`
 	}{false}
 
-	_, err := Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil)
+	_, err := utils.Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) completeJellyfinStartup() error {
 	fmt.Println("-- Completing startup...")
-	_, err := Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
+	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
 }
 
 func (c *JellyfinConfig) getJellyfinApiKey() error {
 	fmt.Println("-- Getting Jellyfin Api Key...")
-	h, err := getJellyfinHeaders()
+	h, err := Headers()
 	if err != nil {
 		return err
 	}
 
-	_, err = Request("POST", c.Url+"/Auth/Keys?app=JELLYFIN_APIKEY", nil, h, nil)
+	_, err = utils.Request("POST", c.Url+"/Auth/Keys?app=JELLYFIN_APIKEY", nil, h, nil)
 	if err != nil {
 		return err
 	}
 
 	for tries := 0; tries < 5; tries++ {
 		time.Sleep(5 * time.Second)
-		rb, err := Request("GET", c.Url+"/Auth/Keys", nil, h, nil)
+		rb, err := utils.Request("GET", c.Url+"/Auth/Keys", nil, h, nil)
 		if err != nil {
 			return err
 		}
@@ -212,7 +214,7 @@ func (c *JellyfinConfig) getJellyfinApiKey() error {
 
 		for _, item := range r.Items {
 			if item.AppName == "JELLYFIN_APIKEY" {
-				err = updateDotEnv("JELLYFIN_APIKEY", item.AccessToken)
+				err = utils.UpdateDotEnv("JELLYFIN_APIKEY", item.AccessToken)
 				if err != nil {
 					return err
 				}
@@ -224,7 +226,7 @@ func (c *JellyfinConfig) getJellyfinApiKey() error {
 	return fmt.Errorf("missing token: 'JELLYFIN_APIKEY' not found")
 }
 
-func ConfigureJellyfin() error {
+func Configure() error {
 	fmt.Println("- Starting Jellyfin configuration...")
 
 	c, err := getJellyfinConfig()

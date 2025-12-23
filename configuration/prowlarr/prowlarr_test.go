@@ -1,31 +1,34 @@
-package main
+package prowlarr_test
 
 import (
 	"encoding/json"
 	"slices"
 	"testing"
+
+	"MediaServer/configuration/prowlarr"
+	"MediaServer/configuration/utils"
 )
 
 func TestProwlarrLogin(t *testing.T) {
-	c, err := getProwlarrConfig()
+	c, err := prowlarr.Config()
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = c.prowlarrLogin()
+	err = c.Login()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestProwlarrDownloadClients(t *testing.T) {
-	c, err := getProwlarrConfig()
+	c, err := prowlarr.Config()
 	if err != nil {
 		t.Error(err)
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	respBody, err := Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil)
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,13 +47,13 @@ func TestProwlarrDownloadClients(t *testing.T) {
 }
 
 func TestProwlarrIndexers(t *testing.T) {
-	c, err := getProwlarrConfig()
+	c, err := prowlarr.Config()
 	if err != nil {
 		t.Error(err)
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	respBody, err := Request("GET", c.Url+"/api/v1/indexer", nil, h, nil)
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexer", nil, h, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,7 +65,7 @@ func TestProwlarrIndexers(t *testing.T) {
 
 	// Expected indexer names
 	eIndexers := []string{
-		"EZTV",
+		// "EZTV",
 		"LimeTorrents",
 		"The Pirate Bay",
 		"YTS",

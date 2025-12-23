@@ -1,4 +1,4 @@
-package main
+package prowlarr
 
 import (
 	"encoding/json"
@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"MediaServer/configuration/utils"
 )
 
 type ProwlarrConfig struct {
@@ -20,7 +22,7 @@ type ProwlarrConfig struct {
 	QBittorrentPassword string
 }
 
-func getProwlarrConfig() (*ProwlarrConfig, error) {
+func Config() (*ProwlarrConfig, error) {
 	fmt.Println("-- Loading Prowlarr config...")
 
 	url := os.Getenv("PROWLARR_URL")
@@ -69,12 +71,12 @@ func getProwlarrConfig() (*ProwlarrConfig, error) {
 	}, nil
 }
 
-func (c *ProwlarrConfig) prowlarrLogin() error {
+func (c *ProwlarrConfig) Login() error {
 	fmt.Println("-- Logging in to Prowlarr...")
 
 	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
 
-	req, err := requestBuilder("POST", c.Url+"/login", b, nil)
+	req, err := utils.RequestBuilder("POST", c.Url+"/login", b, nil)
 	if err != nil {
 		return err
 	}
@@ -100,7 +102,7 @@ func (c *ProwlarrConfig) prowlarrLogin() error {
 
 func (c *ProwlarrConfig) prowlarrInitialize() error {
 	fmt.Println("-- Retrieving Prowlarr API Key...")
-	rb, err := Request("GET", c.Url+"/initialize.json", nil, nil, nil)
+	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf("failed to get API key: %w", err)
 	}
@@ -114,7 +116,7 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 
 	c.Apikey = r.APIKey
 
-	updateDotEnv("PROWLARR_APIKEY", c.Apikey)
+	utils.UpdateDotEnv("PROWLARR_APIKEY", c.Apikey)
 
 	return nil
 }
@@ -122,7 +124,7 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 func (c *ProwlarrConfig) configureProwlarrHostSettings() error {
 	fmt.Println("-- Configuring Prowlarr with login details...")
 
-	b, err := loadJSONFile("prowlarr", "host_config.json")
+	b, err := utils.LoadJSONFile("prowlarr", "host_config.json")
 	if err != nil {
 		return err
 	}
@@ -134,14 +136,14 @@ func (c *ProwlarrConfig) configureProwlarrHostSettings() error {
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
 
-	_, err = Request("PUT", c.Url+"/api/v1/config/host", b, h, nil)
+	_, err = utils.Request("PUT", c.Url+"/api/v1/config/host", b, h, nil)
 	return err
 }
 
 func (c *ProwlarrConfig) configureProwlarrDownloadClient() error {
 	fmt.Println("-- Configuring Download Client...")
 
-	b, err := loadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
+	b, err := utils.LoadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
 	if err != nil {
 		return err
 	}
@@ -164,27 +166,27 @@ func (c *ProwlarrConfig) configureProwlarrDownloadClient() error {
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
+	_, err = utils.Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
 	return err
 }
 
 func (c *ProwlarrConfig) addProwlarrIndexer(filename, name string) error {
 	fmt.Println("-- Adding indexer:", name)
 
-	b, err := loadJSONFile("prowlarr", filename)
+	b, err := utils.LoadJSONFile("prowlarr", filename)
 	if err != nil {
 		return err
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
+	_, err = utils.Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
 	return err
 }
 
-func ConfigureProwlarr() error {
+func Configure() error {
 	fmt.Println("- Starting Prowlarr configuration...")
 
-	c, err := getProwlarrConfig()
+	c, err := Config()
 	if err != nil {
 		return err
 	}
@@ -196,7 +198,7 @@ func ConfigureProwlarr() error {
 		return nil
 	}
 
-	// // Otherwise, proceed with configuration
+	// Otherwise, proceed with configuration
 	if err = c.configureProwlarrHostSettings(); err != nil {
 		return err
 	}

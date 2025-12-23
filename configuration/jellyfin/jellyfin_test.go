@@ -1,4 +1,4 @@
-package main
+package jellyfin_test
 
 import (
 	"encoding/json"
@@ -6,10 +6,13 @@ import (
 	"os"
 	"slices"
 	"testing"
+
+	"MediaServer/configuration/jellyfin"
+	"MediaServer/configuration/utils"
 )
 
 func getJellyfinItems(path string) ([]string, error) {
-	h, err := getJellyfinHeaders()
+	h, err := jellyfin.Headers()
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +22,7 @@ func getJellyfinItems(path string) ([]string, error) {
 		return nil, fmt.Errorf("JELLYFIN_URL environment variable not set")
 	}
 
-	rb, err := Request("GET", url+path, nil, h, nil)
+	rb, err := utils.Request("GET", url+path, nil, h, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -1,9 +1,11 @@
-package main
+package homepagetest
 
 import (
 	"os"
 	"strings"
 	"testing"
+
+	"MediaServer/configuration/utils"
 )
 
 func TestHomepageSite(t *testing.T) {
@@ -12,7 +14,7 @@ func TestHomepageSite(t *testing.T) {
 		t.Error("HOMEPAGE_URL environment variable not set")
 	}
 
-	rb, err := Request("GET", u, nil, nil, nil)
+	rb, err := utils.Request("GET", u, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
