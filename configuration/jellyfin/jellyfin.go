@@ -9,13 +9,13 @@ import (
 	"MediaServer/configuration/utils"
 )
 
-type JellyfinConfig struct {
+type Config struct {
 	Url      string
 	Username string
 	Password string
 }
 
-func getJellyfinConfig() (*JellyfinConfig, error) {
+func config() (*Config, error) {
 	fmt.Println("-- Create Jellyfin config based on Environment Variables...")
 
 	url := os.Getenv("JELLYFIN_URL")
@@ -33,7 +33,7 @@ func getJellyfinConfig() (*JellyfinConfig, error) {
 		return nil, fmt.Errorf("missing env var: `JELLYFIN_PASSWORD`")
 	}
 
-	return &JellyfinConfig{
+	return &Config{
 		Url:      url,
 		Username: username,
 		Password: password,
@@ -49,7 +49,7 @@ func Headers() (map[string]string, error) {
 	}
 
 	fmt.Println("-- Getting Jellyfin authorization token...")
-	c, err := getJellyfinConfig()
+	c, err := config()
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func Headers() (map[string]string, error) {
 	return map[string]string{"Authorization": jellyfinAuthorization}, nil
 }
 
-func (c *JellyfinConfig) jellyfinLogin() (string, error) {
+func (c *Config) jellyfinLogin() (string, error) {
 	b := struct {
 		Username string `json:"Username"`
 		Pw       string `json:"Pw"`
@@ -92,13 +92,13 @@ func (c *JellyfinConfig) jellyfinLogin() (string, error) {
 	return r.AccessToken, nil
 }
 
-func (c *JellyfinConfig) checkJellyfinSystemInfo() error {
+func (c *Config) checkJellyfinSystemInfo() error {
 	fmt.Println("-- Checking system info...")
 	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
-func (c *JellyfinConfig) configureJellyfinStartup() error {
+func (c *Config) configureJellyfinStartup() error {
 	fmt.Println("-- Configuring startup settings...")
 
 	url := c.Url + "/Startup/Configuration"
@@ -117,13 +117,13 @@ func (c *JellyfinConfig) configureJellyfinStartup() error {
 	return err
 }
 
-func (c *JellyfinConfig) checkJellyfinUser() error {
+func (c *Config) checkJellyfinUser() error {
 	fmt.Println("-- Checking user status...")
 	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
-func (c *JellyfinConfig) createJellyfinUser() error {
+func (c *Config) createJellyfinUser() error {
 	fmt.Println("-- Creating admin user...")
 
 	b := struct {
@@ -137,7 +137,7 @@ func (c *JellyfinConfig) createJellyfinUser() error {
 	return err
 }
 
-func (c *JellyfinConfig) createJellyfinMoviesLibrary() error {
+func (c *Config) createJellyfinMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
 	b, err := utils.LoadJSONFile("jellyfin", "library_movies.json")
@@ -149,7 +149,7 @@ func (c *JellyfinConfig) createJellyfinMoviesLibrary() error {
 	return err
 }
 
-func (c *JellyfinConfig) createJellyfinTVShowsLibrary() error {
+func (c *Config) createJellyfinTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
 	b, err := utils.LoadJSONFile("jellyfin", "library_tv.json")
@@ -161,7 +161,7 @@ func (c *JellyfinConfig) createJellyfinTVShowsLibrary() error {
 	return err
 }
 
-func (c *JellyfinConfig) configureJellyfinRemoteAccess() error {
+func (c *Config) configureJellyfinRemoteAccess() error {
 	fmt.Println("-- Configuring remote access...")
 
 	// Too small to store this req body as a file
@@ -173,13 +173,13 @@ func (c *JellyfinConfig) configureJellyfinRemoteAccess() error {
 	return err
 }
 
-func (c *JellyfinConfig) completeJellyfinStartup() error {
+func (c *Config) completeJellyfinStartup() error {
 	fmt.Println("-- Completing startup...")
 	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
 }
 
-func (c *JellyfinConfig) getJellyfinApiKey() error {
+func (c *Config) getJellyfinApiKey() error {
 	fmt.Println("-- Getting Jellyfin Api Key...")
 	h, err := Headers()
 	if err != nil {
@@ -229,7 +229,7 @@ func (c *JellyfinConfig) getJellyfinApiKey() error {
 func Configure() error {
 	fmt.Println("- Starting Jellyfin configuration...")
 
-	c, err := getJellyfinConfig()
+	c, err := config()
 	if err != nil {
 		return err
 	}
