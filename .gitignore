@@ -15,6 +15,3 @@ kubeconfig.yaml
 config
 cache
 media
-
-# Files which are generated from templates
-services.yaml
