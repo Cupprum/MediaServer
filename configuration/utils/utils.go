@@ -8,11 +8,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"time"
 )
 
-func RequestBuilder(method, url string, body interface{}, headers map[string]string) (*http.Request, error) {
+func requestBuilder(method, url string, body interface{}, headers map[string]string) (*http.Request, error) {
 	var reqBody io.Reader
 
 	if body != nil {
@@ -51,7 +50,7 @@ func RequestBuilder(method, url string, body interface{}, headers map[string]str
 }
 
 func Request(method, url string, body interface{}, headers map[string]string, client *http.Client) ([]byte, error) {
-	req, err := RequestBuilder(method, url, body, headers)
+	req, err := requestBuilder(method, url, body, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -98,26 +97,4 @@ func LoadJSONFile(service string, filename string) (map[string]interface{}, erro
 	}
 
 	return jsonData, nil
-}
-
-func UpdateDotEnv(key, value string) error {
-	data, err := os.ReadFile(".env")
-	if err != nil {
-		return fmt.Errorf("failed to read .env file: %w", err)
-	}
-
-	re := regexp.MustCompile("(?m)^" + key + "=.*")
-	replacement := []byte(key + "='" + value + "'")
-
-	if re.Match(data) {
-		data = re.ReplaceAll(data, replacement)
-	} else {
-		data = append(data, []byte("\n"+string(replacement))...)
-	}
-	err = os.WriteFile(".env", data, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write .env file: %w", err)
-	}
-
-	return nil
 }

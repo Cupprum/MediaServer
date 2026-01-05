@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
+	"net/http/cookiejar"
 	"os"
 	"strings"
 	"time"
@@ -76,25 +76,32 @@ func (c *ProwlarrConfig) Login() error {
 
 	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
 
-	req, err := utils.RequestBuilder("POST", c.Url+"/login", b, nil)
+	// Create a cookie jar for persisting cookies across login and subsequent requests
+	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create cookie jar: %w", err)
 	}
 
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
+	client := &http.Client{
+		Jar:     jar,
+		Timeout: 30 * time.Second,
+	}
+
+	_, err = utils.Request("POST", c.Url+"/login", b, nil, client)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Response verification
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("request failed: %s", resp.Status)
+		return fmt.Errorf("failed to login to prowlarr: %v", err)
 	}
 
-	if string(resp.Request.URL.RawQuery) != url.PathEscape("returnUrl=/") {
-		return fmt.Errorf("request failed: error 401: invalid returnUrl")
+	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client)
+	if err != nil {
+		return fmt.Errorf("failed to get API key: %w", err)
+	}
+
+	var r struct {
+		APIKey string `json:"apiKey"`
+	}
+	if err := json.Unmarshal(rb, &r); err != nil {
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	return nil
@@ -115,8 +122,6 @@ func (c *ProwlarrConfig) prowlarrInitialize() error {
 	}
 
 	c.Apikey = r.APIKey
-
-	utils.UpdateDotEnv("PROWLARR_APIKEY", c.Apikey)
 
 	return nil
 }

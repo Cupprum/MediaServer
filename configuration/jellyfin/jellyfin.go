@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"time"
 
 	"MediaServer/configuration/utils"
 )
@@ -179,53 +178,6 @@ func (c *Config) completeJellyfinStartup() error {
 	return err
 }
 
-func (c *Config) getJellyfinApiKey() error {
-	fmt.Println("-- Getting Jellyfin Api Key...")
-	h, err := Headers()
-	if err != nil {
-		return err
-	}
-
-	_, err = utils.Request("POST", c.Url+"/Auth/Keys?app=JELLYFIN_APIKEY", nil, h, nil)
-	if err != nil {
-		return err
-	}
-
-	for tries := 0; tries < 5; tries++ {
-		time.Sleep(5 * time.Second)
-		rb, err := utils.Request("GET", c.Url+"/Auth/Keys", nil, h, nil)
-		if err != nil {
-			return err
-		}
-
-		var r struct {
-			Items []struct {
-				AppName     string `json:"AppName"`
-				AccessToken string `json:"AccessToken"`
-			} `json:"Items"`
-		}
-		if err := json.Unmarshal(rb, &r); err != nil {
-			return fmt.Errorf("failed to parse API key response: %v", err)
-		}
-
-		if len(r.Items) == 0 {
-			continue
-		}
-
-		for _, item := range r.Items {
-			if item.AppName == "JELLYFIN_APIKEY" {
-				err = utils.UpdateDotEnv("JELLYFIN_APIKEY", item.AccessToken)
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-		}
-	}
-
-	return fmt.Errorf("missing token: 'JELLYFIN_APIKEY' not found")
-}
-
 func Configure() error {
 	fmt.Println("- Starting Jellyfin configuration...")
 
@@ -265,9 +217,6 @@ func Configure() error {
 		return err
 	}
 	if err = c.completeJellyfinStartup(); err != nil {
-		return err
-	}
-	if err = c.getJellyfinApiKey(); err != nil {
 		return err
 	}
 
