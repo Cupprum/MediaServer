@@ -2,11 +2,11 @@ package utils
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"time"
 )
@@ -84,11 +84,12 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 	return respBody, nil
 }
 
-func LoadJSONFile(service string, filename string) (map[string]interface{}, error) {
-	filePath := filepath.Join(service, "req_bodies", filename)
-	data, err := os.ReadFile(filePath)
+func LoadJSONFile(folder embed.FS, filename string) (map[string]interface{}, error) {
+	filePath := filepath.Join("req_bodies", filename)
+
+	data, err := folder.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
+		return nil, fmt.Errorf("failed to read file %s: %w", filename, err)
 	}
 
 	var jsonData map[string]interface{}
