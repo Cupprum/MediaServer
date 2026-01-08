@@ -13,17 +13,17 @@ import (
 )
 
 type ProwlarrConfig struct {
+	Apikey              string // Set during login
 	Url                 string
 	Username            string
 	Password            string
-	Apikey              string
 	QBittorrentHostname string
 	QBittorrentUsername string
 	QBittorrentPassword string
 }
 
 func Config() (*ProwlarrConfig, error) {
-	fmt.Println("-- Loading Prowlarr config...")
+	fmt.Println("-- Loading config...")
 
 	url := os.Getenv("PROWLARR_URL")
 	if url == "" {
@@ -38,11 +38,6 @@ func Config() (*ProwlarrConfig, error) {
 	password := os.Getenv("PROWLARR_PASSWORD")
 	if password == "" {
 		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
-	}
-
-	apikey := os.Getenv("PROWLARR_APIKEY")
-	if apikey == "" {
-		fmt.Println(" * env var: `PROWLARR_APIKEY` is not defined, this is expected during first run")
 	}
 
 	QBittorrentHostname := os.Getenv("QBITTORRENT_HOSTNAME")
@@ -61,10 +56,10 @@ func Config() (*ProwlarrConfig, error) {
 	}
 
 	return &ProwlarrConfig{
+		Apikey:              "", // Set during login
 		Url:                 url,
 		Username:            username,
 		Password:            password,
-		Apikey:              apikey,
 		QBittorrentHostname: QBittorrentHostname,
 		QBittorrentUsername: qbittorrentUsername,
 		QBittorrentPassword: qbittorrentPassword,
@@ -72,62 +67,61 @@ func Config() (*ProwlarrConfig, error) {
 }
 
 func (c *ProwlarrConfig) Login() error {
-	fmt.Println("-- Logging in to Prowlarr...")
-
-	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
+	fmt.Println("-- Logging in...")
 
 	// Create a cookie jar for persisting cookies across login and subsequent requests
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return fmt.Errorf("failed to create cookie jar: %w", err)
 	}
-
 	client := &http.Client{
 		Jar:     jar,
 		Timeout: 30 * time.Second,
 	}
 
+	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
 	_, err = utils.Request("POST", c.Url+"/login", b, nil, client)
 	if err != nil {
-		return fmt.Errorf("failed to login to prowlarr: %v", err)
+		return fmt.Errorf("failed to login: %w", err)
 	}
 
+	err = c.apikey(client)
+	if err != nil {
+		return fmt.Errorf("failed to initialize: %w", err)
+	}
+
+	return nil
+}
+
+func (c *ProwlarrConfig) apikey(client *http.Client) error {
+	fmt.Println("-- Retrieving apikey...")
 	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client)
 	if err != nil {
-		return fmt.Errorf("failed to get API key: %w", err)
+		return fmt.Errorf("failed to get apikey: %w", err)
 	}
 
 	var r struct {
 		APIKey string `json:"apiKey"`
 	}
 	if err := json.Unmarshal(rb, &r); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+		// If not logged in, prowlarr returns html
+		if err.Error() == "invalid character '<' looking for beginning of value" {
+			return fmt.Errorf("not logged in")
+		}
+		return fmt.Errorf("failed to decode apikey: %w", err)
 	}
 
-	return nil
-}
-
-func (c *ProwlarrConfig) prowlarrInitialize() error {
-	fmt.Println("-- Retrieving Prowlarr API Key...")
-	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, nil)
-	if err != nil {
-		return fmt.Errorf("failed to get API key: %w", err)
-	}
-
-	var r struct {
-		APIKey string `json:"apiKey"`
-	}
-	if err := json.Unmarshal(rb, &r); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
-	}
-
+	// Set the API Key for Prowlarr
 	c.Apikey = r.APIKey
+	if c.Apikey == "" {
+		return fmt.Errorf("apikey cannot be empty")
+	}
 
 	return nil
 }
 
-func (c *ProwlarrConfig) configureProwlarrHostSettings() error {
-	fmt.Println("-- Configuring Prowlarr with login details...")
+func (c *ProwlarrConfig) setHostSetting() error {
+	fmt.Println("-- Set login details...")
 
 	b, err := utils.LoadJSONFile("prowlarr", "host_config.json")
 	if err != nil {
@@ -142,15 +136,19 @@ func (c *ProwlarrConfig) configureProwlarrHostSettings() error {
 	h := map[string]string{"X-Api-Key": c.Apikey}
 
 	_, err = utils.Request("PUT", c.Url+"/api/v1/config/host", b, h, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to configure login details")
+	}
+
+	return nil
 }
 
-func (c *ProwlarrConfig) configureProwlarrDownloadClient() error {
+func (c *ProwlarrConfig) setDownloadClient() error {
 	fmt.Println("-- Configuring Download Client...")
 
 	b, err := utils.LoadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
 	// Update download client config
@@ -172,20 +170,28 @@ func (c *ProwlarrConfig) configureProwlarrDownloadClient() error {
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
 	_, err = utils.Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to set downloadclient: %w", err)
+	}
+
+	return nil
 }
 
-func (c *ProwlarrConfig) addProwlarrIndexer(filename, name string) error {
-	fmt.Println("-- Adding indexer:", name)
+func (c *ProwlarrConfig) setIndexer(filename, name string) error {
+	fmt.Printf("-- Adding indexer: %v...\n", name)
 
 	b, err := utils.LoadJSONFile("prowlarr", filename)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
 	_, err = utils.Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to set indexer %v: %w", name, err)
+	}
+
+	return nil
 }
 
 func Configure() error {
@@ -193,37 +199,43 @@ func Configure() error {
 
 	c, err := Config()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	err = c.prowlarrInitialize()
+	// If not configured, the first call needs to be `initialization`
+	// If prowlarr is already configured, the apikey retrieval will fail
+	err = c.apikey(nil)
 	if err != nil {
-		fmt.Println("- Prowlarr already configured, skipping...")
-		fmt.Println()
-		return nil
+		if err.Error() == "not logged in" {
+			fmt.Println("- prowlarr already configured, skipping...")
+			fmt.Println()
+			return nil
+		} else {
+			return fmt.Errorf("failed to retrieve apikey: %w", err)
+		}
 	}
 
-	// Otherwise, proceed with configuration
-	if err = c.configureProwlarrHostSettings(); err != nil {
+	if err = c.setHostSetting(); err != nil {
 		return err
 	}
-	if err = c.configureProwlarrDownloadClient(); err != nil {
+	if err = c.setDownloadClient(); err != nil {
 		return err
 	}
-	if err = c.addProwlarrIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
+	if err = c.setIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
 		return err
 	}
-	// if err = c.addProwlarrIndexer("eztv_indexer.json", "EZTV"); err != nil {
+	// if err = c.setIndexer("eztv_indexer.json", "EZTV"); err != nil {
 	// 	return err
 	// }
-	if err = c.addProwlarrIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
+	if err = c.setIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
 		return err
 	}
-	if err = c.addProwlarrIndexer("yts_indexer.json", "YTS"); err != nil {
+	if err = c.setIndexer("yts_indexer.json", "YTS"); err != nil {
 		return err
 	}
 
 	fmt.Println("- Prowlarr configured successfully!")
 	fmt.Println()
+
 	return nil
 }
