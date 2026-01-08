@@ -9,20 +9,38 @@ import (
 	"MediaServer/configuration/utils"
 )
 
-func TestProwlarrLogin(t *testing.T) {
+var cc *prowlarr.ProwlarrConfig
+
+func config() (*prowlarr.ProwlarrConfig, error) {
+	if cc != nil {
+		return cc, nil
+	}
+
 	c, err := prowlarr.Config()
 	if err != nil {
-		t.Error(err)
+		return nil, err
 	}
 
 	err = c.Login()
+	if err != nil {
+		return nil, err
+	}
+
+	// Stare `config` in `cache`
+	cc = c
+
+	return c, nil
+}
+
+func TestProwlarrLogin(t *testing.T) {
+	_, err := config()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestProwlarrDownloadClients(t *testing.T) {
-	c, err := prowlarr.Config()
+	c, err := config()
 	if err != nil {
 		t.Error(err)
 	}
@@ -47,7 +65,7 @@ func TestProwlarrDownloadClients(t *testing.T) {
 }
 
 func TestProwlarrIndexers(t *testing.T) {
-	c, err := prowlarr.Config()
+	c, err := config()
 	if err != nil {
 		t.Error(err)
 	}
