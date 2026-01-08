@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/cookiejar"
 	"os"
 	"strings"
-	"time"
 
 	"MediaServer/configuration/utils"
 )
@@ -70,53 +68,28 @@ func Config() (*ProwlarrConfig, error) {
 	}, nil
 }
 
-func (c *ProwlarrConfig) Login() error {
-	fmt.Println("-- Logging in...")
-
-	// Create a cookie jar for persisting cookies across login and subsequent requests
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return fmt.Errorf("failed to create cookie jar: %w", err)
-	}
-	client := &http.Client{
-		Jar:     jar,
-		Timeout: 30 * time.Second,
-	}
-
-	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
-	_, err = utils.Request("POST", c.Url+"/login", b, nil, client)
-	if err != nil {
-		return fmt.Errorf("failed to login: %w", err)
-	}
-
-	err = c.apikey(client)
-	if err != nil {
-		return fmt.Errorf("failed to initialize: %w", err)
-	}
-
-	return nil
-}
-
-func (c *ProwlarrConfig) apikey(client *http.Client) error {
+func (c *ProwlarrConfig) LoadApikey(client *http.Client) error {
 	fmt.Println("-- Retrieving apikey...")
+	// First call to initialize does not require authentication
+	// the subsequent calls do authentication via cookie in client
 	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client)
 	if err != nil {
 		return fmt.Errorf("failed to get apikey: %w", err)
 	}
 
 	var r struct {
-		APIKey string `json:"apiKey"`
+		Apikey string `json:"apiKey"`
 	}
 	if err := json.Unmarshal(rb, &r); err != nil {
-		// If not logged in, prowlarr returns html
+		// After initial setup, if not logged in, prowlarr returns html
 		if err.Error() == "invalid character '<' looking for beginning of value" {
-			return fmt.Errorf("not logged in")
+			return fmt.Errorf("configured")
 		}
 		return fmt.Errorf("failed to decode apikey: %w", err)
 	}
 
 	// Set the API Key for Prowlarr
-	c.Apikey = r.APIKey
+	c.Apikey = r.Apikey
 	if c.Apikey == "" {
 		return fmt.Errorf("apikey cannot be empty")
 	}
@@ -206,17 +179,16 @@ func Configure() error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	// If not configured, the first call needs to be `initialization`
+	// If not configured, the first call needs to be `initialization` endpoint
 	// If prowlarr is already configured, the apikey retrieval will fail
-	err = c.apikey(nil)
+	err = c.LoadApikey(nil)
 	if err != nil {
-		if err.Error() == "not logged in" {
-			fmt.Println("- prowlarr already configured, skipping...")
+		if err.Error() == "configured" {
+			fmt.Println("- already configured, skipping...")
 			fmt.Println()
 			return nil
-		} else {
-			return fmt.Errorf("failed to retrieve apikey: %w", err)
 		}
+		return fmt.Errorf("failed to load api key: %w", err)
 	}
 
 	if err = c.setHostSetting(); err != nil {
@@ -238,7 +210,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- Prowlarr configured successfully!")
+	fmt.Println("- prowlarr configured successfully!")
 	fmt.Println()
 
 	return nil

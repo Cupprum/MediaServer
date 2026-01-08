@@ -2,18 +2,50 @@ package prowlarr_test
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/cookiejar"
 	"slices"
 	"testing"
+	"time"
 
 	"MediaServer/configuration/prowlarr"
 	"MediaServer/configuration/utils"
 )
 
-var cc *prowlarr.ProwlarrConfig
+func login(c *prowlarr.ProwlarrConfig) error {
+	fmt.Println("-- Logging in...")
+
+	// Create a cookie jar for persisting cookies across login and subsequent requests
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return fmt.Errorf("failed to create cookie jar: %w", err)
+	}
+	client := &http.Client{
+		Jar:     jar,
+		Timeout: 30 * time.Second,
+	}
+
+	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
+	_, err = utils.Request("POST", c.Url+"/login", b, nil, client)
+	if err != nil {
+		return fmt.Errorf("failed to login: %w", err)
+	}
+
+	// Login stores cookie in client jar, so now we can retrieve apikey
+	err = c.LoadApikey(client)
+	if err != nil {
+		return fmt.Errorf("failed to initialize: %w", err)
+	}
+
+	return nil
+}
+
+var configCache *prowlarr.ProwlarrConfig
 
 func config() (*prowlarr.ProwlarrConfig, error) {
-	if cc != nil {
-		return cc, nil
+	if configCache != nil {
+		return configCache, nil
 	}
 
 	c, err := prowlarr.Config()
@@ -21,18 +53,19 @@ func config() (*prowlarr.ProwlarrConfig, error) {
 		return nil, err
 	}
 
-	err = c.Login()
+	err = login(c)
 	if err != nil {
 		return nil, err
 	}
 
-	// Stare `config` in `cache`
-	cc = c
+	// Store `config` in `cache`
+	configCache = c
 
 	return c, nil
 }
 
 func TestProwlarrLogin(t *testing.T) {
+	// If we get config, login was successful
 	_, err := config()
 	if err != nil {
 		t.Error(err)
