@@ -68,8 +68,9 @@ func (c *config) Login() error {
 		return err
 	}
 
+	// If response does not contain "Ok.", login failed
 	if string(r) != "Ok." {
-		return fmt.Errorf("login failed, unexpected response: %s", string(r))
+		return fmt.Errorf("not logged in")
 	}
 	return nil
 }
@@ -129,19 +130,22 @@ func (c *config) changePassword() error {
 }
 
 func Configure() error {
-	fmt.Println("- Starting qBittorrent configuration...")
+	fmt.Println("- Starting qbittorrent configuration...")
 	c, err := GetConfig()
 	if err != nil {
 		return err
 	}
 
 	// Try to login
-	if err = c.Login(); err == nil {
-		// If login is successful, assume already configured
-		fmt.Println("- qBittorrent already configured, skipping...")
+	err = c.Login()
+	if err == nil {
+		fmt.Println("- already configured, skipping...")
 		fmt.Println()
 		return nil
+	} else if err.Error() != "not logged in" {
+		return fmt.Errorf("failed to login: %w", err)
 	}
+	// If error is "not logged in", proceed with configuration
 
 	// Otherwise, proceed with configuration
 	pw := c.Password
@@ -171,7 +175,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- qBittorrent configured successfully!")
+	fmt.Println("- qbittorrent configured successfully!")
 	fmt.Println()
 	return nil
 }
