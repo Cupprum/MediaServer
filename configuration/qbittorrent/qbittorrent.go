@@ -142,15 +142,19 @@ func Configure() error {
 		return fmt.Errorf("failed to login: %w", err)
 	}
 	// If error is "not logged in", proceed with configuration
+	// as we need to configure user
 
-	pw := c.Password
-
-	// On failure, get temp password from logs
-	tempPw, err := getPasswordFromLogs()
+	// Get temp password from logs
+	tpw, err := getPasswordFromLogs()
 	if err != nil {
 		return err
 	}
-	c.Password = tempPw
+
+	// Backup original password
+	opw := c.Password
+
+	// Set temp password for login
+	c.Password = tpw
 
 	// Retry login with temp password
 	if err = c.Login(); err != nil {
@@ -158,7 +162,7 @@ func Configure() error {
 	}
 
 	// Set password back to original value
-	c.Password = pw
+	c.Password = opw
 
 	// Change password to desired value
 	if err = c.changePassword(); err != nil {
