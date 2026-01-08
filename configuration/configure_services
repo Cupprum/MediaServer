@@ -21,8 +21,10 @@ fi
 
 if [ "$1" = "run" ]; then
     echo "- Running configuration services..."
+    echo ""
     go run .
 elif [ "$1" = "test" ]; then
     echo "- Running tests..."
+    echo ""
     go test ./...
 fi
