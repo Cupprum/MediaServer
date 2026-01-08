@@ -22,7 +22,7 @@ func headers() (map[string]string, error) {
 	}
 
 	fmt.Println("-- Getting authorization token...")
-	c, err := jellyfin.Config()
+	c, err := jellyfin.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}

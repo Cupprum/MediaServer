@@ -13,7 +13,7 @@ import (
 	"MediaServer/configuration/utils"
 )
 
-func login(c *prowlarr.ProwlarrConfig) error {
+func login(c *prowlarr.Config) error {
 	fmt.Println("-- Logging in...")
 
 	// Create a cookie jar for persisting cookies across login and subsequent requests
@@ -41,14 +41,14 @@ func login(c *prowlarr.ProwlarrConfig) error {
 	return nil
 }
 
-var configCache *prowlarr.ProwlarrConfig
+var configCache *prowlarr.Config
 
-func config() (*prowlarr.ProwlarrConfig, error) {
+func config() (*prowlarr.Config, error) {
 	if configCache != nil {
 		return configCache, nil
 	}
 
-	c, err := prowlarr.Config()
+	c, err := prowlarr.GetConfig()
 	if err != nil {
 		return nil, err
 	}

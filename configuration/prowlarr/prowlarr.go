@@ -14,7 +14,7 @@ import (
 //go:embed req_bodies/*.json
 var reqBodies embed.FS
 
-type ProwlarrConfig struct {
+type Config struct {
 	Apikey              string // Set during login
 	Url                 string
 	Username            string
@@ -24,7 +24,7 @@ type ProwlarrConfig struct {
 	QBittorrentPassword string
 }
 
-func Config() (*ProwlarrConfig, error) {
+func GetConfig() (*Config, error) {
 	fmt.Println("-- Loading config...")
 
 	url := os.Getenv("PROWLARR_URL")
@@ -57,7 +57,7 @@ func Config() (*ProwlarrConfig, error) {
 		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
 	}
 
-	return &ProwlarrConfig{
+	return &Config{
 		Apikey:              "", // Set during login
 		Url:                 url,
 		Username:            username,
@@ -68,7 +68,7 @@ func Config() (*ProwlarrConfig, error) {
 	}, nil
 }
 
-func (c *ProwlarrConfig) LoadApikey(client *http.Client) error {
+func (c *Config) LoadApikey(client *http.Client) error {
 	fmt.Println("-- Retrieving apikey...")
 	// First call to initialize does not require authentication
 	// the subsequent calls do authentication via cookie in client
@@ -97,7 +97,7 @@ func (c *ProwlarrConfig) LoadApikey(client *http.Client) error {
 	return nil
 }
 
-func (c *ProwlarrConfig) setHostSetting() error {
+func (c *Config) setHostSetting() error {
 	fmt.Println("-- Set login details...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "host_config.json")
@@ -120,7 +120,7 @@ func (c *ProwlarrConfig) setHostSetting() error {
 	return nil
 }
 
-func (c *ProwlarrConfig) setDownloadClient() error {
+func (c *Config) setDownloadClient() error {
 	fmt.Println("-- Configuring Download Client...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "qbittorrent_downloadclient.json")
@@ -154,7 +154,7 @@ func (c *ProwlarrConfig) setDownloadClient() error {
 	return nil
 }
 
-func (c *ProwlarrConfig) setIndexer(filename, name string) error {
+func (c *Config) setIndexer(filename, name string) error {
 	fmt.Printf("-- Adding indexer: %v...\n", name)
 
 	b, err := utils.LoadJSONFile(reqBodies, filename)
@@ -174,7 +174,7 @@ func (c *ProwlarrConfig) setIndexer(filename, name string) error {
 func Configure() error {
 	fmt.Println("- Starting Prowlarr configuration...")
 
-	c, err := Config()
+	c, err := GetConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}

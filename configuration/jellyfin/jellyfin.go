@@ -13,13 +13,13 @@ import (
 //go:embed req_bodies/*.json
 var reqBodies embed.FS
 
-type config struct {
+type Config struct {
 	Url      string
 	Username string
 	Password string
 }
 
-func Config() (*config, error) {
+func GetConfig() (*Config, error) {
 	fmt.Println("-- Creating config based on Environment Variables...")
 
 	url := os.Getenv("JELLYFIN_URL")
@@ -37,7 +37,7 @@ func Config() (*config, error) {
 		return nil, fmt.Errorf("missing env var: `JELLYFIN_PASSWORD`")
 	}
 
-	return &config{
+	return &Config{
 		Url:      url,
 		Username: username,
 		Password: password,
@@ -45,7 +45,7 @@ func Config() (*config, error) {
 }
 
 // TOOD: isnt this only first login?
-func (c *config) Login() (string, error) {
+func (c *Config) Login() (string, error) {
 	b := struct {
 		Username string `json:"Username"`
 		Pw       string `json:"Pw"`
@@ -73,13 +73,13 @@ func (c *config) Login() (string, error) {
 	return r.AccessToken, nil
 }
 
-func (c *config) checkSystemInfo() error {
+func (c *Config) checkSystemInfo() error {
 	fmt.Println("-- Checking system info...")
 	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
-func (c *config) configureStartup() error {
+func (c *Config) configureStartup() error {
 	fmt.Println("-- Configuring startup settings...")
 
 	url := c.Url + "/Startup/Configuration"
@@ -98,13 +98,13 @@ func (c *config) configureStartup() error {
 	return err
 }
 
-func (c *config) checkUser() error {
+func (c *Config) checkUser() error {
 	fmt.Println("-- Checking user status...")
 	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
-func (c *config) createUser() error {
+func (c *Config) createUser() error {
 	fmt.Println("-- Creating admin user...")
 
 	b := struct {
@@ -118,7 +118,7 @@ func (c *config) createUser() error {
 	return err
 }
 
-func (c *config) createMoviesLibrary() error {
+func (c *Config) createMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_movies.json")
@@ -130,7 +130,7 @@ func (c *config) createMoviesLibrary() error {
 	return err
 }
 
-func (c *config) createTVShowsLibrary() error {
+func (c *Config) createTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_tv.json")
@@ -142,7 +142,7 @@ func (c *config) createTVShowsLibrary() error {
 	return err
 }
 
-func (c *config) configureRemoteAccess() error {
+func (c *Config) configureRemoteAccess() error {
 	fmt.Println("-- Configuring remote access...")
 
 	// Too small to store this req body as a file
@@ -154,7 +154,7 @@ func (c *config) configureRemoteAccess() error {
 	return err
 }
 
-func (c *config) completeStartup() error {
+func (c *Config) completeStartup() error {
 	fmt.Println("-- Completing startup...")
 	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
@@ -163,7 +163,7 @@ func (c *config) completeStartup() error {
 func Configure() error {
 	fmt.Println("- Starting jellyfin configuration...")
 
-	c, err := Config()
+	c, err := GetConfig()
 	if err != nil {
 		return err
 	}

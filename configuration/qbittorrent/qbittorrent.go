@@ -14,14 +14,14 @@ import (
 	"MediaServer/configuration/utils"
 )
 
-type config struct {
+type Config struct {
 	Url      string
 	Username string
 	Password string
 	Client   *http.Client
 }
 
-func GetConfig() (*config, error) {
+func GetConfig() (*Config, error) {
 	fmt.Println("-- Loading qBittorrent config...")
 
 	url := os.Getenv("QBITTORRENT_URL")
@@ -50,7 +50,7 @@ func GetConfig() (*config, error) {
 		Timeout: 30 * time.Second,
 	}
 
-	return &config{
+	return &Config{
 		Url:      url,
 		Username: username,
 		Password: password,
@@ -58,7 +58,7 @@ func GetConfig() (*config, error) {
 	}, nil
 }
 
-func (c *config) Login() error {
+func (c *Config) Login() error {
 	fmt.Println("-- Logging in to qBittorrent...")
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
@@ -76,7 +76,7 @@ func (c *config) Login() error {
 }
 
 func getPasswordFromLogs() (string, error) {
-	fmt.Println("-- Getting initial qBittorrent password...")
+	fmt.Println("-- Getting initial password...")
 
 	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
 	o, err := cmd.Output()
@@ -101,8 +101,8 @@ func getPasswordFromLogs() (string, error) {
 	return pw, nil
 }
 
-func (c *config) changePassword() error {
-	fmt.Println("-- Changing qBittorrent password...")
+func (c *Config) changePassword() error {
+	fmt.Println("-- Changing password...")
 
 	b := struct {
 		Username string `json:"web_ui_username"`
@@ -122,11 +122,7 @@ func (c *config) changePassword() error {
 	formData := fmt.Sprintf("json=%s", url.QueryEscape(string(jsonBytes)))
 
 	_, err = utils.Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func Configure() error {
@@ -147,7 +143,6 @@ func Configure() error {
 	}
 	// If error is "not logged in", proceed with configuration
 
-	// Otherwise, proceed with configuration
 	pw := c.Password
 
 	// On failure, get temp password from logs
@@ -167,11 +162,6 @@ func Configure() error {
 
 	// Change password to desired value
 	if err = c.changePassword(); err != nil {
-		return err
-	}
-
-	// Retry login with original password
-	if err = c.Login(); err != nil {
 		return err
 	}
 
