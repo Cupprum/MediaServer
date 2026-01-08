@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"MediaServer/configuration/utils"
 )
@@ -83,7 +84,10 @@ func (c *Config) jellyfinLogin() (string, error) {
 
 	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
 	if err != nil {
-		return "", err
+		if strings.Contains(err.Error(), "401 Unauthorized") {
+			return "", fmt.Errorf("not logged in")
+		}
+		return "", fmt.Errorf("failed to log in: %w", err)
 	}
 
 	var r struct {
@@ -184,20 +188,23 @@ func (c *Config) completeJellyfinStartup() error {
 }
 
 func Configure() error {
-	fmt.Println("- Starting Jellyfin configuration...")
+	fmt.Println("- Starting jellyfin configuration...")
 
 	c, err := config()
 	if err != nil {
 		return err
 	}
 
-	// Check if Jellyfin was already configured
-	if _, err := c.jellyfinLogin(); err == nil {
-		// If login is successful, assume already configured
-		fmt.Println("- Jellyfin already configured, skipping...")
+	// Try to login
+	_, err = c.jellyfinLogin()
+	if err == nil {
+		fmt.Println("- already configured, skipping...")
 		fmt.Println()
 		return nil
+	} else if err.Error() != "not logged in" {
+		return fmt.Errorf("failed to login: %w", err)
 	}
+	// If error is "not logged in", proceed with configuration
 
 	// Otherwise, proceed with configuration
 	if err = c.checkJellyfinSystemInfo(); err != nil {
@@ -225,7 +232,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- Jellyfin configured successfully!")
+	fmt.Println("- jellyfin configured successfully!")
 	fmt.Println()
 	return nil
 }
