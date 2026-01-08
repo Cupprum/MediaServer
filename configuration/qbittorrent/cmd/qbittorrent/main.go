@@ -3,5 +3,8 @@ package main
 import "MediaServer/configuration/qbittorrent"
 
 func main() {
-	qbittorrent.Configure()
+	err := qbittorrent.Configure()
+	if err != nil {
+		panic(err)
+	}
 }

@@ -5,5 +5,8 @@ import (
 )
 
 func main() {
-	prowlarr.Configure()
+	err := prowlarr.Configure()
+	if err != nil {
+		panic(err)
+	}
 }

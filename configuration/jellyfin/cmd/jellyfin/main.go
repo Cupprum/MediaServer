@@ -5,5 +5,8 @@ import (
 )
 
 func main() {
-	jellyfin.Configure()
+	err := jellyfin.Configure()
+	if err != nil {
+		panic(err)
+	}
 }
