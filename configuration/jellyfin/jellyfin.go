@@ -13,14 +13,14 @@ import (
 //go:embed req_bodies/*.json
 var reqBodies embed.FS
 
-type Config struct {
+type config struct {
 	Url      string
 	Username string
 	Password string
 }
 
-func config() (*Config, error) {
-	fmt.Println("-- Create Jellyfin config based on Environment Variables...")
+func Config() (*config, error) {
+	fmt.Println("-- Creating config based on Environment Variables...")
 
 	url := os.Getenv("JELLYFIN_URL")
 	if url == "" {
@@ -37,42 +37,15 @@ func config() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `JELLYFIN_PASSWORD`")
 	}
 
-	return &Config{
+	return &config{
 		Url:      url,
 		Username: username,
 		Password: password,
 	}, nil
 }
 
-// Used to cache the Jellyfin authorization token
-var jellyfinAuthorization string = ""
-
-func Headers() (map[string]string, error) {
-	if jellyfinAuthorization != "" {
-		return map[string]string{"Authorization": jellyfinAuthorization}, nil
-	}
-
-	fmt.Println("-- Getting Jellyfin authorization token...")
-	c, err := config()
-	if err != nil {
-		return nil, err
-	}
-
-	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
-	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
-
-	accessToken, err := c.jellyfinLogin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Add token to the initial auth header
-	jellyfinAuthorization = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, accessToken)
-	return map[string]string{"Authorization": jellyfinAuthorization}, nil
-}
-
-// TODO: change naming to get rid of Jellyfin
-func (c *Config) jellyfinLogin() (string, error) {
+// TOOD: isnt this only first login?
+func (c *config) Login() (string, error) {
 	b := struct {
 		Username string `json:"Username"`
 		Pw       string `json:"Pw"`
@@ -100,13 +73,13 @@ func (c *Config) jellyfinLogin() (string, error) {
 	return r.AccessToken, nil
 }
 
-func (c *Config) checkJellyfinSystemInfo() error {
+func (c *config) checkSystemInfo() error {
 	fmt.Println("-- Checking system info...")
 	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil)
 	return err
 }
 
-func (c *Config) configureJellyfinStartup() error {
+func (c *config) configureStartup() error {
 	fmt.Println("-- Configuring startup settings...")
 
 	url := c.Url + "/Startup/Configuration"
@@ -125,13 +98,13 @@ func (c *Config) configureJellyfinStartup() error {
 	return err
 }
 
-func (c *Config) checkJellyfinUser() error {
+func (c *config) checkUser() error {
 	fmt.Println("-- Checking user status...")
 	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil)
 	return err
 }
 
-func (c *Config) createJellyfinUser() error {
+func (c *config) createUser() error {
 	fmt.Println("-- Creating admin user...")
 
 	b := struct {
@@ -145,7 +118,7 @@ func (c *Config) createJellyfinUser() error {
 	return err
 }
 
-func (c *Config) createJellyfinMoviesLibrary() error {
+func (c *config) createMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_movies.json")
@@ -157,7 +130,7 @@ func (c *Config) createJellyfinMoviesLibrary() error {
 	return err
 }
 
-func (c *Config) createJellyfinTVShowsLibrary() error {
+func (c *config) createTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_tv.json")
@@ -169,7 +142,7 @@ func (c *Config) createJellyfinTVShowsLibrary() error {
 	return err
 }
 
-func (c *Config) configureJellyfinRemoteAccess() error {
+func (c *config) configureRemoteAccess() error {
 	fmt.Println("-- Configuring remote access...")
 
 	// Too small to store this req body as a file
@@ -181,7 +154,7 @@ func (c *Config) configureJellyfinRemoteAccess() error {
 	return err
 }
 
-func (c *Config) completeJellyfinStartup() error {
+func (c *config) completeStartup() error {
 	fmt.Println("-- Completing startup...")
 	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
 	return err
@@ -190,13 +163,13 @@ func (c *Config) completeJellyfinStartup() error {
 func Configure() error {
 	fmt.Println("- Starting jellyfin configuration...")
 
-	c, err := config()
+	c, err := Config()
 	if err != nil {
 		return err
 	}
 
 	// Try to login
-	_, err = c.jellyfinLogin()
+	_, err = c.Login()
 	if err == nil {
 		fmt.Println("- already configured, skipping...")
 		fmt.Println()
@@ -207,28 +180,28 @@ func Configure() error {
 	// If error is "not logged in", proceed with configuration
 
 	// Otherwise, proceed with configuration
-	if err = c.checkJellyfinSystemInfo(); err != nil {
+	if err = c.checkSystemInfo(); err != nil {
 		return err
 	}
-	if err = c.configureJellyfinStartup(); err != nil {
+	if err = c.configureStartup(); err != nil {
 		return err
 	}
-	if err = c.checkJellyfinUser(); err != nil {
+	if err = c.checkUser(); err != nil {
 		return err
 	}
-	if err = c.createJellyfinUser(); err != nil {
+	if err = c.createUser(); err != nil {
 		return err
 	}
-	if err = c.createJellyfinMoviesLibrary(); err != nil {
+	if err = c.createMoviesLibrary(); err != nil {
 		return err
 	}
-	if err = c.createJellyfinTVShowsLibrary(); err != nil {
+	if err = c.createTVShowsLibrary(); err != nil {
 		return err
 	}
-	if err = c.configureJellyfinRemoteAccess(); err != nil {
+	if err = c.configureRemoteAccess(); err != nil {
 		return err
 	}
-	if err = c.completeJellyfinStartup(); err != nil {
+	if err = c.completeStartup(); err != nil {
 		return err
 	}
 
