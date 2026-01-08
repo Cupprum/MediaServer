@@ -1,12 +1,16 @@
 package jellyfin
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"os"
 
 	"MediaServer/configuration/utils"
 )
+
+//go:embed req_bodies/*.json
+var reqBodies embed.FS
 
 type Config struct {
 	Url      string
@@ -66,6 +70,7 @@ func Headers() (map[string]string, error) {
 	return map[string]string{"Authorization": jellyfinAuthorization}, nil
 }
 
+// TODO: change naming to get rid of Jellyfin
 func (c *Config) jellyfinLogin() (string, error) {
 	b := struct {
 		Username string `json:"Username"`
@@ -139,7 +144,7 @@ func (c *Config) createJellyfinUser() error {
 func (c *Config) createJellyfinMoviesLibrary() error {
 	fmt.Println("-- Creating Movies library...")
 
-	b, err := utils.LoadJSONFile("jellyfin", "library_movies.json")
+	b, err := utils.LoadJSONFile(reqBodies, "library_movies.json")
 	if err != nil {
 		return err
 	}
@@ -151,7 +156,7 @@ func (c *Config) createJellyfinMoviesLibrary() error {
 func (c *Config) createJellyfinTVShowsLibrary() error {
 	fmt.Println("-- Creating TV Shows library...")
 
-	b, err := utils.LoadJSONFile("jellyfin", "library_tv.json")
+	b, err := utils.LoadJSONFile(reqBodies, "library_tv.json")
 	if err != nil {
 		return err
 	}

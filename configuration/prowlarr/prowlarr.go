@@ -1,6 +1,7 @@
 package prowlarr
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +12,9 @@ import (
 
 	"MediaServer/configuration/utils"
 )
+
+//go:embed req_bodies/*.json
+var reqBodies embed.FS
 
 type ProwlarrConfig struct {
 	Apikey              string // Set during login
@@ -123,7 +127,7 @@ func (c *ProwlarrConfig) apikey(client *http.Client) error {
 func (c *ProwlarrConfig) setHostSetting() error {
 	fmt.Println("-- Set login details...")
 
-	b, err := utils.LoadJSONFile("prowlarr", "host_config.json")
+	b, err := utils.LoadJSONFile(reqBodies, "host_config.json")
 	if err != nil {
 		return err
 	}
@@ -146,7 +150,7 @@ func (c *ProwlarrConfig) setHostSetting() error {
 func (c *ProwlarrConfig) setDownloadClient() error {
 	fmt.Println("-- Configuring Download Client...")
 
-	b, err := utils.LoadJSONFile("prowlarr", "qbittorrent_downloadclient.json")
+	b, err := utils.LoadJSONFile(reqBodies, "qbittorrent_downloadclient.json")
 	if err != nil {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
@@ -180,7 +184,7 @@ func (c *ProwlarrConfig) setDownloadClient() error {
 func (c *ProwlarrConfig) setIndexer(filename, name string) error {
 	fmt.Printf("-- Adding indexer: %v...\n", name)
 
-	b, err := utils.LoadJSONFile("prowlarr", filename)
+	b, err := utils.LoadJSONFile(reqBodies, filename)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
