@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"MediaServer/configuration/jellyfin"
 	"MediaServer/configuration/prowlarr"
@@ -12,19 +11,16 @@ import (
 func main() {
 	err := qbittorrent.Configure()
 	if err != nil {
-		fmt.Println("  * qBittorrent configuration failed:", err)
-		os.Exit(1)
+		log.Fatalf("--- qBittorrent configuration failed: %v\n", err)
 	}
 
 	err = prowlarr.Configure()
 	if err != nil {
-		fmt.Println("  * Prowlarr configuration failed:", err)
-		os.Exit(1)
+		log.Fatalf("--- Prowlarr configuration failed: %v\n", err)
 	}
 
 	err = jellyfin.Configure()
 	if err != nil {
-		fmt.Println("  * Jellyfin configuration failed:", err)
-		os.Exit(1)
+		log.Fatalf("--- Jellyfin configuration failed: %v\n", err)
 	}
 }

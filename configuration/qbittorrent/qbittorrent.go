@@ -3,6 +3,7 @@ package qbittorrent
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -22,7 +23,7 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
-	fmt.Println("-- Loading qBittorrent config...")
+	log.Println("-- Loading qBittorrent config...")
 
 	url := os.Getenv("QBITTORRENT_URL")
 	if url == "" {
@@ -59,7 +60,7 @@ func GetConfig() (*Config, error) {
 }
 
 func (c *Config) Login() error {
-	fmt.Println("-- Logging in to qBittorrent...")
+	log.Println("-- Logging in to qBittorrent...")
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
 
@@ -76,7 +77,7 @@ func (c *Config) Login() error {
 }
 
 func getPasswordFromLogs() (string, error) {
-	fmt.Println("-- Getting initial password...")
+	log.Println("-- Getting initial password...")
 
 	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
 	o, err := cmd.Output()
@@ -102,7 +103,7 @@ func getPasswordFromLogs() (string, error) {
 }
 
 func (c *Config) changePassword() error {
-	fmt.Println("-- Changing password...")
+	log.Println("-- Changing password...")
 
 	b := struct {
 		Username string `json:"web_ui_username"`
@@ -126,7 +127,7 @@ func (c *Config) changePassword() error {
 }
 
 func Configure() error {
-	fmt.Println("- Starting qbittorrent configuration...")
+	log.Println("- Starting qbittorrent configuration...")
 	c, err := GetConfig()
 	if err != nil {
 		return err
@@ -135,7 +136,7 @@ func Configure() error {
 	// Try to login
 	err = c.Login()
 	if err == nil {
-		fmt.Println("- already configured, skipping...")
+		log.Println("- already configured, skipping...")
 		fmt.Println()
 		return nil
 	} else if err.Error() != "not logged in" {
@@ -169,7 +170,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- qbittorrent configured successfully!")
+	log.Println("- qbittorrent configured successfully!")
 	fmt.Println()
 	return nil
 }

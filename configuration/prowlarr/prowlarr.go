@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -25,7 +26,7 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
-	fmt.Println("-- Loading config...")
+	log.Println("-- Loading config...")
 
 	url := os.Getenv("PROWLARR_URL")
 	if url == "" {
@@ -69,7 +70,7 @@ func GetConfig() (*Config, error) {
 }
 
 func (c *Config) LoadApikey(client *http.Client) error {
-	fmt.Println("-- Retrieving apikey...")
+	log.Println("-- Retrieving apikey...")
 	// First call to initialize does not require authentication
 	// the subsequent calls do authentication via cookie in client
 	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client)
@@ -98,11 +99,11 @@ func (c *Config) LoadApikey(client *http.Client) error {
 }
 
 func (c *Config) setHostSetting() error {
-	fmt.Println("-- Set login details...")
+	log.Println("-- Set login details...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "host_config.json")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
 	b["username"] = c.Username
@@ -121,7 +122,7 @@ func (c *Config) setHostSetting() error {
 }
 
 func (c *Config) setDownloadClient() error {
-	fmt.Println("-- Configuring Download Client...")
+	log.Println("-- Configuring Download Client...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "qbittorrent_downloadclient.json")
 	if err != nil {
@@ -172,7 +173,7 @@ func (c *Config) setIndexer(filename, name string) error {
 }
 
 func Configure() error {
-	fmt.Println("- Starting Prowlarr configuration...")
+	log.Println("- Starting Prowlarr configuration...")
 
 	c, err := GetConfig()
 	if err != nil {
@@ -184,7 +185,7 @@ func Configure() error {
 	err = c.LoadApikey(nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "configured") {
-			fmt.Println("- already configured, skipping...")
+			log.Println("- already configured, skipping...")
 			fmt.Println()
 			return nil
 		}
@@ -210,7 +211,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- prowlarr configured successfully!")
+	log.Println("- prowlarr configured successfully!")
 	fmt.Println()
 
 	return nil

@@ -3,6 +3,7 @@ package prowlarr_test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"slices"
@@ -14,7 +15,7 @@ import (
 )
 
 func login(c *prowlarr.Config) error {
-	fmt.Println("-- Logging in...")
+	log.Println("-- Logging in...")
 
 	// Create a cookie jar for persisting cookies across login and subsequent requests
 	jar, err := cookiejar.New(nil)
