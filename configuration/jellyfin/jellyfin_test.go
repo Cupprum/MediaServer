@@ -24,7 +24,7 @@ func config() (*jellyfin.Config, error) {
 
 	err = c.LoadAccessToken()
 	if err != nil {
-		return nil, fmt.Errorf("failed to login: %w", err)
+		return nil, fmt.Errorf("failed to get access token: %w", err)
 	}
 
 	configCache = c

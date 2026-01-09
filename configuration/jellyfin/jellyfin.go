@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -21,7 +22,7 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
-	fmt.Println("-- Creating config based on Environment Variables...")
+	log.Println("-- Creating config based on Environment Variables...")
 
 	url := os.Getenv("JELLYFIN_URL")
 	if url == "" {
@@ -47,7 +48,7 @@ func GetConfig() (*Config, error) {
 	}, nil
 }
 
-// Used to check if jellyfin was already configured and in tests
+// Used to check if jellyfin was already configured and also in tests
 func (c *Config) LoadAccessToken() error {
 	b := struct {
 		Username string `json:"Username"`
@@ -73,7 +74,7 @@ func (c *Config) LoadAccessToken() error {
 		return fmt.Errorf("failed to parse auth response: %v", err)
 	}
 
-	// Set AccessToken with retrieved token
+	// Add retrieved token to `AccessToken`
 	if !strings.Contains(c.AccessToken, "Token") {
 		c.AccessToken = fmt.Sprintf(`%s, Token="%s"`, c.AccessToken, r.AccessToken)
 	}
@@ -82,38 +83,47 @@ func (c *Config) LoadAccessToken() error {
 }
 
 func (c *Config) checkSystemInfo() error {
-	fmt.Println("-- Checking system info...")
+	log.Println("-- Checking system info...")
 	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to get system info: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) configureStartup() error {
-	fmt.Println("-- Configuring startup settings...")
+	log.Println("-- Configuring startup settings...")
 
 	url := c.Url + "/Startup/Configuration"
 
 	rconfig, err := utils.Request("GET", url, nil, nil, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get startup configuration: %w", err)
 	}
 
 	config := map[string]interface{}{}
 	if err := json.Unmarshal(rconfig, &config); err != nil {
-		return fmt.Errorf("failed to decode response: %w", err)
+		return fmt.Errorf("failed to decode startup configuration response: %w", err)
 	}
 
 	_, err = utils.Request("POST", url, config, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to set startup configuration: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) checkUser() error {
-	fmt.Println("-- Checking user status...")
+	log.Println("-- Checking user status...")
 	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to get startup user: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) createUser() error {
-	fmt.Println("-- Creating admin user...")
+	log.Println("-- Creating user...")
 
 	b := struct {
 		Name     string `json:"Name"`
@@ -123,35 +133,44 @@ func (c *Config) createUser() error {
 		Password: c.Password,
 	}
 	_, err := utils.Request("POST", c.Url+"/Startup/User", b, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to create user: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) createMoviesLibrary() error {
-	fmt.Println("-- Creating Movies library...")
+	log.Println("-- Creating Movies library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_movies.json")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
 	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to create movies library: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) createTVShowsLibrary() error {
-	fmt.Println("-- Creating TV Shows library...")
+	log.Println("-- Creating TV Shows library...")
 
 	b, err := utils.LoadJSONFile(reqBodies, "library_tv.json")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
 	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to create tv shows library: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) configureRemoteAccess() error {
-	fmt.Println("-- Configuring remote access...")
+	log.Println("-- Configuring remote access...")
 
 	// Too small to store this req body as a file
 	b := struct {
@@ -159,27 +178,33 @@ func (c *Config) configureRemoteAccess() error {
 	}{false}
 
 	_, err := utils.Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to configure remote access: %w", err)
+	}
+	return nil
 }
 
 func (c *Config) completeStartup() error {
-	fmt.Println("-- Completing startup...")
+	log.Println("-- Completing startup...")
 	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to complete startup: %w", err)
+	}
+	return nil
 }
 
 func Configure() error {
-	fmt.Println("- Starting jellyfin configuration...")
+	log.Println("- Starting jellyfin configuration...")
 
 	c, err := GetConfig()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get config: %w", err)
 	}
 
 	// Try to login
 	err = c.LoadAccessToken()
 	if err == nil {
-		fmt.Println("- already configured, skipping...")
+		log.Println("- already configured, skipping...")
 		fmt.Println()
 		return nil
 	} else if err.Error() != "not logged in" {
@@ -187,7 +212,6 @@ func Configure() error {
 	}
 	// If error is "not logged in", proceed with configuration
 
-	// Otherwise, proceed with configuration
 	if err = c.checkSystemInfo(); err != nil {
 		return err
 	}
@@ -213,7 +237,7 @@ func Configure() error {
 		return err
 	}
 
-	fmt.Println("- jellyfin configured successfully!")
+	log.Println("- jellyfin configured successfully!")
 	fmt.Println()
 	return nil
 }
