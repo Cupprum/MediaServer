@@ -105,9 +105,6 @@ func kubectlLogs() (string, error) {
 		return "", fmt.Errorf("failed to get logs: %v", err)
 	}
 
-	fmt.Println("------------test")
-	fmt.Println(string(o))
-
 	pw := strings.TrimSpace(string(o))
 	if pw == "" {
 		return "", fmt.Errorf("failed to retrieve temporary password from kubectl logs")
