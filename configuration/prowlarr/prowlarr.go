@@ -83,12 +83,12 @@ func (c *Config) LoadApikey(client *http.Client) error {
 	if err := json.Unmarshal(rb, &r); err != nil {
 		// After initial setup, if not logged in, prowlarr returns html
 		if err.Error() == "invalid character '<' looking for beginning of value" {
-			return fmt.Errorf("configured")
+			return fmt.Errorf("configured: authentication required")
 		}
 		return fmt.Errorf("failed to decode apikey: %w", err)
 	}
 
-	// Set the API Key for Prowlarr
+	// Set the apikey in the config
 	c.Apikey = r.Apikey
 	if c.Apikey == "" {
 		return fmt.Errorf("apikey cannot be empty")
@@ -183,7 +183,7 @@ func Configure() error {
 	// If prowlarr is already configured, the apikey retrieval will fail
 	err = c.LoadApikey(nil)
 	if err != nil {
-		if err.Error() == "configured" {
+		if strings.Contains(err.Error(), "configured") {
 			fmt.Println("- already configured, skipping...")
 			fmt.Println()
 			return nil

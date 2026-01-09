@@ -14,9 +14,10 @@ import (
 var reqBodies embed.FS
 
 type Config struct {
-	Url      string
-	Username string
-	Password string
+	AccessToken string // Set during login
+	Url         string
+	Username    string
+	Password    string
 }
 
 func GetConfig() (*Config, error) {
@@ -37,40 +38,47 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `JELLYFIN_PASSWORD`")
 	}
 
+	// Initial AccessToken without token value -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
 	return &Config{
-		Url:      url,
-		Username: username,
-		Password: password,
+		AccessToken: `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`,
+		Url:         url,
+		Username:    username,
+		Password:    password,
 	}, nil
 }
 
-// TOOD: isnt this only first login?
-func (c *Config) Login() (string, error) {
+// Used to check if jellyfin was already configured and in tests
+func (c *Config) LoadAccessToken() error {
 	b := struct {
 		Username string `json:"Username"`
 		Pw       string `json:"Pw"`
 	}{c.Username, c.Password}
 
-	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
-	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
-	h := map[string]string{"Authorization": defaultAuth}
+	h := map[string]string{"Authorization": c.AccessToken}
 
 	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "401 Unauthorized") {
-			return "", fmt.Errorf("not logged in")
+			// During first call we dont have a valid token yet
+			// as our user was not created yet.
+			return fmt.Errorf("not logged in")
 		}
-		return "", fmt.Errorf("failed to log in: %w", err)
+		return fmt.Errorf("failed to log in: %w", err)
 	}
 
 	var r struct {
 		AccessToken string `json:"AccessToken"`
 	}
 	if err := json.Unmarshal(rb, &r); err != nil {
-		return "", fmt.Errorf("failed to parse auth response: %v", err)
+		return fmt.Errorf("failed to parse auth response: %v", err)
 	}
 
-	return r.AccessToken, nil
+	// Set AccessToken with retrieved token
+	if !strings.Contains(c.AccessToken, "Token") {
+		c.AccessToken = fmt.Sprintf(`%s, Token="%s"`, c.AccessToken, r.AccessToken)
+	}
+
+	return nil
 }
 
 func (c *Config) checkSystemInfo() error {
@@ -169,7 +177,7 @@ func Configure() error {
 	}
 
 	// Try to login
-	_, err = c.Login()
+	err = c.LoadAccessToken()
 	if err == nil {
 		fmt.Println("- already configured, skipping...")
 		fmt.Println()

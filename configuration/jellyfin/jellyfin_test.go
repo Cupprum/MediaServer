@@ -3,7 +3,6 @@ package jellyfin_test
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"slices"
 	"testing"
 
@@ -11,48 +10,37 @@ import (
 	"MediaServer/configuration/utils"
 )
 
-// TODO: try to cleanup working with headers and tokens
+var configCache *jellyfin.Config
 
-// Used to cache the Jellyfin authorization token
-var token string = ""
-
-func headers() (map[string]string, error) {
-	if token != "" {
-		return map[string]string{"Authorization": token}, nil
+func config() (*jellyfin.Config, error) {
+	if configCache != nil {
+		return configCache, nil
 	}
 
-	fmt.Println("-- Getting authorization token...")
 	c, err := jellyfin.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	// Initial auth header without token -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
-	defaultAuth := `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`
-
-	accessToken, err := c.Login()
+	err = c.LoadAccessToken()
 	if err != nil {
 		return nil, fmt.Errorf("failed to login: %w", err)
 	}
 
-	// Add token to the initial auth header
-	token = fmt.Sprintf(`%s, Token="%s"`, defaultAuth, accessToken)
-	return map[string]string{"Authorization": token}, nil
+	configCache = c
+
+	return c, nil
 }
 
 func getJellyfinItems(path string) ([]string, error) {
-	h, err := headers()
+	c, err := config()
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: if i kind of have config already, why not use it instead of getting env var?
-	url := os.Getenv("JELLYFIN_URL")
-	if url == "" {
-		return nil, fmt.Errorf("JELLYFIN_URL environment variable not set")
-	}
+	h := map[string]string{"Authorization": c.AccessToken}
 
-	rb, err := utils.Request("GET", url+path, nil, h, nil)
+	rb, err := utils.Request("GET", c.Url+path, nil, h, nil)
 	if err != nil {
 		return nil, err
 	}
