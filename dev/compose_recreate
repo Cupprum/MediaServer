@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+
+if [ $# -gt 1 ]; then
+    echo "Usage: $0 (jellyfin|qbittorrent|prowlarr)"
+    exit 1
+fi
+
+if [ $# -eq 0 ]; then
+    echo "- Reconfiguring all services..."
+    echo ""
+    sudo rm -rf ../config/*
+    docker compose up -d --force-recreate
+    echo ""
+elif [ $# -eq 1 ]; then
+    echo "- Reconfiguring $1..."
+    echo ""
+    sudo rm -rf "../config/$1/*"
+    docker compose up -d --force-recreate "$1"
+fi
+
+sleep 15
+echo "- It should be fine to start with configuration."
