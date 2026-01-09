@@ -29,6 +29,10 @@ spec:
               value: "1000"
             - name: PGID
               value: "1000"
+            {{- if eq .Values.serviceName "homepage" }}
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "homepage.pi.local" # TODO: should be part of the configuration Testing
+            {{- end }}
           ports:
             - containerPort: {{ .Values.port }}
               protocol: TCP
