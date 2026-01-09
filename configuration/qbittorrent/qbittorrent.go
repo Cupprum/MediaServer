@@ -99,8 +99,7 @@ func dockerLogs() (string, error) {
 }
 
 func kubectlLogs() (string, error) {
-	cmd := exec.Command("kubectl", "logs", "-l", "app=qbittorrent", "-n", "server",
-		"| grep 'temporary password' | awk '{print $NF}'")
+	cmd := exec.Command("bash", "-c", "kubectl logs -l app=qbittorrent -n server | grep 'temporary password' | awk '{print $NF}'")
 	o, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get logs: %v", err)
