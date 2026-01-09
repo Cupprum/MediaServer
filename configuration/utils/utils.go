@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -75,12 +77,13 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 		return nil, fmt.Errorf("request failed: %s - %s", resp.Status, string(respBody))
 	}
 
-	fmt.Println(" * HTTP request completed",
-		"method", method,
-		"url", url,
-		"status", resp.Status,
-	)
-
+	if os.Getenv("MEDIASERVER_DEBUG") == "true" {
+		log.Println("--- HTTP request completed",
+			"method", method,
+			"url", url,
+			"status", resp.Status,
+		)
+	}
 	return respBody, nil
 }
 
