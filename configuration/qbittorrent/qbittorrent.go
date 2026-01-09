@@ -99,7 +99,7 @@ func dockerLogs() (string, error) {
 }
 
 func kubectlLogs() (string, error) {
-	cmd := exec.Command("kubectl", "get", "pods", "-l", "app=qbittorrent", "-n", "server")
+	cmd := exec.Command("kubectl", "logs", "-l", "app=qbittorrent", "-n", "server")
 	// ,
 	// 	"| grep 'temporary password' | awk '{print $NF}'")
 	o, err := cmd.Output()
