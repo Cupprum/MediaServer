@@ -76,9 +76,7 @@ func (c *Config) Login() error {
 	return nil
 }
 
-func getPasswordFromLogs() (string, error) {
-	log.Println("-- Getting initial password...")
-
+func dockerLogs() (string, error) {
 	cmd := exec.Command("docker", "ps", "-a", "--filter", "ancestor=qbittorrent", "-q")
 	o, err := cmd.Output()
 	if err != nil {
@@ -87,8 +85,7 @@ func getPasswordFromLogs() (string, error) {
 
 	containerId := strings.TrimSpace(string(o))
 
-	cmd = exec.Command("bash", "-c",
-		"docker logs "+containerId+" | grep 'temporary password' | awk '{print $NF}'")
+	cmd = exec.Command("bash", "-c", "docker logs "+containerId+" | grep 'temporary password' | awk '{print $NF}'")
 	o, err = cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get logs: %v", err)
@@ -96,7 +93,35 @@ func getPasswordFromLogs() (string, error) {
 
 	pw := strings.TrimSpace(string(o))
 	if pw == "" {
-		return "", fmt.Errorf("failed to retrieve temporary password from logs")
+		return "", fmt.Errorf("failed to retrieve temporary password from docker logs")
+	}
+	return pw, nil
+}
+
+func kubectlLogs() (string, error) {
+	cmd := exec.Command("kubectl", "get", "pods", "-l", "app=qbittorrent", "|", "grep 'temporary password' | awk '{print $NF}'")
+	o, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get logs: %v", err)
+	}
+
+	pw := strings.TrimSpace(string(o))
+	if pw == "" {
+		return "", fmt.Errorf("failed to retrieve temporary password from kubectl logs")
+	}
+	return pw, nil
+}
+
+func getPasswordFromLogs() (string, error) {
+	log.Println("-- Getting initial password...")
+
+	pw, err := dockerLogs()
+	if err != nil {
+		log.Println("-- Docker logs method failed, trying kubectl...")
+		pw, err = kubectlLogs()
+		if err != nil {
+			return "", fmt.Errorf("failed to get temporary password from logs: %w", err)
+		}
 	}
 
 	return pw, nil
