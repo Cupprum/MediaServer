@@ -23,7 +23,7 @@ func main() {
 		}
 	}
 
-	if os.Getenv("JELLYFIN_DEPLOY") != "true" {
+	if os.Getenv("JELLYFIN_DEPLOY") == "true" {
 		if err := jellyfin.Configure(); err != nil {
 			log.Fatalf("--- jellyfin configuration failed: %v\n", err)
 		}
