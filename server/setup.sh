@@ -11,7 +11,7 @@ set -o pipefail
 # - Jellyfin
 # - qBittorrent
 # - Prowlarr
-# - Heimdall
+# - Homepage
 #
 # Usage: ./setup.sh [install|delete]
 ###############################################################################
@@ -24,7 +24,7 @@ readonly SERVICES=(
     "jellyfin"
     "qbittorrent"
     "prowlarr"
-    "heimdall"
+    "homepage"
 )
 
 ###############################################################################
@@ -43,7 +43,7 @@ Applications managed:
     - Jellyfin
     - qBittorrent
     - Prowlarr
-    - Heimdall
+    - Homepage
 
 Example:
     $(basename "$0") install    # Install all applications

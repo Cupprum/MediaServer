@@ -7,7 +7,7 @@ After=update-hostname.service
 
 [Service]
 Type=exec
-ExecStart=/usr/local/bin/go-avahi-cname cname jellyfin qbittorrent prowlarr heimdall homepage grafana argocd
+ExecStart=/usr/local/bin/go-avahi-cname cname jellyfin qbittorrent prowlarr homepage grafana argocd
 
 [Install]
 WantedBy=multi-user.target

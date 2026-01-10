@@ -1,7 +1,0 @@
-serviceName: heimdall
-image: linuxserver/heimdall:latest
-port: 80
-mountPoints:
-  - name: config
-    source: /home/x42/MediaServer/config/heimdall/config
-    destination: /config

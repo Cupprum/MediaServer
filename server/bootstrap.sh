@@ -26,7 +26,6 @@ main() {
 
     log_info "Creating required directories..."
     mkdir -p /home/x42/MediaServer/config
-    mkdir -p /home/x42/MediaServer/config/heimdall/config
     mkdir -p /home/x42/MediaServer/config/homepage/config
     mkdir -p /home/x42/MediaServer/config/jellyfin/config
     mkdir -p /home/x42/MediaServer/config/jellyfin/cache
