@@ -5,3 +5,6 @@ mountPoints:
   - name: config
     source: /home/x42/MediaServer/config/homepage/config
     destination: /config
+env:
+  - name: HOMEPAGE_ALLOWED_HOSTS
+    value: "homepage.pi.local"
