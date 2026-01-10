@@ -1,4 +1,4 @@
-package homepagetest
+package homepage_test
 
 import (
 	"os"
