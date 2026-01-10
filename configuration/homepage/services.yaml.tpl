@@ -1,11 +1,11 @@
 - Download:
     - Prowlarr:
         icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/prowlarr.png
-        href: http://localhost:9696/
+        href: ${PROWLARR_URL}
     - qBittorrent:
         icon: https://a.fsdn.com/allura/p/qbittorrent/icon?1724097660?&w=90
-        href: http://localhost:8080/
+        href: ${QBITTORRENT_URL}
 - Watch:
     - Jellyfin:
         icon: https://images.icon-icons.com/3912/PNG/512/jellyfin_logo_icon_247973.png
-        href: http://localhost:8096/
+        href: ${JELLYFIN_URL}
