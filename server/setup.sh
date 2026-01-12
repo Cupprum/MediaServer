@@ -188,7 +188,7 @@ delete_apps() {
 }
 
 cleanup() {
-    log_info "Performing cleanup tasks..."
+    log_info "Cleaning up config folders..."
 
     load_env_file
 
