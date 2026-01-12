@@ -13,7 +13,7 @@ fi
 echo "- Loading environment variables from .env file..."
 if [ -f ".env" ]; then
     set -a
-    source .env
+    source "$(dirname "${BASH_SOURCE[0]}")/.env"
     set +a
 else
     echo "- .env file not found. Skipping loading environment variables."
