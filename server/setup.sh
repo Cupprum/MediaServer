@@ -158,7 +158,7 @@ configure() {
     log_info "Configuring services..."
     echo "$(pwd)"
     echo "$(ls)"
-    bash "cd $(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services run || {
+    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services run || {
         log_error "Failed to configure services"
         exit 1
     }
@@ -166,7 +166,7 @@ configure() {
     sleep 10
 
     log_info "Testing services..."
-    bash "cd $(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services test || {
+    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services test || {
         log_error "Service tests failed"
         exit 1
     }
