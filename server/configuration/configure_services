@@ -28,5 +28,5 @@ if [ "$1" = "run" ]; then
 elif [ "$1" = "test" ]; then
     echo "- Running tests..."
     echo ""
-    go test "$CURRENT_DIR"/..."
+    go test "$CURRENT_DIR/..."
 fi
