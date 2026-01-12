@@ -59,8 +59,7 @@ log_info 'Seting up and configuring Kubernetes...'
 ssh "$Hostname" 'cd MediaServer/k8s; ./setup.sh'
 
 log_info 'Deploying MediaServer to Kubernetes...'
-ssh "$Hostname" 'cd MediaServer/server; ./bootstrap.sh'
-ssh "$Hostname" 'cd MediaServer/server; ./setup.sh install'
+ssh "$Hostname" 'cd MediaServer/server; ./setup.sh install_and_configure'
 
 log_info 'Deploying Monitoring to Kubernetes...'
 ssh "$Hostname" 'cd MediaServer/monitoring; ./setup.sh install'
