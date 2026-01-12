@@ -51,8 +51,80 @@ Example:
 EOF
 }
 
-install_apps() {
+make_sure_folders_exist() {
+    log_info "Ensuring necessary folders exist..."
+
+    if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
+        log_error "MEDIASERVER_CONFIG_DIR is not set. Please set it in the .env file."
+        exit 1
+    fi
+
+    local folders=(
+        "$MEDIASERVER_CONFIG_DIR/config/homepage/config"
+        "$MEDIASERVER_CONFIG_DIR/config/jellyfin/config"
+        "$MEDIASERVER_CONFIG_DIR/config/jellyfin/cache"
+        "$MEDIASERVER_CONFIG_DIR/config/prowlarr/config"
+        "$MEDIASERVER_CONFIG_DIR/config/qbittorrent/config"
+    )
+
+    for folder in "${folders[@]}"; do
+        if [ ! -d "$folder" ]; then
+            log_info "Creating folder: $folder"
+            mkdir -p "$folder" || {
+                log_error "Failed to create folder: $folder"
+                exit 1
+            }
+        fi
+    done
+}
+
+make_sure_namespace_exists() {
+    local namespace="server"
+
+    if ! kubectl get namespace "$namespace" &> /dev/null; then
+        log_info "Creating namespace: $namespace"
+        kubectl create namespace "$namespace" || {
+            log_error "Failed to create namespace: $namespace"
+            exit 1
+        }
+    else
+        log_info "Namespace $namespace already exists"
+    fi
+}
+
+wait_for_jellyfin() {
+    local url="$JELLYFIN_URL/health"
+    local max_retries=30
+    local wait_time=10
+    local attempt=1
+
+    # While `curl http://jellyfin.pi.local/health` does not return "Healthy"
+    while [ $attempt -le $max_retries ]; do
+        local status
+        status=$(curl "$url" || echo "unreachable")
+        if [ "$status" == "Healthy" ]; then
+            log_info "Jellyfin is healthy"
+            return 0
+        else
+            log_info "Waiting for Jellyfin to become healthy (Attempt: $attempt/$max_retries)..."
+            sleep $wait_time
+            ((attempt++))
+        fi
+    done
+    log_error "Jellyfin did not become healthy within the expected time"
+    exit 1
+}
+
+install_and_configure_apps() {
     log_info "Installing ArgoCD applications..."
+
+    log_info "Loading environment variables..."
+    set -a
+    source "$(dirname "${BASH_SOURCE[0]}")/configuration/.env"
+    set +a
+
+    make_sure_folders_exist
+    make_sure_namespace_exists
     
     for service in "${SERVICES[@]}"; do
         log_info "Installing $service..."
@@ -61,8 +133,29 @@ install_apps() {
             exit 1
         }
     done
-    
+
     log_info "All applications installed successfully"
+    
+    log_info "Waiting for services to become ready..."
+    # From the services, jellyfin takes longest to start
+    wait_for_jellyfin
+
+    log_info "All services are up and running"
+
+    log_info "Configuring services..."
+    bash ./configuration/configure_services run || {
+        log_error "Failed to configure services"
+        exit 1
+    }
+
+    sleep 10
+
+    log_info "Testing services..."
+    bash ./configuration/configure_services test || {
+        log_error "Service tests failed"
+        exit 1
+    }
+    log_info "All services configured and tested successfully"
 }
 
 delete_apps() {
@@ -94,7 +187,7 @@ main() {
 
     case "$1" in
         "install")
-            install_apps
+            install_and_configure_apps
             ;;
         "delete")
             delete_apps
