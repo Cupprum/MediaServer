@@ -20,12 +20,13 @@ else
     echo "- .env file not found. Skipping loading environment variables."
 fi
 
+CURRENT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 if [ "$1" = "run" ]; then
     echo "- Running configuration services..."
     echo ""
-    go run .
+    go run "$CURRENT_DIR"/main.go
 elif [ "$1" = "test" ]; then
     echo "- Running tests..."
     echo ""
-    go test ./...
+    go test "$CURRENT_DIR"/..."
 fi
