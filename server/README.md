@@ -4,8 +4,12 @@ The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Homepage.
 
 ## Installation and configuration
 
-Install setup using the following command: `./setup.sh install` - This will create the ArgoCD apps, wait for the applications to be up and running and afterwards configure the services and test the they are configured properly.
+Install and configure the setup using the following command: `./setup.sh install_and_configure` - This will create the ArgoCD apps, wait for the applications to be up and running and afterwards configure the services and test the they are configured properly.
+
+This tool also supports other commands, like only installation only mode: `./setup.sh install`, or configuration only mode: `./setup.sh configure`
 
 ## Deletion process
 
 Delete the argocd apps with their configuration: `./setup.sh delete`
+
+IF NEEDED, you can also clean up the config folders: `./setup.sh cleanup`
