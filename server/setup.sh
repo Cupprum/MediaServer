@@ -36,8 +36,12 @@ show_help() {
 Usage: $(basename "$0") [MODE]
 
 Modes:
-    install     Install all ArgoCD applications
-    delete      Remove all ArgoCD applications
+    install                 Install all ArgoCD applications
+    configure               Configure all services after installation
+    install_and_configure   Install applications and configure services
+    delete                  Remove all ArgoCD applications
+    cleanup                 Remove all configuration directories
+    help, --help, -h        Display this help message
 
 Applications managed:
     - Jellyfin
@@ -46,9 +50,16 @@ Applications managed:
     - Homepage
 
 Example:
-    $(basename "$0") install    # Install all applications
-    $(basename "$0") delete    # Remove all applications
+    $(basename "$0") install_and_configure  # Install and configure all applications
+    $(basename "$0") delete                 # Remove all applications
 EOF
+}
+
+load_env_file() {
+    log_info "Loading environment variables..."
+    set -a
+    source "$(dirname "${BASH_SOURCE[0]}")/configuration/.env"
+    set +a
 }
 
 make_sure_folders_exist() {
@@ -115,13 +126,10 @@ wait_for_jellyfin() {
     exit 1
 }
 
-install_and_configure_apps() {
+install() {
     log_info "Installing ArgoCD applications..."
 
-    log_info "Loading environment variables..."
-    set -a
-    source "$(dirname "${BASH_SOURCE[0]}")/configuration/.env"
-    set +a
+    load_env_file
 
     make_sure_folders_exist
     make_sure_namespace_exists
@@ -135,7 +143,9 @@ install_and_configure_apps() {
     done
 
     log_info "All applications installed successfully"
-    
+}
+
+configure() {
     log_info "Waiting for services to become ready..."
     # From the services, jellyfin takes longest to start
     wait_for_jellyfin
@@ -158,6 +168,11 @@ install_and_configure_apps() {
     log_info "All services configured and tested successfully"
 }
 
+install_and_configure_apps() {
+    install()
+    configure()
+}
+
 delete_apps() {
     log_info "Removing ArgoCD applications..."
     
@@ -170,6 +185,20 @@ delete_apps() {
     done
     
     log_info "All applications removed successfully"
+}
+
+cleanup() {
+    log_info "Performing cleanup tasks..."
+
+    load_env_file
+
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/heimdall/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/homepage/*"
+
+    log_info "Cleanup completed"
 }
 
 ###############################################################################
@@ -187,10 +216,19 @@ main() {
 
     case "$1" in
         "install")
+            install
+            ;;
+        "configure")
+            configure
+            ;;
+        "install_and_configure")
             install_and_configure_apps
             ;;
         "delete")
             delete_apps
+            ;;
+        "cleanup")
+            cleanup
             ;;
         "help"|"--help"|"-h")
             show_help
