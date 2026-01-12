@@ -124,6 +124,7 @@ func (c *Config) setHostSetting() error {
 func (c *Config) setDownloadClient() error {
 	log.Println("-- Configuring Download Client...")
 
+	// Configure qBittorrent download client with the following host: `qbittorrent.server.svc.cluster.local`
 	b, err := utils.LoadJSONFile(reqBodies, "qbittorrent_downloadclient.json")
 	if err != nil {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
