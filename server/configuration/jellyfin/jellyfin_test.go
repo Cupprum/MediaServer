@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"MediaServer/configuration/jellyfin"
-	"MediaServer/configuration/utils"
+	"MediaServer/server/configuration/jellyfin"
+	"MediaServer/server/configuration/utils"
 )
 
 var configCache *jellyfin.Config

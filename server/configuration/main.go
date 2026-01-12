@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"MediaServer/configuration/homepage"
-	"MediaServer/configuration/jellyfin"
-	"MediaServer/configuration/prowlarr"
-	"MediaServer/configuration/qbittorrent"
+	"MediaServer/server/configuration/homepage"
+	"MediaServer/server/configuration/jellyfin"
+	"MediaServer/server/configuration/prowlarr"
+	"MediaServer/server/configuration/qbittorrent"
 )
 
 func main() {

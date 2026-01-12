@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"MediaServer/configuration/utils"
+	"MediaServer/server/configuration/utils"
 )
 
 type Config struct {

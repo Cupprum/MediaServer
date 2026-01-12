@@ -3,7 +3,7 @@ package qbittorrent_test
 import (
 	"testing"
 
-	"MediaServer/configuration/qbittorrent"
+	"MediaServer/server/configuration/qbittorrent"
 )
 
 func TestQbittorrentLogin(t *testing.T) {

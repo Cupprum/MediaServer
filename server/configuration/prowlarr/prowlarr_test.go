@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"MediaServer/configuration/prowlarr"
-	"MediaServer/configuration/utils"
+	"MediaServer/server/configuration/prowlarr"
+	"MediaServer/server/configuration/utils"
 )
 
 func login(c *prowlarr.Config) error {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"MediaServer/configuration/utils"
+	"MediaServer/server/configuration/utils"
 )
 
 func TestHomepageSite(t *testing.T) {

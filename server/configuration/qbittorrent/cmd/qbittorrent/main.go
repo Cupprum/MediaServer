@@ -1,6 +1,6 @@
 package main
 
-import "MediaServer/configuration/qbittorrent"
+import "MediaServer/server/configuration/qbittorrent"
 
 func main() {
 	err := qbittorrent.Configure()

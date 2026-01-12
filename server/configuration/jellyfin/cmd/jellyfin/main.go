@@ -1,7 +1,7 @@
 package main
 
 import (
-	"MediaServer/configuration/jellyfin"
+	"MediaServer/server/configuration/jellyfin"
 )
 
 func main() {

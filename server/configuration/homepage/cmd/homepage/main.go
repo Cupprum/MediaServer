@@ -1,6 +1,6 @@
 package main
 
-import "MediaServer/configuration/homepage"
+import "MediaServer/server/configuration/homepage"
 
 func main() {
 	err := homepage.Configure()

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"MediaServer/configuration/prowlarr"
+	"MediaServer/server/configuration/prowlarr"
 )
 
 func main() {

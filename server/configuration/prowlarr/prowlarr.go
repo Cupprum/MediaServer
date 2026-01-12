@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"MediaServer/configuration/utils"
+	"MediaServer/server/configuration/utils"
 )
 
 //go:embed req_bodies/*.json
