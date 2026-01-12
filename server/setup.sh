@@ -169,8 +169,8 @@ configure() {
 }
 
 install_and_configure_apps() {
-    install()
-    configure()
+    install
+    configure
 }
 
 delete_apps() {
