@@ -156,7 +156,7 @@ configure() {
     log_info "All services are up and running"
 
     log_info "Configuring services..."
-    bash cd ./configuration; ./configure_services run || {
+    bash "cd ./configuration"; ./configure_services run || {
         log_error "Failed to configure services"
         exit 1
     }
@@ -164,7 +164,7 @@ configure() {
     sleep 10
 
     log_info "Testing services..."
-    bash cd ./configuration; ./configure_services test || {
+    bash "cd ./configuration"; ./configure_services test || {
         log_error "Service tests failed"
         exit 1
     }
