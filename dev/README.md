@@ -9,4 +9,4 @@ Development container used for development of this project. Keeps dependencies s
 
 # Docker Compose
 
-For testing the `configure-services` we can run the services in docker compose: `docker compose up -d --force-recreate`.
+For testing the `server/configuration` go code, we can run the services in docker compose using the following utility: `./compose_recreate`, it also supports just recreating a single service: `./compose_recreate jellyfin`.
