@@ -112,7 +112,7 @@ wait_for_jellyfin() {
     # While `curl http://jellyfin.pi.local/health` does not return "Healthy"
     while [ $attempt -le $max_retries ]; do
         local status
-        status=$(curl "$url" || echo "unreachable")
+        status=$(curl -s "$url" || echo "unreachable")
         if [ "$status" == "Healthy" ]; then
             log_info "Jellyfin is healthy"
             return 0
