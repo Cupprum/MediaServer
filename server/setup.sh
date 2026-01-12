@@ -155,10 +155,12 @@ configure() {
 
     log_info "All services are up and running"
 
+    # Change to configuration directory
+    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; 
+    
     log_info "Configuring services..."
-    echo "$(pwd)"
-    echo "$(ls)"
-    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services run || {
+    ./configure_services run || {
+        cd .. # Return to previous directory on error
         log_error "Failed to configure services"
         exit 1
     }
@@ -166,11 +168,15 @@ configure() {
     sleep 10
 
     log_info "Testing services..."
-    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; ./configure_services test || {
+    ./configure_services test || {
+        cd .. # Return to previous directory on error
         log_error "Service tests failed"
         exit 1
     }
     log_info "All services configured and tested successfully"
+    
+    # Return to previous directory
+    cd ..
 }
 
 install_and_configure_apps() {
