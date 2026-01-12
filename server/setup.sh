@@ -60,11 +60,11 @@ make_sure_folders_exist() {
     fi
 
     local folders=(
-        "$MEDIASERVER_CONFIG_DIR/config/homepage/config"
-        "$MEDIASERVER_CONFIG_DIR/config/jellyfin/config"
-        "$MEDIASERVER_CONFIG_DIR/config/jellyfin/cache"
-        "$MEDIASERVER_CONFIG_DIR/config/prowlarr/config"
-        "$MEDIASERVER_CONFIG_DIR/config/qbittorrent/config"
+        "$MEDIASERVER_CONFIG_DIR/homepage/config"
+        "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
+        "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
+        "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
+        "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
     )
 
     for folder in "${folders[@]}"; do
