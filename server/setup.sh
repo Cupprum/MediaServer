@@ -147,6 +147,9 @@ install() {
 
 configure() {
     log_info "Waiting for services to become ready..."
+
+    load_env_file
+
     # From the services, jellyfin takes longest to start
     wait_for_jellyfin
 
