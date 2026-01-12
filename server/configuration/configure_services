@@ -11,9 +11,10 @@ if [ $# -eq 0 ] || { [ "$1" != "run" ] && [ "$1" != "test" ]; }; then
 fi
 
 echo "- Loading environment variables from .env file..."
-if [ -f ".env" ]; then
+ENVFILE="$(dirname "${BASH_SOURCE[0]}")/.env"
+if [ -f "$ENVFILE" ]; then
     set -a
-    source "$(dirname "${BASH_SOURCE[0]}")/.env"
+    source "$ENVFILE"
     set +a
 else
     echo "- .env file not found. Skipping loading environment variables."
