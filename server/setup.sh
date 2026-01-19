@@ -11,6 +11,7 @@ set -o pipefail
 # - Jellyfin
 # - qBittorrent
 # - Prowlarr
+# - Flaresolverr
 # - Homepage
 #
 # Usage: ./setup.sh [install|delete]
@@ -24,6 +25,7 @@ readonly SERVICES=(
     "jellyfin"
     "qbittorrent"
     "prowlarr"
+    "flaresolverr"
     "homepage"
 )
 
@@ -47,6 +49,7 @@ Applications managed:
     - Jellyfin
     - qBittorrent
     - Prowlarr
+    - Flaresolverr
     - Homepage
 
 Example:
@@ -71,11 +74,12 @@ make_sure_folders_exist() {
     fi
 
     local folders=(
-        "$MEDIASERVER_CONFIG_DIR/homepage/config"
+        "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
+        "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
+        "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
-        "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
-        "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
+        "$MEDIASERVER_CONFIG_DIR/homepage/config"
     )
 
     for folder in "${folders[@]}"; do
@@ -203,10 +207,10 @@ cleanup() {
 
     load_env_file
 
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/flaresolverr/*"
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/*"
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/heimdall/*"
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/homepage/*"
 
     log_info "Cleanup completed"
