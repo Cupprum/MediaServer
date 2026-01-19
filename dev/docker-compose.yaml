@@ -11,8 +11,8 @@ services:
         source: "/home/x42/PP/MediaServer/media/movies"
         target: "/media/movies"
       - type: bind
-        source: "/home/x42/PP/MediaServer/media/series"
-        target: "/media/series"
+        source: "/home/x42/PP/MediaServer/media/tv"
+        target: "/media/tv"
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - "host.docker.internal:host-gateway"
