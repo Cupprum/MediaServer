@@ -6,7 +6,7 @@ set -o pipefail
 
 
 if [ $# -gt 1 ]; then
-    echo "Usage: $0 (jellyfin|qbittorrent|prowlarr)"
+    echo "Usage: $0 (jellyfin|qbittorrent|prowlarr|flaresolverr)"
     exit 1
 fi
 
