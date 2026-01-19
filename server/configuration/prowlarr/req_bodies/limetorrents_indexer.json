@@ -169,5 +169,7 @@
     "implementation": "Cardigann",
     "configContract": "CardigannSettings",
     "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#limetorrents",
-    "tags": []
+    "tags": [
+        1
+    ]
 }

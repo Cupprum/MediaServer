@@ -23,6 +23,7 @@ type Config struct {
 	QBittorrentHostname string
 	QBittorrentUsername string
 	QBittorrentPassword string
+	FlaresolverrHostUrl string
 }
 
 func GetConfig() (*Config, error) {
@@ -58,6 +59,11 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
 	}
 
+	flaresolverrHostUrl := os.Getenv("FLARESOLVERR_HOST_URL")
+	if flaresolverrHostUrl == "" {
+		return nil, fmt.Errorf("missing env var: `FLARESOLVERR_HOST_URL`")
+	}
+
 	return &Config{
 		Apikey:              "", // Set during login
 		Url:                 url,
@@ -66,7 +72,21 @@ func GetConfig() (*Config, error) {
 		QBittorrentHostname: QBittorrentHostname,
 		QBittorrentUsername: qbittorrentUsername,
 		QBittorrentPassword: qbittorrentPassword,
+		FlaresolverrHostUrl: flaresolverrHostUrl,
 	}, nil
+}
+
+func setField(b map[string]interface{}, key string, value string) {
+	if fields, ok := b["fields"].([]interface{}); ok {
+		for _, field := range fields {
+			if fieldMap, ok := field.(map[string]interface{}); ok {
+				name, _ := fieldMap["name"].(string)
+				if name == key {
+					fieldMap["value"] = value
+				}
+			}
+		}
+	}
 }
 
 func (c *Config) LoadApikey(client *http.Client) error {
@@ -131,26 +151,61 @@ func (c *Config) setDownloadClient() error {
 	}
 
 	// Update download client config
-	if fields, ok := b["fields"].([]interface{}); ok {
-		for _, field := range fields {
-			if fieldMap, ok := field.(map[string]interface{}); ok {
-				name, _ := fieldMap["name"].(string)
-				switch name {
-				case "host":
-					fieldMap["value"] = c.QBittorrentHostname
-				case "username":
-					fieldMap["value"] = c.QBittorrentUsername
-				case "password":
-					fieldMap["value"] = c.QBittorrentPassword
-				}
-			}
-		}
-	}
+	setField(b, "host", c.QBittorrentHostname)
+	setField(b, "username", c.QBittorrentUsername)
+	setField(b, "password", c.QBittorrentPassword)
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
 	_, err = utils.Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil)
 	if err != nil {
 		return fmt.Errorf("failed to set downloadclient: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Config) addTag(name string) error {
+	log.Printf("-- Adding tag: %v...\n", name)
+
+	b := struct {
+		Label string `json:"label"`
+	}{name}
+
+	h := map[string]string{"X-Api-Key": c.Apikey}
+	rb, err := utils.Request("POST", c.Url+"/api/v1/tag", b, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to add tag %v: %w", name, err)
+	}
+
+	var r struct {
+		Id int `json:"id"`
+	}
+	if err := json.Unmarshal(rb, &r); err != nil {
+		return fmt.Errorf("failed to decode tag id: %w", err)
+	}
+
+	if r.Id != 1 {
+		return fmt.Errorf("tag id has to be 1, received: %v", r.Id)
+	}
+
+	return nil
+}
+
+func (c *Config) setIndexerProxy() error {
+	log.Println("-- Configuring Flaresolverr Indexer Proxy...")
+
+	b, err := utils.LoadJSONFile(reqBodies, "flaresolverr_indexer_proxy.json")
+	if err != nil {
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
+	}
+
+	// Update indexer proxy config
+	setField(b, "host", c.FlaresolverrHostUrl)
+
+	h := map[string]string{"X-Api-Key": c.Apikey}
+	_, err = utils.Request("POST", c.Url+"/api/v1/indexerProxy", b, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to set indexer proxy: %w", err)
 	}
 
 	return nil
@@ -199,16 +254,25 @@ func Configure() error {
 	if err = c.setDownloadClient(); err != nil {
 		return err
 	}
+	if err = c.addTag("flaresolverr"); err != nil {
+		return err
+	}
+	if err = c.setIndexerProxy(); err != nil {
+		return err
+	}
 	if err = c.setIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
 		return err
 	}
 	// if err = c.setIndexer("eztv_indexer.json", "EZTV"); err != nil {
 	// 	return err
 	// }
+	if err = c.setIndexer("yts_indexer.json", "YTS"); err != nil {
+		return err
+	}
 	if err = c.setIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
 		return err
 	}
-	if err = c.setIndexer("yts_indexer.json", "YTS"); err != nil {
+	if err = c.setIndexer("1337x_indexer.json", "1337x"); err != nil {
 		return err
 	}
 
