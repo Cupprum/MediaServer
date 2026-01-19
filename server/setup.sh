@@ -73,6 +73,7 @@ make_sure_folders_exist() {
         exit 1
     fi
 
+    # TODO: the list of folder should be stored centrally for creation and deletion
     local folders=(
         "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
         "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
@@ -207,11 +208,12 @@ cleanup() {
 
     load_env_file
 
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/flaresolverr/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/*"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/homepage/*"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
+    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/homepage/config"
 
     log_info "Cleanup completed"
 }
