@@ -46,3 +46,17 @@ services:
         source: "/home/x42/PP/MediaServer/dev/services.yaml"
         target: "/app/config/services.yaml"
       - "/home/x42/PP/MediaServer/config/homepage:/app/config:z"
+    
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_FILE=none
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=Europe/Copenhagen
+    ports:
+      - "8191:8191"
+    volumes:
+      - "/home/x42/PP/MediaServer/config/flaresolverr:/config:z"
