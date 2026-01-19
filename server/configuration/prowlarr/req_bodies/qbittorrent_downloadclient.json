@@ -8,7 +8,7 @@
     "fields": [
         {
             "name": "host",
-            "value": "qbittorrent.server.svc.cluster.local"
+            "value": "xxx"
         },
         {
             "name": "port",
@@ -23,11 +23,11 @@
         },
         {
             "name": "username",
-            "value": "admin"
+            "value": "xxx"
         },
         {
             "name": "password",
-            "value": "qbittorrent"
+            "value": "xxx"
         },
         {
             "name": "category",
