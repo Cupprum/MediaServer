@@ -98,6 +98,31 @@ func TestProwlarrDownloadClients(t *testing.T) {
 	t.Error("qbittorrent download client not found in the response")
 }
 
+func TestProwlarrIndexerProxy(t *testing.T) {
+	c, err := config()
+	if err != nil {
+		t.Error(err)
+	}
+
+	h := map[string]string{"X-Api-Key": c.Apikey}
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexerProxy", nil, h, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var proxies []struct {
+		Name string `json:"name"`
+	}
+	json.Unmarshal(respBody, &proxies)
+
+	for _, proxy := range proxies {
+		if proxy.Name == "FlareSolverr" {
+			return
+		}
+	}
+	t.Error("flaresolverr indexer proxy not found in the response")
+}
+
 func TestProwlarrIndexers(t *testing.T) {
 	c, err := config()
 	if err != nil {
@@ -121,6 +146,7 @@ func TestProwlarrIndexers(t *testing.T) {
 		"LimeTorrents",
 		"The Pirate Bay",
 		"YTS",
+		"1337x",
 	}
 
 	var indexers []string
