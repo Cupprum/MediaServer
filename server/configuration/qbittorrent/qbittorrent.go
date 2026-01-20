@@ -162,18 +162,20 @@ func (c *Config) changePassword() error {
 	return nil
 }
 
+type SeedingLimits struct {
+	RatioEnabled    bool    `json:"max_ratio_enabled"`
+	RatioLimit      float64 `json:"max_ratio"`
+	TimeEnabled     bool    `json:"max_seeding_time_enabled"`
+	TimeLimit       int     `json:"max_seeding_time"`
+	InactiveEnabled bool    `json:"max_inactive_seeding_time_enabled"`
+	InactiveLimit   int     `json:"max_inactive_seeding_time"`
+	Action          int     `json:"max_ratio_act"`
+}
+
 func (c *Config) setSeedingLimits() error {
 	log.Println("-- Configuring Seeding Limits...")
 
-	b := struct {
-		RatioEnabled    bool    `json:"max_ratio_enabled"`
-		RatioLimit      float64 `json:"max_ratio"`
-		TimeEnabled     bool    `json:"max_seeding_time_enabled"`
-		TimeLimit       int     `json:"max_seeding_time"`
-		InactiveEnabled bool    `json:"max_inactive_seeding_time_enabled"`
-		InactiveLimit   int     `json:"max_inactive_seeding_time"`
-		Action          int     `json:"max_ratio_act"`
-	}{
+	b := SeedingLimits{
 		RatioEnabled:    true,
 		RatioLimit:      1.0,
 		TimeEnabled:     true,
