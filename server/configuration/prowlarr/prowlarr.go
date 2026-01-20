@@ -212,7 +212,7 @@ func (c *Config) setIndexerProxy() error {
 }
 
 func (c *Config) setIndexer(filename, name string) error {
-	fmt.Printf("-- Adding indexer: %v...\n", name)
+	log.Printf("-- Adding indexer: %v...\n", name)
 
 	b, err := utils.LoadJSONFile(reqBodies, filename)
 	if err != nil {
