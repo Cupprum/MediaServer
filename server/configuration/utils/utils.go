@@ -77,7 +77,7 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 		return nil, fmt.Errorf("request failed: %s - %s", resp.Status, string(respBody))
 	}
 
-	if os.Getenv("MEDIASERVER_DEBUG") == "true" {
+	if os.Getenv("MEDIASERVER_LOG") == "debug" {
 		log.Println("--- HTTP request completed",
 			"method", method,
 			"url", url,
