@@ -1,6 +1,6 @@
 # Configure Media Server
 
-The Media Server is based on Jellyfin, QBittorrent, Prowlarr, Flaresolverr and Homepage.
+The Media Server is based on Jellyfin, QBittorrent, Prowlarr and Flaresolverr.
 
 ## Installation and configuration
 

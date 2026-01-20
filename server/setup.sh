@@ -6,15 +6,6 @@ set -o pipefail
 
 ###############################################################################
 # ArgoCD Apps Management Script
-#
-# This script manages Helm charts for:
-# - Jellyfin
-# - qBittorrent
-# - Prowlarr
-# - Flaresolverr
-# - Homepage
-#
-# Usage: ./setup.sh [install|delete]
 ###############################################################################
 
 # Source common utilities
@@ -26,7 +17,6 @@ readonly SERVICES=(
     "qbittorrent"
     "prowlarr"
     "flaresolverr"
-    "homepage"
 )
 
 ###############################################################################
@@ -50,7 +40,6 @@ Applications managed:
     - qBittorrent
     - Prowlarr
     - Flaresolverr
-    - Homepage
 
 Example:
     $(basename "$0") install_and_configure  # Install and configure all applications
@@ -80,7 +69,6 @@ make_sure_folders_exist() {
         "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
-        "$MEDIASERVER_CONFIG_DIR/homepage/config"
     )
 
     for folder in "${folders[@]}"; do
@@ -213,7 +201,6 @@ cleanup() {
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
     sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/homepage/config"
 
     log_info "Cleanup completed"
 }

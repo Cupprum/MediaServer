@@ -198,7 +198,6 @@ configure_local_dns_resolution() {
 127.0.0.1       flaresolverr.pi.local
 127.0.0.1       prowlarr.pi.local
 127.0.0.1       jellyfin.pi.local
-127.0.0.1       homepage.pi.local
 127.0.0.1       argocd.pi.local
 127.0.0.1       grafana.pi.local
 EOF

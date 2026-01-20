@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"MediaServer/server/configuration/homepage"
 	"MediaServer/server/configuration/jellyfin"
 	"MediaServer/server/configuration/prowlarr"
 	"MediaServer/server/configuration/qbittorrent"
@@ -26,12 +25,6 @@ func main() {
 	if os.Getenv("JELLYFIN_DEPLOY") == "true" {
 		if err := jellyfin.Configure(); err != nil {
 			log.Fatalf("--- jellyfin configuration failed: %v\n", err)
-		}
-	}
-
-	if os.Getenv("HOMEPAGE_DEPLOY") == "true" {
-		if err := homepage.Configure(); err != nil {
-			log.Fatalf("--- homepage configuration failed: %v\n", err)
 		}
 	}
 }
