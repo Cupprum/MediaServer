@@ -127,16 +127,8 @@ func getPasswordFromLogs() (string, error) {
 	return pw, nil
 }
 
-func (c *Config) changePassword() error {
-	log.Println("-- Changing password...")
-
-	b := struct {
-		Username string `json:"web_ui_username"`
-		Password string `json:"web_ui_password"`
-	}{
-		Username: c.Username,
-		Password: c.Password,
-	}
+func (c *Config) setPreferences(b any) error {
+	log.Println("-- Setting preferences...")
 
 	// Convert map to JSON string for form encoding
 	jsonBytes, err := json.Marshal(b)
@@ -149,6 +141,54 @@ func (c *Config) changePassword() error {
 
 	_, err = utils.Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client)
 	return err
+}
+
+func (c *Config) changePassword() error {
+	log.Println("-- Changing password...")
+
+	b := struct {
+		Username string `json:"web_ui_username"`
+		Password string `json:"web_ui_password"`
+	}{
+		Username: c.Username,
+		Password: c.Password,
+	}
+
+	err := c.setPreferences(b)
+	if err != nil {
+		return fmt.Errorf("failed to change password: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Config) setSeedingLimits() error {
+	log.Println("-- Configuring Seeding Limits...")
+
+	b := struct {
+		RatioEnabled    bool    `json:"max_ratio_enabled"`
+		RatioLimit      float64 `json:"max_ratio"`
+		TimeEnabled     bool    `json:"max_seeding_time_enabled"`
+		TimeLimit       int     `json:"max_seeding_time"`
+		InactiveEnabled bool    `json:"max_inactive_seeding_time_enabled"`
+		InactiveLimit   int     `json:"max_inactive_seeding_time"`
+		Action          int     `json:"max_ratio_act"`
+	}{
+		RatioEnabled:    true,
+		RatioLimit:      1.0,
+		TimeEnabled:     true,
+		TimeLimit:       60, // 60 minutes
+		InactiveEnabled: true,
+		InactiveLimit:   60, // 60 minutes
+		Action:          1,  // 1 = Remove Torrent
+	}
+
+	err := c.setPreferences(b)
+	if err != nil {
+		return fmt.Errorf("failed to set seeding limits: %w", err)
+	}
+
+	return nil
 }
 
 func Configure() error {
@@ -192,6 +232,10 @@ func Configure() error {
 
 	// Change password to desired value
 	if err = c.changePassword(); err != nil {
+		return err
+	}
+
+	if err = c.setSeedingLimits(); err != nil {
 		return err
 	}
 

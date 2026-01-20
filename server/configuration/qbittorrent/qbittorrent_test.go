@@ -17,3 +17,5 @@ func TestQbittorrentLogin(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// TODO: write test to check if seeding limits were set correctly
