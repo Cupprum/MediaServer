@@ -28,7 +28,7 @@ readonly KUBECONFIG='/etc/rancher/k3s/k3s.yaml'
 source_env_vars() {
     log_info "Source environment variables..."
     set -a # automatically export all variables
-    source ../.env
+    source "$(dirname "${BASH_SOURCE[0]}")/../.env"
     set +a
     if [ -z "$GH_TOKEN" ] || [ -z "$ARGO_PASSWORD" ]; then
         log_error "GH_TOKEN and ARGO_PASSWORD must be present in the environment"

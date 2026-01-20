@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || { [ "$1" != "run" ] && [ "$1" != "test" ]; }; then
 fi
 
 echo "- Loading environment variables from .env file..."
-ENVFILE="$(dirname "${BASH_SOURCE[0]}")/.env"
+ENVFILE="$(dirname "${BASH_SOURCE[0]}")/../../.env"
 if [ -f "$ENVFILE" ]; then
     set -a
     source "$ENVFILE"

@@ -61,7 +61,7 @@ EOF
 load_env_file() {
     log_info "Loading environment variables..."
     set -a
-    source "$(dirname "${BASH_SOURCE[0]}")/configuration/.env"
+    source "$(dirname "${BASH_SOURCE[0]}")/../.env"
     set +a
 }
 
