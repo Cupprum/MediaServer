@@ -8,10 +8,10 @@ services:
       - "/home/x42/PP/MediaServer/data/config/jellyfin:/config:z"
       - "/home/x42/PP/MediaServer/data/cache/jellyfin:/cache:z"
       - type: bind
-        source: "/home/x42/PP/MediaServer/media/movies"
+        source: "/home/x42/PP/MediaServer/data/media/movies"
         target: "/media/movies"
       - type: bind
-        source: "/home/x42/PP/MediaServer/media/tv"
+        source: "/home/x42/PP/MediaServer/data/media/tv"
         target: "/media/tv"
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
