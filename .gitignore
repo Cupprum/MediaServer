@@ -12,9 +12,9 @@ kubeconfig.yaml
 .piactl_login
 
 # Runtime storage
-config
-cache
-media
+data/config
+data/cache
+data/media
 
 # Work in progress
 TODO.md
