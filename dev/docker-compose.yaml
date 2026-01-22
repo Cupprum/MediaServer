@@ -5,8 +5,8 @@ services:
     ports:
       - "8096:8096"
     volumes:
-      - "/home/x42/PP/MediaServer/config/jellyfin:/config:z"
-      - "/home/x42/PP/MediaServer/cache/jellyfin:/cache:z"
+      - "/home/x42/PP/MediaServer/data/config/jellyfin:/config:z"
+      - "/home/x42/PP/MediaServer/data/cache/jellyfin:/cache:z"
       - type: bind
         source: "/home/x42/PP/MediaServer/media/movies"
         target: "/media/movies"
@@ -23,7 +23,7 @@ services:
     ports:
       - "9696:9696"
     volumes:
-      - "/home/x42/PP/MediaServer/config/prowlarr:/config:z"
+      - "/home/x42/PP/MediaServer/data/config/prowlarr:/config:z"
 
   qbittorrent:
     image: linuxserver/qbittorrent:latest
@@ -31,8 +31,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - "/home/x42/PP/MediaServer/config/qbittorrent:/config:z"
-      - "/home/x42/PP/MediaServer/media/movies:/downloads:z"
+      - "/home/x42/PP/MediaServer/data/config/qbittorrent:/config:z"
+      - "/home/x42/PP/MediaServer/data/media/movies:/downloads:z"
     
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
@@ -40,4 +40,4 @@ services:
     ports:
       - "8191:8191"
     volumes:
-      - "/home/x42/PP/MediaServer/config/flaresolverr:/config:z"
+      - "/home/x42/PP/MediaServer/data/config/flaresolverr:/config:z"
