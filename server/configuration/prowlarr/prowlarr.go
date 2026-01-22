@@ -29,39 +29,39 @@ type Config struct {
 func GetConfig() (*Config, error) {
 	log.Println("-- Loading config...")
 
-	url := os.Getenv("PROWLARR_URL")
+	url := os.Getenv("MEDIASERVER_PROWLARR_URL")
 	if url == "" {
-		return nil, fmt.Errorf("missing env var: `PROWLARR_URL`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_URL`")
 	}
 
-	username := os.Getenv("PROWLARR_USERNAME")
+	username := os.Getenv("MEDIASERVER_PROWLARR_USERNAME")
 	if username == "" {
-		return nil, fmt.Errorf("missing env var: `PROWLARR_USERNAME`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_USERNAME`")
 	}
 
-	password := os.Getenv("PROWLARR_PASSWORD")
+	password := os.Getenv("MEDIASERVER_PROWLARR_PASSWORD")
 	if password == "" {
-		return nil, fmt.Errorf("missing env var: `PROWLARR_PASSWORD`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_PASSWORD`")
 	}
 
-	QBittorrentHostname := os.Getenv("QBITTORRENT_HOSTNAME")
+	QBittorrentHostname := os.Getenv("MEDIASERVER_QBITTORRENT_HOSTNAME")
 	if QBittorrentHostname == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_HOSTNAME`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_HOSTNAME`")
 	}
 
-	qbittorrentUsername := os.Getenv("QBITTORRENT_USERNAME")
+	qbittorrentUsername := os.Getenv("MEDIASERVER_QBITTORRENT_USERNAME")
 	if qbittorrentUsername == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_USERNAME`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_USERNAME`")
 	}
 
-	qbittorrentPassword := os.Getenv("QBITTORRENT_PASSWORD")
+	qbittorrentPassword := os.Getenv("MEDIASERVER_QBITTORRENT_PASSWORD")
 	if qbittorrentPassword == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_PASSWORD`")
 	}
 
-	flaresolverrHostUrl := os.Getenv("FLARESOLVERR_HOST_URL")
+	flaresolverrHostUrl := os.Getenv("MEDIASERVER_FLARESOLVERR_HOST_URL")
 	if flaresolverrHostUrl == "" {
-		return nil, fmt.Errorf("missing env var: `FLARESOLVERR_HOST_URL`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_FLARESOLVERR_HOST_URL`")
 	}
 
 	return &Config{

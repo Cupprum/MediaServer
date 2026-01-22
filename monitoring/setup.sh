@@ -28,8 +28,8 @@ Modes:
     delete      Remove monitoring ArgoCD application
 
 Environment variables required:
-    GRAFANA_USERNAME    Username for Grafana admin
-    GRAFANA_PASSWORD    Password for Grafana admin
+    MEDIASERVER_GRAFANA_USERNAME    Username for Grafana admin
+    MEDIASERVER_GRAFANA_PASSWORD    Password for Grafana admin
 
 Example:
     $(basename "$0") install    # Install monitoring application
@@ -42,8 +42,8 @@ install_monitoring() {
     set -a # automatically export all variables
     source "$(dirname "${BASH_SOURCE[0]}")/../.env"
     set +a
-    if [ -z "$GRAFANA_USERNAME" ] || [ -z "$GRAFANA_PASSWORD" ]; then
-        log_error "GRAFANA_USERNAME and GRAFANA_PASSWORD must be present in the environment"
+    if [ -z "$MEDIASERVER_GRAFANA_USERNAME" ] || [ -z "$MEDIASERVER_GRAFANA_PASSWORD" ]; then
+        log_error "MEDIASERVER_GRAFANA_USERNAME and MEDIASERVER_GRAFANA_PASSWORD must be present in the environment"
         exit 1
     fi
     log_info "Environment variables loaded successfully"
@@ -55,8 +55,8 @@ install_monitoring() {
         log_info "Creating grafana-admin-credentials secret..."
         kubectl create secret generic grafana-admin-credentials \
             --namespace monitoring \
-            --from-literal=admin-user="${GRAFANA_USERNAME}" \
-            --from-literal=admin-password="${GRAFANA_PASSWORD}" \
+            --from-literal=admin-user="${MEDIASERVER_GRAFANA_USERNAME}" \
+            --from-literal=admin-password="${MEDIASERVER_GRAFANA_PASSWORD}" \
             --dry-run=client -o yaml | kubectl apply  -f - || {
                 log_error "Failed to create grafana-admin-credentials secret"
                 exit 1

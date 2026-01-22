@@ -30,8 +30,8 @@ source_env_vars() {
     set -a # automatically export all variables
     source "$(dirname "${BASH_SOURCE[0]}")/../.env"
     set +a
-    if [ -z "$GH_TOKEN" ] || [ -z "$ARGO_PASSWORD" ]; then
-        log_error "GH_TOKEN and ARGO_PASSWORD must be present in the environment"
+    if [ -z "$MEDIASERVER_GITHUB_TOKEN" ] || [ -z "$MEDIASERVER_ARGO_PASSWORD" ]; then
+        log_error "MEDIASERVER_GITHUB_TOKEN and MEDIASERVER_ARGO_PASSWORD must be present in the environment"
         exit 1
     fi
     log_info "Environment variables loaded successfully"
@@ -152,7 +152,7 @@ create_and_configure_argocd() {
         --namespace argocd -- \
             argocd account update-password \
                 --current-password "$currentArgoPassword" \
-                --new-password "$ARGO_PASSWORD"
+                --new-password "$MEDIASERVER_ARGO_PASSWORD"
     log_info "ArgoCD password configured"
 
     log_info "Adding MediaServer repository to ArgoCD..."
@@ -162,7 +162,7 @@ create_and_configure_argocd() {
                 --name 'MediaServer' \
                 --project 'default' \
                 --username "$(git config user.name)" \
-                --password "$GH_TOKEN"
+                --password "$MEDIASERVER_GITHUB_TOKEN"
     log_info "MediaServer repository configured"                
 
     log_info "- ArgoCD UI: http://argocd.pi.local/"

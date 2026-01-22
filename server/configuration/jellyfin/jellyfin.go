@@ -24,19 +24,19 @@ type Config struct {
 func GetConfig() (*Config, error) {
 	log.Println("-- Creating config based on Environment Variables...")
 
-	url := os.Getenv("JELLYFIN_URL")
+	url := os.Getenv("MEDIASERVER_JELLYFIN_URL")
 	if url == "" {
-		return nil, fmt.Errorf("missing env var: `JELLYFIN_URL`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_URL`")
 	}
 
-	username := os.Getenv("JELLYFIN_USERNAME")
+	username := os.Getenv("MEDIASERVER_JELLYFIN_USERNAME")
 	if username == "" {
-		return nil, fmt.Errorf("missing env var: `JELLYFIN_USERNAME`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_USERNAME`")
 	}
 
-	password := os.Getenv("JELLYFIN_PASSWORD")
+	password := os.Getenv("MEDIASERVER_JELLYFIN_PASSWORD")
 	if password == "" {
-		return nil, fmt.Errorf("missing env var: `JELLYFIN_PASSWORD`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_PASSWORD`")
 	}
 
 	// Initial AccessToken without token value -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f

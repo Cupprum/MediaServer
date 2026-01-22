@@ -25,19 +25,19 @@ type Config struct {
 func GetConfig() (*Config, error) {
 	log.Println("-- Loading qBittorrent config...")
 
-	url := os.Getenv("QBITTORRENT_URL")
+	url := os.Getenv("MEDIASERVER_QBITTORRENT_URL")
 	if url == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_URL`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_URL`")
 	}
 
-	username := os.Getenv("QBITTORRENT_USERNAME")
+	username := os.Getenv("MEDIASERVER_QBITTORRENT_USERNAME")
 	if username == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_USERNAME`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_USERNAME`")
 	}
 
-	password := os.Getenv("QBITTORRENT_PASSWORD")
+	password := os.Getenv("MEDIASERVER_QBITTORRENT_PASSWORD")
 	if password == "" {
-		return nil, fmt.Errorf("missing env var: `QBITTORRENT_PASSWORD`")
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_PASSWORD`")
 	}
 
 	// Create a cookie jar for persisting cookies across requests

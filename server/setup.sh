@@ -97,7 +97,7 @@ make_sure_namespace_exists() {
 }
 
 wait_for_jellyfin() {
-    local url="$JELLYFIN_URL/health"
+    local url="$MEDIASERVER_JELLYFIN_URL/health"
     local max_retries=30
     local wait_time=10
     local attempt=1
