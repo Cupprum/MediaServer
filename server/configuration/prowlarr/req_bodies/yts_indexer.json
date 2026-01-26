@@ -111,5 +111,7 @@
     "implementation": "Cardigann",
     "configContract": "CardigannSettings",
     "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#yts",
-    "tags": []
+    "tags": [
+        1
+    ]
 }
