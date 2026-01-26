@@ -1,0 +1,454 @@
+{
+  "indexerUrls": [
+    "https://sktorrent.eu/"
+  ],
+  "legacyUrls": [
+    "http://sktorrent.eu/torrent/",
+    "http://sktorrent.eu/"
+  ],
+  "definitionName": "sktorrent",
+  "description": "Sk-CzTorrent is a CZECH/SLOVAK Semi-Private Torrent Tracker for MOVIES / TV / GENERAL",
+  "language": "cs-CZ",
+  "encoding": "Unicode (UTF-8)",
+  "enable": true,
+  "redirect": false,
+  "supportsRss": true,
+  "supportsSearch": true,
+  "supportsRedirect": false,
+  "supportsPagination": false,
+  "appProfileId": 1,
+  "protocol": "torrent",
+  "privacy": "semiPrivate",
+  "capabilities": {
+    "limitsMax": 100,
+    "limitsDefault": 100,
+    "categories": [
+      {
+        "id": 6000,
+        "name": "XXX",
+        "subCategories": []
+      },
+      {
+        "id": 100009,
+        "name": "xXx",
+        "subCategories": []
+      },
+      {
+        "id": 7000,
+        "name": "Books",
+        "subCategories": []
+      },
+      {
+        "id": 100023,
+        "name": "Knihy a Časopisy",
+        "subCategories": []
+      },
+      {
+        "id": 8000,
+        "name": "Other",
+        "subCategories": []
+      },
+      {
+        "id": 100025,
+        "name": "Ostatní",
+        "subCategories": []
+      },
+      {
+        "id": 2000,
+        "name": "Movies",
+        "subCategories": [
+          {
+            "id": 2020,
+            "name": "Movies/Other",
+            "subCategories": []
+          },
+          {
+            "id": 2070,
+            "name": "Movies/DVD",
+            "subCategories": []
+          },
+          {
+            "id": 2060,
+            "name": "Movies/3D",
+            "subCategories": []
+          },
+          {
+            "id": 2040,
+            "name": "Movies/HD",
+            "subCategories": []
+          },
+          {
+            "id": 2050,
+            "name": "Movies/BluRay",
+            "subCategories": []
+          },
+          {
+            "id": 2045,
+            "name": "Movies/UHD",
+            "subCategories": []
+          }
+        ]
+      },
+      {
+        "id": 100001,
+        "name": "Filmy CZ/SK dabing",
+        "subCategories": []
+      },
+      {
+        "id": 100005,
+        "name": "Filmy Kreslené",
+        "subCategories": []
+      },
+      {
+        "id": 100014,
+        "name": "Filmy Kamera",
+        "subCategories": []
+      },
+      {
+        "id": 100015,
+        "name": "Filmy s titulkama",
+        "subCategories": []
+      },
+      {
+        "id": 100020,
+        "name": "Filmy DVD",
+        "subCategories": []
+      },
+      {
+        "id": 100031,
+        "name": "Filmy bez titulků",
+        "subCategories": []
+      },
+      {
+        "id": 100003,
+        "name": "Filmy 3D",
+        "subCategories": []
+      },
+      {
+        "id": 100019,
+        "name": "Filmy HD",
+        "subCategories": []
+      },
+      {
+        "id": 100028,
+        "name": "Filmy Blu-ray",
+        "subCategories": []
+      },
+      {
+        "id": 100029,
+        "name": "Filmy 3D Blu-ray",
+        "subCategories": []
+      },
+      {
+        "id": 100043,
+        "name": "Filmy UHD",
+        "subCategories": []
+      },
+      {
+        "id": 4000,
+        "name": "PC",
+        "subCategories": [
+          {
+            "id": 4050,
+            "name": "PC/Games",
+            "subCategories": []
+          },
+          {
+            "id": 4040,
+            "name": "PC/Mobile-Other",
+            "subCategories": []
+          }
+        ]
+      },
+      {
+        "id": 100018,
+        "name": "Hry na Windows",
+        "subCategories": []
+      },
+      {
+        "id": 100030,
+        "name": "Hry na Konzole",
+        "subCategories": []
+      },
+      {
+        "id": 100037,
+        "name": "Hry na Linux",
+        "subCategories": []
+      },
+      {
+        "id": 100059,
+        "name": "Hry na Mac",
+        "subCategories": []
+      },
+      {
+        "id": 100060,
+        "name": "xXx hry (18+)",
+        "subCategories": []
+      },
+      {
+        "id": 100063,
+        "name": "VR Hry",
+        "subCategories": []
+      },
+      {
+        "id": 5000,
+        "name": "TV",
+        "subCategories": [
+          {
+            "id": 5080,
+            "name": "TV/Documentary",
+            "subCategories": []
+          },
+          {
+            "id": 5060,
+            "name": "TV/Sport",
+            "subCategories": []
+          }
+        ]
+      },
+      {
+        "id": 100016,
+        "name": "TV Seriál",
+        "subCategories": []
+      },
+      {
+        "id": 100017,
+        "name": "TV Dokument",
+        "subCategories": []
+      },
+      {
+        "id": 100042,
+        "name": "TV Pořad",
+        "subCategories": []
+      },
+      {
+        "id": 100044,
+        "name": "TV Sport",
+        "subCategories": []
+      },
+      {
+        "id": 3000,
+        "name": "Audio",
+        "subCategories": [
+          {
+            "id": 3020,
+            "name": "Audio/Video",
+            "subCategories": []
+          }
+        ]
+      },
+      {
+        "id": 100002,
+        "name": "Hudba",
+        "subCategories": []
+      },
+      {
+        "id": 100022,
+        "name": "Hudba DJ's Mix",
+        "subCategories": []
+      },
+      {
+        "id": 100024,
+        "name": "Mluvené slovo",
+        "subCategories": []
+      },
+      {
+        "id": 100026,
+        "name": "Hudební videa",
+        "subCategories": []
+      },
+      {
+        "id": 100045,
+        "name": "Soundtrack",
+        "subCategories": []
+      },
+      {
+        "id": 100021,
+        "name": "Programy",
+        "subCategories": []
+      },
+      {
+        "id": 100027,
+        "name": "Mobil, PDA",
+        "subCategories": []
+      },
+      {
+        "id": 100058,
+        "name": "Neschválené",
+        "subCategories": []
+      }
+    ],
+    "supportsRawSearch": false,
+    "searchParams": [
+      "q",
+      "q"
+    ],
+    "tvSearchParams": [
+      "q",
+      "season",
+      "ep",
+      "genre"
+    ],
+    "movieSearchParams": [
+      "q",
+      "genre"
+    ],
+    "musicSearchParams": [
+      "q"
+    ],
+    "bookSearchParams": [
+      "q"
+    ]
+  },
+  "priority": 25,
+  "downloadClientId": 0,
+  "added": "2026-01-26T10:33:32Z",
+  "sortName": "sk cztorrent",
+  "name": "Sk-CzTorrent",
+  "fields": [
+    {
+      "order": 0,
+      "name": "definitionFile",
+      "value": "sktorrent",
+      "type": "textbox",
+      "advanced": false,
+      "hidden": "hidden",
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 1,
+      "name": "baseUrl",
+      "label": "Base Url",
+      "helpText": "Select which base url Prowlarr will use for requests to the site",
+      "type": "select",
+      "advanced": false,
+      "selectOptionsProviderAction": "getUrls",
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 2,
+      "name": "baseSettings.queryLimit",
+      "label": "Query Limit",
+      "helpText": "The number of max queries as specified by the respective unit that Prowlarr will allow to the site",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 3,
+      "name": "baseSettings.grabLimit",
+      "label": "Grab Limit",
+      "helpText": "The number of max grabs as specified by the respective unit that Prowlarr will allow to the site",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 4,
+      "name": "baseSettings.limitsUnit",
+      "label": "Limits Unit",
+      "helpText": "The unit of time for counting limits per indexer",
+      "value": 0,
+      "type": "select",
+      "advanced": true,
+      "selectOptions": [
+        {
+          "value": 0,
+          "name": "Day",
+          "order": 0,
+          "hint": "(0)"
+        },
+        {
+          "value": 1,
+          "name": "Hour",
+          "order": 1,
+          "hint": "(1)"
+        }
+      ],
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 5,
+      "name": "torrentBaseSettings.appMinimumSeeders",
+      "label": "Apps Minimum Seeders",
+      "helpText": "Minimum seeders required by the Applications for the indexer to grab, empty is Sync profile's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 6,
+      "name": "torrentBaseSettings.seedRatio",
+      "label": "Seed Ratio",
+      "helpText": "The ratio a torrent should reach before stopping, empty uses the download client's default. Ratio should be at least 1.0 and follow the indexers rules",
+      "type": "number",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": true
+    },
+    {
+      "order": 7,
+      "name": "torrentBaseSettings.seedTime",
+      "label": "Seed Time",
+      "unit": "minutes",
+      "helpText": "The time a torrent should be seeded before stopping, empty uses the download client's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 8,
+      "name": "torrentBaseSettings.packSeedTime",
+      "label": "Pack Seed Time",
+      "unit": "minutes",
+      "helpText": "The time a pack (season or discography) torrent should be seeded before stopping, empty is app's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 9,
+      "name": "torrentBaseSettings.preferMagnetUrl",
+      "label": "Prefer Magnet URL",
+      "helpText": "When enabled, this indexer will prefer the use of magnet URLs for grabs with fallback to torrent links",
+      "value": false,
+      "type": "checkbox",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 0,
+      "name": "username",
+      "label": "Username",
+      "value": "xxx",
+      "type": "textbox",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 1,
+      "name": "password",
+      "label": "Password",
+      "value": "xxx",
+      "type": "password",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": false
+    }
+  ],
+  "implementationName": "Cardigann",
+  "implementation": "Cardigann",
+  "configContract": "CardigannSettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#sktorrent",
+  "tags": []
+}
