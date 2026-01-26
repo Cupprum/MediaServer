@@ -142,11 +142,15 @@ func TestProwlarrIndexers(t *testing.T) {
 
 	// Expected indexer names
 	eIndexers := []string{
-		// "EZTV",
+		"1337x",
+		"EZTV",
+		"Internet Archive",
 		"LimeTorrents",
 		"The Pirate Bay",
 		"YTS",
-		"1337x",
+		"RuTracker.org",
+		"Sk-CzTorrent",
+		"SkTorrent.org",
 	}
 
 	var indexers []string

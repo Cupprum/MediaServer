@@ -24,6 +24,12 @@ type Config struct {
 	QBittorrentUsername string
 	QBittorrentPassword string
 	FlaresolverrHostUrl string
+	RutrackerUsername   string
+	RutrackerPassword   string
+	SkTorrentUsername   string
+	SkTorrentPassword   string
+	SkCzTorrentUsername string
+	SkCzTorrentPassword string
 }
 
 func GetConfig() (*Config, error) {
@@ -44,8 +50,8 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_PASSWORD`")
 	}
 
-	QBittorrentHostname := os.Getenv("MEDIASERVER_QBITTORRENT_HOSTNAME")
-	if QBittorrentHostname == "" {
+	qbittorrentHostname := os.Getenv("MEDIASERVER_QBITTORRENT_HOSTNAME")
+	if qbittorrentHostname == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_QBITTORRENT_HOSTNAME`")
 	}
 
@@ -64,15 +70,51 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_FLARESOLVERR_HOST_URL`")
 	}
 
+	rutrackerUsername := os.Getenv("MEDIASERVER_PROWLARR_RUTRACKER_USERNAME")
+	if rutrackerUsername == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_RUTRACKER_USERNAME`")
+	}
+
+	rutrackerPassword := os.Getenv("MEDIASERVER_PROWLARR_RUTRACKER_PASSWORD")
+	if rutrackerPassword == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_RUTRACKER_PASSWORD`")
+	}
+
+	skTorrentUsername := os.Getenv("MEDIASERVER_PROWLARR_SKTORRENT_USERNAME")
+	if skTorrentUsername == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKTORRENT_USERNAME`")
+	}
+
+	skTorrentPassword := os.Getenv("MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD")
+	if skTorrentPassword == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD`")
+	}
+
+	skczTorrentUsername := os.Getenv("MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME")
+	if skczTorrentUsername == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME`")
+	}
+
+	skczTorrentPassword := os.Getenv("MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD")
+	if skczTorrentPassword == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD`")
+	}
+
 	return &Config{
 		Apikey:              "", // Set during login
 		Url:                 url,
 		Username:            username,
 		Password:            password,
-		QBittorrentHostname: QBittorrentHostname,
+		QBittorrentHostname: qbittorrentHostname,
 		QBittorrentUsername: qbittorrentUsername,
 		QBittorrentPassword: qbittorrentPassword,
 		FlaresolverrHostUrl: flaresolverrHostUrl,
+		RutrackerUsername:   rutrackerUsername,
+		RutrackerPassword:   rutrackerPassword,
+		SkTorrentUsername:   skTorrentUsername,
+		SkTorrentPassword:   skTorrentPassword,
+		SkCzTorrentUsername: skczTorrentUsername,
+		SkCzTorrentPassword: skczTorrentPassword,
 	}, nil
 }
 
@@ -211,21 +253,42 @@ func (c *Config) setIndexerProxy() error {
 	return nil
 }
 
-func (c *Config) setIndexer(filename, name string) error {
-	log.Printf("-- Adding indexer: %v...\n", name)
+func (c *Config) setIndexer(name string, body any) error {
+	h := map[string]string{"X-Api-Key": c.Apikey}
+	_, err := utils.Request("POST", c.Url+"/api/v1/indexer", body, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to set indexer %v: %w", name, err)
+	}
+
+	return nil
+}
+
+func (c *Config) setPublicIndexer(filename, name string) error {
+	log.Printf("-- Adding public indexer: %v...\n", name)
 
 	b, err := utils.LoadJSONFile(reqBodies, filename)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
-	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = utils.Request("POST", c.Url+"/api/v1/indexer", b, h, nil)
+	err = c.setIndexer(name, b)
+	return err
+}
+
+func (c *Config) setPrivateIndexer(filename, name, username, password string) error {
+	log.Printf("-- Adding private indexer: %v...\n", name)
+
+	b, err := utils.LoadJSONFile(reqBodies, filename)
 	if err != nil {
-		return fmt.Errorf("failed to set indexer %v: %w", name, err)
+		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
-	return nil
+	// Update indexer config
+	setField(b, "username", username)
+	setField(b, "password", password)
+
+	err = c.setIndexer(name, b)
+	return err
 }
 
 func Configure() error {
@@ -260,19 +323,35 @@ func Configure() error {
 	if err = c.setIndexerProxy(); err != nil {
 		return err
 	}
-	if err = c.setIndexer("pirate_bay_indexer.json", "Pirate Bay"); err != nil {
+
+	if err = c.setPublicIndexer("1337x_indexer.json", "1337x"); err != nil {
 		return err
 	}
-	// if err = c.setIndexer("eztv_indexer.json", "EZTV"); err != nil {
-	// 	return err
-	// }
-	if err = c.setIndexer("yts_indexer.json", "YTS"); err != nil {
+	if err = c.setPublicIndexer("eztv_indexer.json", "EZTV"); err != nil {
 		return err
 	}
-	if err = c.setIndexer("limetorrents_indexer.json", "Limetorrents"); err != nil {
+	if err = c.setPublicIndexer("internetarchive_indexer.json", "Internet Archive"); err != nil {
 		return err
 	}
-	if err = c.setIndexer("1337x_indexer.json", "1337x"); err != nil {
+	if err = c.setPublicIndexer("limetorrents_indexer.json", "LimeTorrents"); err != nil {
+		return err
+	}
+	if err = c.setPublicIndexer("pirate_bay_indexer.json", "The Pirate Bay"); err != nil {
+		return err
+	}
+	if err = c.setPublicIndexer("yts_indexer.json", "YTS"); err != nil {
+		return err
+	}
+	err = c.setPrivateIndexer("rutracker_indexer.json", "RuTracker.org", c.RutrackerUsername, c.RutrackerPassword)
+	if err != nil {
+		return err
+	}
+	err = c.setPrivateIndexer("skcztorrent_indexer.json", "Sk-CzTorrent", c.SkCzTorrentUsername, c.SkCzTorrentPassword)
+	if err != nil {
+		return err
+	}
+	err = c.setPrivateIndexer("sktorrent_indexer.json", "SkTorrent.org", c.SkTorrentUsername, c.SkTorrentPassword)
+	if err != nil {
 		return err
 	}
 
