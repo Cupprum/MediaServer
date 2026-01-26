@@ -1,0 +1,340 @@
+{
+  "indexerUrls": [
+    "https://archive.org/"
+  ],
+  "legacyUrls": [],
+  "definitionName": "internetarchive",
+  "description": "Internet Archive is a non-profit digital library offering free universal access to books, movies & music, as well as 406 billion archived web pages",
+  "language": "en-US",
+  "encoding": "Unicode (UTF-8)",
+  "enable": true,
+  "redirect": false,
+  "supportsRss": true,
+  "supportsSearch": true,
+  "supportsRedirect": false,
+  "supportsPagination": false,
+  "appProfileId": 1,
+  "protocol": "torrent",
+  "privacy": "public",
+  "capabilities": {
+    "limitsMax": 100,
+    "limitsDefault": 100,
+    "categories": [
+      {
+        "id": 3000,
+        "name": "Audio",
+        "subCategories": []
+      },
+      {
+        "id": 127296,
+        "name": "audio",
+        "subCategories": []
+      },
+      {
+        "id": 154563,
+        "name": "etree",
+        "subCategories": []
+      },
+      {
+        "id": 2000,
+        "name": "Movies",
+        "subCategories": []
+      },
+      {
+        "id": 112696,
+        "name": "movies",
+        "subCategories": []
+      },
+      {
+        "id": 5000,
+        "name": "TV",
+        "subCategories": []
+      },
+      {
+        "id": 112696,
+        "name": "movies",
+        "subCategories": []
+      },
+      {
+        "id": 8000,
+        "name": "Other",
+        "subCategories": [
+          {
+            "id": 8010,
+            "name": "Other/Misc",
+            "subCategories": []
+          }
+        ]
+      },
+      {
+        "id": 130222,
+        "name": "image",
+        "subCategories": []
+      },
+      {
+        "id": 7000,
+        "name": "Books",
+        "subCategories": []
+      },
+      {
+        "id": 130440,
+        "name": "texts",
+        "subCategories": []
+      },
+      {
+        "id": 4000,
+        "name": "PC",
+        "subCategories": []
+      },
+      {
+        "id": 133225,
+        "name": "software",
+        "subCategories": []
+      },
+      {
+        "id": 133994,
+        "name": "web",
+        "subCategories": []
+      },
+      {
+        "id": 114112,
+        "name": "collection",
+        "subCategories": []
+      },
+      {
+        "id": 108394,
+        "name": "account",
+        "subCategories": []
+      },
+      {
+        "id": 131905,
+        "name": "data",
+        "subCategories": []
+      },
+      {
+        "id": 138096,
+        "name": "other",
+        "subCategories": []
+      }
+    ],
+    "supportsRawSearch": false,
+    "searchParams": [
+      "q",
+      "q"
+    ],
+    "tvSearchParams": [
+      "q",
+      "season",
+      "ep"
+    ],
+    "movieSearchParams": [
+      "q"
+    ],
+    "musicSearchParams": [
+      "q"
+    ],
+    "bookSearchParams": [
+      "q"
+    ]
+  },
+  "priority": 25,
+  "downloadClientId": 0,
+  "added": "2026-01-26T10:51:40Z",
+  "sortName": "internet archive",
+  "name": "Internet Archive",
+  "fields": [
+    {
+      "order": 0,
+      "name": "definitionFile",
+      "value": "internetarchive",
+      "type": "textbox",
+      "advanced": false,
+      "hidden": "hidden",
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 1,
+      "name": "baseUrl",
+      "label": "Base Url",
+      "helpText": "Select which base url Prowlarr will use for requests to the site",
+      "type": "select",
+      "advanced": false,
+      "selectOptionsProviderAction": "getUrls",
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 2,
+      "name": "baseSettings.queryLimit",
+      "label": "Query Limit",
+      "helpText": "The number of max queries as specified by the respective unit that Prowlarr will allow to the site",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 3,
+      "name": "baseSettings.grabLimit",
+      "label": "Grab Limit",
+      "helpText": "The number of max grabs as specified by the respective unit that Prowlarr will allow to the site",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 4,
+      "name": "baseSettings.limitsUnit",
+      "label": "Limits Unit",
+      "helpText": "The unit of time for counting limits per indexer",
+      "value": 0,
+      "type": "select",
+      "advanced": true,
+      "selectOptions": [
+        {
+          "value": 0,
+          "name": "Day",
+          "order": 0,
+          "hint": "(0)"
+        },
+        {
+          "value": 1,
+          "name": "Hour",
+          "order": 1,
+          "hint": "(1)"
+        }
+      ],
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 5,
+      "name": "torrentBaseSettings.appMinimumSeeders",
+      "label": "Apps Minimum Seeders",
+      "helpText": "Minimum seeders required by the Applications for the indexer to grab, empty is Sync profile's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 6,
+      "name": "torrentBaseSettings.seedRatio",
+      "label": "Seed Ratio",
+      "helpText": "The ratio a torrent should reach before stopping, empty uses the download client's default. Ratio should be at least 1.0 and follow the indexers rules",
+      "type": "number",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": true
+    },
+    {
+      "order": 7,
+      "name": "torrentBaseSettings.seedTime",
+      "label": "Seed Time",
+      "unit": "minutes",
+      "helpText": "The time a torrent should be seeded before stopping, empty uses the download client's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 8,
+      "name": "torrentBaseSettings.packSeedTime",
+      "label": "Pack Seed Time",
+      "unit": "minutes",
+      "helpText": "The time a pack (season or discography) torrent should be seeded before stopping, empty is app's default",
+      "type": "number",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 9,
+      "name": "torrentBaseSettings.preferMagnetUrl",
+      "label": "Prefer Magnet URL",
+      "helpText": "When enabled, this indexer will prefer the use of magnet URLs for grabs with fallback to torrent links",
+      "value": false,
+      "type": "checkbox",
+      "advanced": true,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 0,
+      "name": "titleOnly",
+      "label": "Search only in title",
+      "value": true,
+      "type": "checkbox",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 1,
+      "name": "noMagnet",
+      "label": "Download using .torrent only. No Magnets.",
+      "value": false,
+      "type": "checkbox",
+      "advanced": false,
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 2,
+      "name": "sort",
+      "label": "Sort requested from site",
+      "value": 2,
+      "type": "select",
+      "advanced": false,
+      "selectOptions": [
+        {
+          "value": 0,
+          "name": "downloads",
+          "order": 0
+        },
+        {
+          "value": 1,
+          "name": "size",
+          "order": 0
+        },
+        {
+          "value": 2,
+          "name": "created",
+          "order": 0
+        }
+      ],
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 3,
+      "name": "type",
+      "label": "Order requested from site",
+      "value": 1,
+      "type": "select",
+      "advanced": false,
+      "selectOptions": [
+        {
+          "value": 0,
+          "name": "asc",
+          "order": 0
+        },
+        {
+          "value": 1,
+          "name": "desc",
+          "order": 0
+        }
+      ],
+      "privacy": "normal",
+      "isFloat": false
+    }
+  ],
+  "implementationName": "Cardigann",
+  "implementation": "Cardigann",
+  "configContract": "CardigannSettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#internetarchive",
+  "tags": []
+}
