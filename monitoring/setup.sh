@@ -62,13 +62,13 @@ verify_namespace() {
 }
 
 verify_folders() {
-    log_info "Ensuring necessary folders exist..."
-    
     local folder="$MEDIASERVER_CONFIG_DIR/prometheus"
 
     if [ ! -d "$folder" ]; then
-        log_info "Creating folder: $folder"
+        log_info "Creating config folder: $folder..."
         mkdir -p "$folder"
+    else
+        log_info "Config folder already exist..."
     fi
 }
 
