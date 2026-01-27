@@ -16,20 +16,29 @@ import (
 var reqBodies embed.FS
 
 type Config struct {
-	Apikey              string // Set during login
-	Url                 string
-	Username            string
-	Password            string
-	QBittorrentHostname string
-	QBittorrentUsername string
-	QBittorrentPassword string
-	FlaresolverrHostUrl string
-	RutrackerUsername   string
-	RutrackerPassword   string
-	SkTorrentUsername   string
-	SkTorrentPassword   string
-	SkCzTorrentUsername string
-	SkCzTorrentPassword string
+	Apikey                string // Set during login
+	Url                   string
+	Username              string
+	Password              string
+	QBittorrentHostname   string
+	QBittorrentUsername   string
+	QBittorrentPassword   string
+	FlaresolverrHostUrl   string
+	Deploy1337x           bool
+	DeployEztv            bool
+	DeployInternetArchive bool
+	DeployLimetorrents    bool
+	DeployPirateBay       bool
+	DeployYts             bool
+	DeployRutracker       bool
+	RutrackerUsername     string
+	RutrackerPassword     string
+	DeploySkTorrent       bool
+	SkTorrentUsername     string
+	SkTorrentPassword     string
+	DeploySkczTorrent     bool
+	SkCzTorrentUsername   string
+	SkCzTorrentPassword   string
 }
 
 func GetConfig() (*Config, error) {
@@ -70,6 +79,14 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_FLARESOLVERR_HOST_URL`")
 	}
 
+	deploy1337x := os.Getenv("MEDIASERVER_PROWLARR_1337X_ENABLED") == "true"
+	deployEztv := os.Getenv("MEDIASERVER_PROWLARR_EZTV_ENABLED") == "true"
+	deployInternetArchive := os.Getenv("MEDIASERVER_PROWLARR_INTERNETARCHIVE_ENABLED") == "true"
+	deployLimetorrents := os.Getenv("MEDIASERVER_PROWLARR_LIMETORRENTS_ENABLED") == "true"
+	deployPirateBay := os.Getenv("MEDIASERVER_PROWLARR_PIRATEBAY_ENABLED") == "true"
+	deployYts := os.Getenv("MEDIASERVER_PROWLARR_YTS_ENABLED") == "true"
+	deployRutracker := os.Getenv("MEDIASERVER_PROWLARR_RUTRACKER_ENABLED") == "true"
+
 	rutrackerUsername := os.Getenv("MEDIASERVER_PROWLARR_RUTRACKER_USERNAME")
 	if rutrackerUsername == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_RUTRACKER_USERNAME`")
@@ -80,41 +97,50 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_RUTRACKER_PASSWORD`")
 	}
 
+	deploySkTorrent := os.Getenv("MEDIASERVER_PROWLARR_SKTORRENT_ENABLED") == "true"
 	skTorrentUsername := os.Getenv("MEDIASERVER_PROWLARR_SKTORRENT_USERNAME")
 	if skTorrentUsername == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKTORRENT_USERNAME`")
 	}
-
 	skTorrentPassword := os.Getenv("MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD")
 	if skTorrentPassword == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD`")
 	}
 
+	deploySkczTorrent := os.Getenv("MEDIASERVER_PROWLARR_SKCZTORRENT_ENABLED") == "true"
 	skczTorrentUsername := os.Getenv("MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME")
 	if skczTorrentUsername == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME`")
 	}
-
 	skczTorrentPassword := os.Getenv("MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD")
 	if skczTorrentPassword == "" {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD`")
 	}
 
 	return &Config{
-		Apikey:              "", // Set during login
-		Url:                 url,
-		Username:            username,
-		Password:            password,
-		QBittorrentHostname: qbittorrentHostname,
-		QBittorrentUsername: qbittorrentUsername,
-		QBittorrentPassword: qbittorrentPassword,
-		FlaresolverrHostUrl: flaresolverrHostUrl,
-		RutrackerUsername:   rutrackerUsername,
-		RutrackerPassword:   rutrackerPassword,
-		SkTorrentUsername:   skTorrentUsername,
-		SkTorrentPassword:   skTorrentPassword,
-		SkCzTorrentUsername: skczTorrentUsername,
-		SkCzTorrentPassword: skczTorrentPassword,
+		Apikey:                "", // Set during login
+		Url:                   url,
+		Username:              username,
+		Password:              password,
+		QBittorrentHostname:   qbittorrentHostname,
+		QBittorrentUsername:   qbittorrentUsername,
+		QBittorrentPassword:   qbittorrentPassword,
+		FlaresolverrHostUrl:   flaresolverrHostUrl,
+		Deploy1337x:           deploy1337x,
+		DeployEztv:            deployEztv,
+		DeployInternetArchive: deployInternetArchive,
+		DeployLimetorrents:    deployLimetorrents,
+		DeployPirateBay:       deployPirateBay,
+		DeployYts:             deployYts,
+		DeployRutracker:       deployRutracker,
+		RutrackerUsername:     rutrackerUsername,
+		RutrackerPassword:     rutrackerPassword,
+		DeploySkTorrent:       deploySkTorrent,
+		SkTorrentUsername:     skTorrentUsername,
+		SkTorrentPassword:     skTorrentPassword,
+		DeploySkczTorrent:     deploySkczTorrent,
+		SkCzTorrentUsername:   skczTorrentUsername,
+		SkCzTorrentPassword:   skczTorrentPassword,
 	}, nil
 }
 
@@ -324,35 +350,53 @@ func Configure() error {
 		return err
 	}
 
-	if err = c.setPublicIndexer("1337x_indexer.json", "1337x"); err != nil {
-		return err
+	if c.Deploy1337x {
+		if err = c.setPublicIndexer("1337x_indexer.json", "1337x"); err != nil {
+			return err
+		}
 	}
-	if err = c.setPublicIndexer("eztv_indexer.json", "EZTV"); err != nil {
-		return err
+	if c.DeployEztv {
+		if err = c.setPublicIndexer("eztv_indexer.json", "EZTV"); err != nil {
+			return err
+		}
 	}
-	if err = c.setPublicIndexer("internetarchive_indexer.json", "Internet Archive"); err != nil {
-		return err
+	if c.DeployInternetArchive {
+		if err = c.setPublicIndexer("internetarchive_indexer.json", "Internet Archive"); err != nil {
+			return err
+		}
 	}
-	if err = c.setPublicIndexer("limetorrents_indexer.json", "LimeTorrents"); err != nil {
-		return err
+	if c.DeployLimetorrents {
+		if err = c.setPublicIndexer("limetorrents_indexer.json", "LimeTorrents"); err != nil {
+			return err
+		}
 	}
-	if err = c.setPublicIndexer("pirate_bay_indexer.json", "The Pirate Bay"); err != nil {
-		return err
+	if c.DeployPirateBay {
+		if err = c.setPublicIndexer("pirate_bay_indexer.json", "The Pirate Bay"); err != nil {
+			return err
+		}
 	}
-	if err = c.setPublicIndexer("yts_indexer.json", "YTS"); err != nil {
-		return err
+	if c.DeployYts {
+		if err = c.setPublicIndexer("yts_indexer.json", "YTS"); err != nil {
+			return err
+		}
 	}
-	err = c.setPrivateIndexer("rutracker_indexer.json", "RuTracker.org", c.RutrackerUsername, c.RutrackerPassword)
-	if err != nil {
-		return err
+	if c.DeployRutracker {
+		err = c.setPrivateIndexer("rutracker_indexer.json", "RuTracker.org", c.RutrackerUsername, c.RutrackerPassword)
+		if err != nil {
+			return err
+		}
 	}
-	err = c.setPrivateIndexer("skcztorrent_indexer.json", "Sk-CzTorrent", c.SkCzTorrentUsername, c.SkCzTorrentPassword)
-	if err != nil {
-		return err
+	if c.DeploySkczTorrent {
+		err = c.setPrivateIndexer("skcztorrent_indexer.json", "Sk-CzTorrent", c.SkCzTorrentUsername, c.SkCzTorrentPassword)
+		if err != nil {
+			return err
+		}
 	}
-	err = c.setPrivateIndexer("sktorrent_indexer.json", "SkTorrent.org", c.SkTorrentUsername, c.SkTorrentPassword)
-	if err != nil {
-		return err
+	if c.DeploySkTorrent {
+		err = c.setPrivateIndexer("sktorrent_indexer.json", "SkTorrent.org", c.SkTorrentUsername, c.SkTorrentPassword)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Println("- prowlarr configured successfully!")
