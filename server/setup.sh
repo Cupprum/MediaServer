@@ -28,11 +28,12 @@ show_help() {
 Usage: $(basename "$0") [MODE]
 
 Modes:
-    install                 Install all ArgoCD applications
-    configure               Configure all services after installation
-    install_and_configure   Install applications and configure services
-    delete                  Remove all ArgoCD applications
-    cleanup                 Remove all configuration directories
+    install_services        Install all ArgoCD applications
+    configure_services      Configure all services after installation
+    install                 Install applications and configure services
+    delete_services         Remove all ArgoCD applications
+    cleanup_services        Remove all configuration directories
+    delete                  Remove all ArgoCD application and all configs
     help, --help, -h        Display this help message
 
 Applications managed:
@@ -42,8 +43,8 @@ Applications managed:
     - Flaresolverr
 
 Example:
-    $(basename "$0") install_and_configure  # Install and configure all applications
-    $(basename "$0") delete                 # Remove all applications
+    $(basename "$0") install  # Install and configure all applications
+    $(basename "$0") delete   # Remove all applications and their configs
 EOF
 }
 
@@ -54,7 +55,7 @@ load_env_file() {
     set +a
 }
 
-make_sure_folders_exist() {
+verify_folders() {
     log_info "Ensuring necessary folders exist..."
 
     if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
@@ -82,7 +83,7 @@ make_sure_folders_exist() {
     done
 }
 
-make_sure_namespace_exists() {
+verify_namespace() {
     local namespace="server"
 
     if ! kubectl get namespace "$namespace" &> /dev/null; then
@@ -119,13 +120,13 @@ wait_for_jellyfin() {
     exit 1
 }
 
-install() {
+install_services() {
     log_info "Installing ArgoCD applications..."
 
     load_env_file
 
-    make_sure_folders_exist
-    make_sure_namespace_exists
+    verify_folders
+    verify_namespace
     
     for service in "${SERVICES[@]}"; do
         log_info "Installing $service..."
@@ -138,7 +139,7 @@ install() {
     log_info "All applications installed successfully"
 }
 
-configure() {
+configure_services() {
     log_info "Waiting for services to become ready..."
 
     load_env_file
@@ -172,12 +173,7 @@ configure() {
     cd ..
 }
 
-install_and_configure_apps() {
-    install
-    configure
-}
-
-delete_apps() {
+delete_services() {
     log_info "Removing ArgoCD applications..."
     
     for service in "${SERVICES[@]}"; do
@@ -191,7 +187,7 @@ delete_apps() {
     log_info "All applications removed successfully"
 }
 
-cleanup() {
+cleanup_services() {
     log_info "Cleaning up config folders..."
 
     load_env_file
@@ -219,20 +215,25 @@ main() {
     verify_kube_config
 
     case "$1" in
+        "install_services")
+            install_services
+            ;;
+        "configure_services")
+            configure_services
+            ;;
         "install")
-            install
+            install_services
+            configure_services
             ;;
-        "configure")
-            configure
+        "delete_services")
+            delete_services
             ;;
-        "install_and_configure")
-            install_and_configure_apps
+        "cleanup_services")
+            cleanup_services
             ;;
         "delete")
-            delete_apps
-            ;;
-        "cleanup")
-            cleanup
+            delete_services
+            cleanup_services
             ;;
         "help"|"--help"|"-h")
             show_help
