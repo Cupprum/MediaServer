@@ -5,11 +5,7 @@ set -u
 set -o pipefail
 
 ###############################################################################
-# ArgoCD App for Monitoring Management Script
-#
-# This script manages the ArgoCD application for the monitoring stack
-#
-# Usage: ./setup.sh [install|delete]
+# Monitoring Management Script
 ###############################################################################
 
 # Source common utilities
@@ -26,28 +22,57 @@ Usage: $(basename "$0") [MODE]
 Modes:
     install     Install monitoring ArgoCD application
     delete      Remove monitoring ArgoCD application
-
-Environment variables required:
-    MEDIASERVER_GRAFANA_USERNAME    Username for Grafana admin
-    MEDIASERVER_GRAFANA_PASSWORD    Password for Grafana admin
+    help        Display this help message
 
 Example:
-    $(basename "$0") install    # Install monitoring application
-    $(basename "$0") delete     # Remove monitoring application
+    $(basename "$0") install
+    $(basename "$0") delete
 EOF
 }
 
-install_monitoring() {
-    log_info "Source environment variables..."
-    set -a # automatically export all variables
+load_env_file() {
+    log_info "Loading environment variables..."
+    set -a
     source "$(dirname "${BASH_SOURCE[0]}")/../.env"
     set +a
-    if [ -z "$MEDIASERVER_GRAFANA_USERNAME" ] || [ -z "$MEDIASERVER_GRAFANA_PASSWORD" ]; then
-        log_error "MEDIASERVER_GRAFANA_USERNAME and MEDIASERVER_GRAFANA_PASSWORD must be present in the environment"
+
+    if [ -z "${MEDIASERVER_GRAFANA_USERNAME:-}" ] || [ -z "${MEDIASERVER_GRAFANA_PASSWORD:-}" ]; then
+        log_error "MEDIASERVER_GRAFANA_USERNAME and MEDIASERVER_GRAFANA_PASSWORD must be present in the .env file"
         exit 1
     fi
-    log_info "Environment variables loaded successfully"
 
+    if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
+        log_error "MEDIASERVER_CONFIG_DIR is not set in the .env file"
+        exit 1
+    fi
+}
+
+verify_namespace() {
+    local namespace="monitoring"
+
+    if ! kubectl get namespace "$namespace" &> /dev/null; then
+        log_info "Creating namespace: $namespace..."
+        kubectl create namespace "$namespace" || {
+            log_error "Failed to create namespace: $namespace"
+            exit 1
+        }
+    else
+        log_info "Namespace $namespace already exists"
+    fi
+}
+
+verify_folders() {
+    log_info "Ensuring necessary folders exist..."
+    
+    local folder="$MEDIASERVER_CONFIG_DIR/config/prometheus"
+
+    if [ ! -d "$folder" ]; then
+        log_info "Creating folder: $folder"
+        mkdir -p "$folder"
+    fi
+}
+
+create_secrets() {
     log_info "Checking if grafana-admin-credentials secret already exists..."
     if kubectl get secret grafana-admin-credentials --namespace monitoring &>/dev/null; then
         log_info "grafana-admin-credentials secret already exists, skipping creation"
@@ -57,12 +82,21 @@ install_monitoring() {
             --namespace monitoring \
             --from-literal=admin-user="${MEDIASERVER_GRAFANA_USERNAME}" \
             --from-literal=admin-password="${MEDIASERVER_GRAFANA_PASSWORD}" \
-            --dry-run=client -o yaml | kubectl apply  -f - || {
+            --dry-run=client -o yaml | kubectl apply -f - || {
                 log_error "Failed to create grafana-admin-credentials secret"
                 exit 1
         }
         log_info "grafana-admin-credentials secret was created successfully"
     fi
+}
+
+install_monitoring() {
+    log_info "Starting Monitoring installation..."
+
+    load_env_file
+    verify_namespace
+    verify_folders
+    create_secrets
 
     log_info "Installing ArgoCD application for monitoring..."
     kubectl apply --filename ./monitoring_app.yaml || {
@@ -78,7 +112,7 @@ delete_monitoring() {
         log_error "Failed to remove ArgoCD application for monitoring"
         exit 1
     }
-    log_info "ArgoCD application for monitoring was removed successfully"
+        log_info "ArgoCD application for monitoring was removed successfully"
 
     log_info "Cleaning up grafana-admin-credentials secret..."
     kubectl delete secret grafana-admin-credentials --namespace monitoring || {
