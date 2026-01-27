@@ -140,27 +140,14 @@ func TestProwlarrIndexers(t *testing.T) {
 	}
 	json.Unmarshal(respBody, &indexerDetails)
 
-	// Expected indexer names
-	eIndexers := []string{
-		"1337x",
-		"EZTV",
-		"Internet Archive",
-		"LimeTorrents",
-		"The Pirate Bay",
-		"YTS",
-		"RuTracker.org",
-		"Sk-CzTorrent",
-		"SkTorrent.org",
-	}
-
 	var indexers []string
 	for _, indexer := range indexerDetails {
 		indexers = append(indexers, indexer.Name)
 	}
 
-	for _, ei := range eIndexers {
-		if !slices.Contains(indexers, ei) {
-			t.Errorf("Expected indexer '%s' not found in actual indexers", ei)
+	for _, i := range c.Indexers {
+		if i.Enabled && !slices.Contains(indexers, i.Name) {
+			t.Errorf("Expected indexer '%s' not found in actual indexers", i.Name)
 		}
 	}
 }
