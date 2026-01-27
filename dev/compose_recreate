@@ -19,7 +19,7 @@ if [ $# -eq 0 ]; then
 elif [ $# -eq 1 ]; then
     echo "- Reconfiguring $1..."
     echo ""
-    sudo rm -rf "../data/config/$1/*"
+    sudo rm -rf ../data/config/$1/*
     docker compose up -d --force-recreate "$1"
 fi
 
