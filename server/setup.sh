@@ -55,22 +55,27 @@ load_env_file() {
     set +a
 }
 
-verify_folders() {
-    log_info "Ensuring necessary folders exist..."
-
+get_service_dirs() {
     if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
         log_error "MEDIASERVER_CONFIG_DIR is not set. Please set it in the .env file."
         exit 1
     fi
 
-    # TODO: the list of folder should be stored centrally for creation and deletion
-    local folders=(
+    local dirs=(
         "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
         "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
         "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
         "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
     )
+
+    echo "${dirs[@]}"
+}
+
+verify_folders() {
+    log_info "Ensuring necessary folders exist..."
+
+    local folders=($(get_service_dirs))
 
     for folder in "${folders[@]}"; do
         if [ ! -d "$folder" ]; then
@@ -192,11 +197,14 @@ cleanup_services() {
 
     load_env_file
 
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
-    sudo rm -rf "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
+    local folders=($(get_service_dirs))
+
+    for folder in "${folders[@]}"; do
+        if [ -d "$folder" ]; then
+            log_info "Removing: $folder"
+            sudo rm -rf "$folder"
+        fi
+    done
 
     log_info "Cleanup completed"
 }
