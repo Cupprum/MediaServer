@@ -64,7 +64,7 @@ verify_namespace() {
 verify_folders() {
     log_info "Ensuring necessary folders exist..."
     
-    local folder="$MEDIASERVER_CONFIG_DIR/config/prometheus"
+    local folder="$MEDIASERVER_CONFIG_DIR/prometheus"
 
     if [ ! -d "$folder" ]; then
         log_info "Creating folder: $folder"
