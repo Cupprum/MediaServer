@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"MediaServer/server/configuration/utils"
 )
@@ -15,10 +16,12 @@ import (
 var reqBodies embed.FS
 
 type Config struct {
-	AccessToken string // Set during login
-	Url         string
-	Username    string
-	Password    string
+	AccessToken           string // Set during login
+	Url                   string
+	Username              string
+	Password              string
+	OpenSubtitlesUsername string
+	OpenSubtitlesPassword string
 }
 
 func GetConfig() (*Config, error) {
@@ -39,12 +42,24 @@ func GetConfig() (*Config, error) {
 		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_PASSWORD`")
 	}
 
+	openSubtitlesUsername := os.Getenv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_USERNAME")
+	if openSubtitlesUsername == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_OPENSUBTITLES_USERNAME`")
+	}
+
+	openSubtitlesPassword := os.Getenv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_PASSWORD")
+	if openSubtitlesPassword == "" {
+		return nil, fmt.Errorf("missing env var: `MEDIASERVER_JELLYFIN_OPENSUBTITLES_PASSWORD`")
+	}
+
 	// Initial AccessToken without token value -> More details https://gist.github.com/nielsvanvelzen/ea047d9028f676185832e51ffaf12a6f
 	return &Config{
-		AccessToken: `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`,
-		Url:         url,
-		Username:    username,
-		Password:    password,
+		AccessToken:           `MediaBrowser Client="Jellyfin", Device="TestScript", DeviceId="1", Version="10.11.0"`,
+		Url:                   url,
+		Username:              username,
+		Password:              password,
+		OpenSubtitlesUsername: openSubtitlesUsername,
+		OpenSubtitlesPassword: openSubtitlesPassword,
 	}, nil
 }
 
@@ -193,6 +208,112 @@ func (c *Config) completeStartup() error {
 	return nil
 }
 
+func (c *Config) restart() error {
+	log.Println("-- Restarting jellyfin server...")
+	h := map[string]string{"Authorization": c.AccessToken}
+	_, err := utils.Request("POST", c.Url+"/System/Restart", nil, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to restart jellyfin server: %w", err)
+	}
+	return nil
+}
+
+func (c *Config) GetAppStatus(name string) (string, error) {
+	log.Println("-- Getting app status...")
+
+	h := map[string]string{"Authorization": c.AccessToken}
+
+	rb, err := utils.Request("GET", c.Url+"/Plugins", nil, h, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to get app status: %w", err)
+	}
+
+	var r []struct {
+		Name   string `json:"Name"`
+		Status string `json:"Status"`
+	}
+	if err := json.Unmarshal(rb, &r); err != nil {
+		return "", fmt.Errorf("failed to decode app status response: %w", err)
+	}
+
+	for _, item := range r {
+		if item.Name == name {
+			return item.Status, nil
+		}
+	}
+
+	return "", fmt.Errorf("app %s not found", name)
+}
+
+func (c *Config) setupOpenSubtitlesApp() error {
+	log.Println("-- Installing OpenSubtitles app...")
+
+	h := map[string]string{"Authorization": c.AccessToken}
+
+	appId := "4b9ed42f-5185-48b5-9803-6ff2989014c4"
+	appVersion := "23.0.0.0"
+
+	// Install OpenSubtitles app
+	p := fmt.Sprintf(
+		"/Packages/Installed/Open%%20Subtitles?assemblyGuid=%s&version=%s",
+		strings.ReplaceAll(appId, "-", ""),
+		appVersion,
+	)
+	_, err := utils.Request("POST", c.Url+p, nil, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to install the OpenSubtitles app: %w", err)
+	}
+
+	// Note: i did not find a way to verify that its installed
+	log.Println("-- Waiting 60s for the app to be installed...")
+	time.Sleep(60 * time.Second)
+
+	// After installation, we need to restart the jellyfin server
+	if err := c.restart(); err != nil {
+		return fmt.Errorf("failed to restart server after installing OpenSubtitles app: %w", err)
+	}
+
+	vb := struct {
+		Username string `json:"Username"`
+		Password string `json:"Password"`
+	}{
+		Username: c.OpenSubtitlesUsername,
+		Password: c.OpenSubtitlesPassword,
+	}
+
+	log.Println("-- Validating Open Subtitles credentials...")
+	for i := 0; i < 5; i++ {
+		time.Sleep(5 * time.Second)
+		_, err = utils.Request("POST", c.Url+"/Jellyfin.Plugin.OpenSubtitles/ValidateLoginInfo", vb, h, nil)
+		if err != nil {
+			if strings.Contains(err.Error(), "503 Service Unavailable") {
+				log.Println("--- Service unavailable; sleeping for 5 Seconds")
+				continue
+			}
+			return fmt.Errorf("failed to validate OpenSubtitles credentials: %w", err)
+		}
+		break
+	}
+
+	log.Println("-- Configuring Open Subtitles App credentials...")
+	p = fmt.Sprintf("/Plugins/%s/Configuration", appId)
+	cb := struct {
+		Username           string `json:"Username"`
+		Password           string `json:"Password"`
+		CredentialsInvalid bool   `json:"CredentialsInvalid"`
+	}{
+		Username:           c.OpenSubtitlesUsername,
+		Password:           c.OpenSubtitlesPassword,
+		CredentialsInvalid: false,
+	}
+	_, err = utils.Request("POST", c.Url+p, cb, h, nil)
+	if err != nil {
+		return fmt.Errorf("failed to set credentials for OpenSubtitles app: %w", err)
+	}
+
+	return nil
+}
+
 func Configure() error {
 	log.Println("- Starting jellyfin configuration...")
 
@@ -234,6 +355,12 @@ func Configure() error {
 		return err
 	}
 	if err = c.completeStartup(); err != nil {
+		return err
+	}
+	if err = c.LoadAccessToken(); err != nil {
+		return fmt.Errorf("failed to login after configuration: %w", err)
+	}
+	if err = c.setupOpenSubtitlesApp(); err != nil {
 		return err
 	}
 
