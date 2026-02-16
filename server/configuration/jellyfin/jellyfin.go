@@ -273,6 +273,9 @@ func (c *Config) setupOpenSubtitlesApp() error {
 		return fmt.Errorf("failed to restart server after installing OpenSubtitles app: %w", err)
 	}
 
+	log.Println("-- Waiting for service to start again...")
+	time.Sleep(10 * time.Second)
+
 	vb := struct {
 		Username string `json:"Username"`
 		Password string `json:"Password"`
@@ -283,11 +286,11 @@ func (c *Config) setupOpenSubtitlesApp() error {
 
 	log.Println("-- Validating Open Subtitles credentials...")
 	for i := 0; i < 5; i++ {
-		time.Sleep(5 * time.Second)
 		_, err = utils.Request("POST", c.Url+"/Jellyfin.Plugin.OpenSubtitles/ValidateLoginInfo", vb, h, nil)
 		if err != nil {
 			if strings.Contains(err.Error(), "503 Service Unavailable") {
 				log.Println("--- Service unavailable; sleeping for 5 Seconds")
+				time.Sleep(5 * time.Second)
 				continue
 			}
 			return fmt.Errorf("failed to validate OpenSubtitles credentials: %w", err)
