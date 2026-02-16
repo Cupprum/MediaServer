@@ -202,7 +202,7 @@ cleanup_services() {
     for folder in "${folders[@]}"; do
         if [ -d "$folder" ]; then
             log_info "Removing: $folder"
-            sudo rm -rf "$folder"
+            sudo rm -rf "$folder" || ( sleep 5 && sudo rm -rf "$folder" )
         fi
     done
 
