@@ -273,8 +273,8 @@ func (c *Config) setupOpenSubtitlesApp() error {
 		return fmt.Errorf("failed to restart server after installing OpenSubtitles app: %w", err)
 	}
 
-	log.Println("-- Waiting for service to start again...")
-	time.Sleep(10 * time.Second)
+	log.Println("-- Waiting 30s for service to start again...")
+	time.Sleep(30 * time.Second)
 
 	vb := struct {
 		Username string `json:"Username"`
