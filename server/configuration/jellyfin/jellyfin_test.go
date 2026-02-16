@@ -106,3 +106,19 @@ func TestJellyfinLibraryShouldContainSeries(t *testing.T) {
 		t.Error("No series found in Jellyfin library")
 	}
 }
+
+func TestJellyfinOpensubtitlesShouldBeInstalled(t *testing.T) {
+	c, err := config()
+	if err != nil {
+		t.Error(err)
+	}
+
+	status, err := c.GetAppStatus("Open Subtitles")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if status != "Active" {
+		t.Error("OpenSubtitles app is not active")
+	}
+}
