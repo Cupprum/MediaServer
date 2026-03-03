@@ -32,7 +32,7 @@ services:
       - "8080:8080"
     volumes:
       - "/home/x42/PP/MediaServer/data/config/qbittorrent:/config:z"
-      - "/home/x42/PP/MediaServer/data/media/movies:/downloads:z"
+      - "/home/x42/PP/MediaServer/data/media:/downloads:z"
     
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
