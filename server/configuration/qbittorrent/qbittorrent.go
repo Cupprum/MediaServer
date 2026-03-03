@@ -222,33 +222,13 @@ func (c *Config) setSeedingLimits() error {
 	return nil
 }
 
-func (c *Config) createCategory(category, savePath string) error {
-	log.Printf("-- Creating category: %v...\n", category)
-
-	b := fmt.Sprintf("category=%s&savePath=%s", category, savePath)
-
-	_, err := utils.Request("POST", c.Url+"/api/v2/torrents/createCategory", b, nil, c.Client)
-	if err != nil {
-		return fmt.Errorf("failed to create category %v: %w", category, err)
-	}
-
-	return nil
-}
-
 type ManagementMode struct {
 	AutoMode             bool `json:"auto_tmm_enabled"`
 	ChangePathOnCategory bool `json:"category_changed_tmm_enabled"` // Change download path on Category change
 }
 
-func (c *Config) setupCategories() error {
-	log.Println("-- Configuring categories...")
-	if err := c.createCategory("Movies", "/downloads/movies"); err != nil {
-		return err
-	}
-	if err := c.createCategory("TV", "/downloads/tv"); err != nil {
-		return err
-	}
-
+// Specify download path based on Category
+func (c *Config) setupManagementMode() error {
 	log.Println("-- Configuring Torrent Management Mode...")
 
 	b := ManagementMode{
@@ -291,7 +271,7 @@ func Configure() error {
 	if err = c.setSeedingLimits(); err != nil {
 		return err
 	}
-	if err = c.setupCategories(); err != nil {
+	if err = c.setupManagementMode(); err != nil {
 		return err
 	}
 
