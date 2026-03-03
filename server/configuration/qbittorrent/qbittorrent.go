@@ -162,6 +162,35 @@ func (c *Config) changePassword() error {
 	return nil
 }
 
+func (c *Config) configureUser() error {
+	// Get temp password from logs
+	tpw, err := getPasswordFromLogs()
+	if err != nil {
+		return err
+	}
+
+	// Backup original password
+	opw := c.Password
+
+	// Set temp password for login
+	c.Password = tpw
+
+	// Retry login with temp password
+	if err = c.Login(); err != nil {
+		return err
+	}
+
+	// Set password back to original value
+	c.Password = opw
+
+	// Change password to desired value
+	if err = c.changePassword(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type SeedingLimits struct {
 	RatioEnabled    bool    `json:"max_ratio_enabled"`
 	RatioLimit      float64 `json:"max_ratio"`
@@ -193,6 +222,48 @@ func (c *Config) setSeedingLimits() error {
 	return nil
 }
 
+func (c *Config) createCategory(category, savePath string) error {
+	log.Printf("-- Creating category: %v...\n", category)
+
+	b := fmt.Sprintf("category=%s&savePath=%s", category, savePath)
+
+	_, err := utils.Request("POST", c.Url+"/api/v2/torrents/createCategory", b, nil, c.Client)
+	if err != nil {
+		return fmt.Errorf("failed to create category %v: %w", category, err)
+	}
+
+	return nil
+}
+
+type ManagementMode struct {
+	AutoMode             bool `json:"auto_tmm_enabled"`
+	ChangePathOnCategory bool `json:"category_changed_tmm_enabled"` // Change download path on Category change
+}
+
+func (c *Config) setupCategories() error {
+	log.Println("-- Configuring categories...")
+	if err := c.createCategory("Movies", "/downloads/movies"); err != nil {
+		return err
+	}
+	if err := c.createCategory("TV", "/downloads/tv"); err != nil {
+		return err
+	}
+
+	log.Println("-- Configuring Torrent Management Mode...")
+
+	b := ManagementMode{
+		AutoMode:             true,
+		ChangePathOnCategory: true,
+	}
+
+	err := c.setPreferences(b)
+	if err != nil {
+		return fmt.Errorf("failed to set management mode: %w", err)
+	}
+
+	return nil
+}
+
 func Configure() error {
 	log.Println("- Starting qbittorrent configuration...")
 	c, err := GetConfig()
@@ -212,32 +283,15 @@ func Configure() error {
 	// If error is "not logged in", proceed with configuration
 	// as we need to configure user
 
-	// Get temp password from logs
-	tpw, err := getPasswordFromLogs()
-	if err != nil {
-		return err
+	if err = c.configureUser(); err != nil {
+		return fmt.Errorf("failed to configure user: %w", err)
 	}
 
-	// Backup original password
-	opw := c.Password
-
-	// Set temp password for login
-	c.Password = tpw
-
-	// Retry login with temp password
-	if err = c.Login(); err != nil {
-		return err
-	}
-
-	// Set password back to original value
-	c.Password = opw
-
-	// Change password to desired value
-	if err = c.changePassword(); err != nil {
-		return err
-	}
-
+	// Set system preferences
 	if err = c.setSeedingLimits(); err != nil {
+		return err
+	}
+	if err = c.setupCategories(); err != nil {
 		return err
 	}
 
