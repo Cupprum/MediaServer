@@ -85,17 +85,43 @@ func TestProwlarrDownloadClients(t *testing.T) {
 		t.Error(err)
 	}
 
+	type category struct {
+		Name string `json:"clientCategory"`
+		IDs  []int  `json:"categories"`
+	}
 	var clients []struct {
-		Name string `json:"name"`
+		Name       string     `json:"name"`
+		Categories []category `json:"categories"`
 	}
 	json.Unmarshal(respBody, &clients)
 
+	qbittorrent := false
+	movies := false
+	tv := false
+
 	for _, client := range clients {
 		if client.Name == "qBittorrent" {
-			return
+			qbittorrent = true
+			for _, cat := range client.Categories {
+				if cat.Name == "movies" && cat.IDs[0] == 2000 {
+					movies = true
+				}
+				if cat.Name == "tv" && cat.IDs[0] == 5000 {
+					tv = true
+				}
+			}
 		}
 	}
-	t.Error("qbittorrent download client not found in the response")
+
+	if !qbittorrent {
+		t.Error("qbittorrent download client not found in the response")
+	}
+	if !movies {
+		t.Error("qbittorrent download client does not have movies category configured properly")
+	}
+	if !tv {
+		t.Error("qbittorrent download client does not have tv category configured properly")
+	}
 }
 
 func TestProwlarrIndexerProxy(t *testing.T) {
