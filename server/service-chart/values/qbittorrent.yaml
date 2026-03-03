@@ -6,5 +6,5 @@ mountPoints:
     source: /home/x42/MediaServer/config/qbittorrent/config
     destination: /config
   - name: data
-    source: /media/x42/T5/media/movies
+    source: /media/x42/T5/media
     destination: /downloads
