@@ -28,7 +28,7 @@ func TestLogin(t *testing.T) {
 	}
 }
 
-func TestPreferences(t *testing.T) {
+func TestSeedingLimits(t *testing.T) {
 	c, err := config()
 	if err != nil {
 		t.Error(err)
@@ -62,5 +62,73 @@ func TestPreferences(t *testing.T) {
 	}
 	if sl.Action != 1 {
 		t.Errorf("expected action to be 1, got %v", sl.Action)
+	}
+}
+
+func TestManagementMode(t *testing.T) {
+	c, err := config()
+	if err != nil {
+		t.Error(err)
+	}
+
+	rb, err := utils.Request("POST", c.Url+"/api/v2/app/preferences", nil, nil, c.Client)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var mm qbittorrent.ManagementMode
+	json.Unmarshal(rb, &mm)
+
+	if !mm.AutoMode {
+		t.Error("expected Automatic Torrent Management Mode to be enabled")
+	}
+	if !mm.ChangePathOnCategory {
+		t.Error("expected updating path on category change to be enabled")
+	}
+}
+
+func TestCategories(t *testing.T) {
+	c, err := config()
+	if err != nil {
+		t.Error(err)
+	}
+
+	rb, err := utils.Request("GET", c.Url+"/api/v2/sync/maindata", nil, nil, c.Client)
+	if err != nil {
+		t.Error(err)
+	}
+
+	type Category struct {
+		Name     string `json:"name"`
+		SavePath string `json:"savePath"`
+	}
+	type resp struct {
+		Categories map[string]Category `json:"categories"`
+	}
+
+	var r resp
+	json.Unmarshal(rb, &r)
+
+	m, mok := r.Categories["Movies"]
+	if !mok {
+		t.Errorf("expected 'Movies' category")
+	}
+	tv, tok := r.Categories["TV"]
+	if !tok {
+		t.Errorf("expected 'TV' category")
+	}
+
+	if m.Name != "Movies" {
+		t.Errorf("expected movies category to have name 'Movies'")
+	}
+	if m.SavePath != "/downloads/movies" {
+		t.Errorf("expected movies category to have savePath '/downloads/movies'")
+	}
+
+	if tv.Name != "TV" {
+		t.Errorf("expected tv category to have name 'TV'")
+	}
+	if tv.SavePath != "/downloads/tv" {
+		t.Errorf("expected tv category to have savePath '/downloads/tv'")
 	}
 }
