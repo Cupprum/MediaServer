@@ -4,14 +4,14 @@
     "priority": 1,
     "categories": [
         {
-            "clientCategory": "Movies",
+            "clientCategory": "movies",
             "categories": [
                 2000
             ],
             "id": 1
         },
         {
-            "clientCategory": "Tv",
+            "clientCategory": "tv",
             "categories": [
                 5000
             ],
