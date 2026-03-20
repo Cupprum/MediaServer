@@ -11,11 +11,18 @@
             "id": 1
         },
         {
+            "clientCategory": "audio",
+            "categories": [
+                3000
+            ],
+            "id": 2
+        },
+        {
             "clientCategory": "tv",
             "categories": [
                 5000
             ],
-            "id": 2
+            "id": 3
         }
     ],
     "supportsCategories": true,
