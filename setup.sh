@@ -40,7 +40,7 @@ main() {
   fi
 
   log_info "Configuring Raspberry Pi..."
-  ssh "${TARGET_HOST}" 'cd MediaServer/rpi && sudo ./setup.sh'
+  ssh "${TARGET_HOST}" 'cd MediaServer/init && sudo ./setup-rpi.sh'
 
   log_info "Restarting the Raspberry Pi..."
   ssh "${TARGET_HOST}" 'sudo reboot' || true
@@ -50,7 +50,7 @@ main() {
   sleep 120
 
   log_info "Setting up and configuring Kubernetes..."
-  ssh "${TARGET_HOST}" 'cd MediaServer/k8s && ./setup.sh'
+  ssh "${TARGET_HOST}" 'cd MediaServer/init && ./setup-k8s.sh'
 
   log_info "Deploying MediaServer to Kubernetes..."
   ssh "${TARGET_HOST}" 'cd MediaServer/server && ./setup.sh install'
