@@ -12,4 +12,4 @@ This tool also supports other commands, like only installation only mode: `./set
 
 Delete the argocd apps with their configuration: `./setup.sh delete`
 
-IF NEEDED, you can also clean up the config folders: `./setup.sh cleanup`
+Cleanup config folders of the services: `./setup.sh cleanup`
