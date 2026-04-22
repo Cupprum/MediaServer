@@ -11,7 +11,6 @@ set -o pipefail
 # Source common utilities
 source "$(dirname "${BASH_SOURCE[0]}")/../utils.sh"
 
-# Array of services
 readonly SERVICES=(
     "jellyfin"
     "qbittorrent"
@@ -48,72 +47,39 @@ Example:
 EOF
 }
 
-load_env_file() {
-    log_info "Loading environment variables..."
-    set -a
-    source "$(dirname "${BASH_SOURCE[0]}")/../.env"
-    set +a
-}
-
 get_service_dirs() {
-    if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
-        log_error "MEDIASERVER_CONFIG_DIR is not set. Please set it in the .env file."
-        exit 1
-    fi
+    require_env_vars "MEDIASERVER_CONFIG_DIR"
 
-    local dirs=(
-        "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
-        "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
-        "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
-        "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
-        "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
-    )
-
-    echo "${dirs[@]}"
+    echo "$MEDIASERVER_CONFIG_DIR/qbittorrent/config"
+    echo "$MEDIASERVER_CONFIG_DIR/flaresolverr/config"
+    echo "$MEDIASERVER_CONFIG_DIR/prowlarr/config"
+    echo "$MEDIASERVER_CONFIG_DIR/jellyfin/config"
+    echo "$MEDIASERVER_CONFIG_DIR/jellyfin/cache"
 }
 
-verify_folders() {
+setup_directories() {
     log_info "Ensuring necessary folders exist..."
-
-    local folders=($(get_service_dirs))
-
-    for folder in "${folders[@]}"; do
-        if [ ! -d "$folder" ]; then
-            log_info "Creating folder: $folder"
-            mkdir -p "$folder" || {
-                log_error "Failed to create folder: $folder"
-                exit 1
-            }
-        fi
+    local dirs
+    mapfile -t dirs < <(get_service_dirs)
+    
+    for dir in "${dirs[@]}"; do
+        ensure_directory "$dir"
     done
 }
 
-verify_namespace() {
-    local namespace="server"
-
-    if ! kubectl get namespace "$namespace" &> /dev/null; then
-        log_info "Creating namespace: $namespace"
-        kubectl create namespace "$namespace" || {
-            log_error "Failed to create namespace: $namespace"
-            exit 1
-        }
-    else
-        log_info "Namespace $namespace already exists"
-    fi
-}
-
 wait_for_jellyfin() {
-    local url="$MEDIASERVER_JELLYFIN_URL/health"
+    require_env_vars "MEDIASERVER_JELLYFIN_URL"
+    
+    local url="${MEDIASERVER_JELLYFIN_URL}/health"
     local max_retries=30
     local wait_time=10
     local attempt=1
 
-    # While `curl http://jellyfin.pi.local/health` does not return "Healthy"
     while [ $attempt -le $max_retries ]; do
         local status
         status=$(curl -s "$url" || echo "unreachable")
         if [ "$status" == "Healthy" ]; then
-            log_info "Jellyfin is healthy"
+            log_info "Jellyfin is healthy."
             return 0
         else
             log_info "Waiting for Jellyfin to become healthy (Attempt: $attempt/$max_retries)..."
@@ -121,46 +87,39 @@ wait_for_jellyfin() {
             ((attempt++))
         fi
     done
-    log_error "Jellyfin did not become healthy within the expected time"
+    
+    log_error "Jellyfin did not become healthy within the expected time."
     exit 1
 }
 
 install_services() {
     log_info "Installing ArgoCD applications..."
 
-    load_env_file
-
-    verify_folders
-    verify_namespace
+    load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
+    setup_directories
+    ensure_namespace "server"
     
     for service in "${SERVICES[@]}"; do
         log_info "Installing $service..."
-        helm install "$service" ./argocd-config-chart --set "service=$service" || {
-            log_error "Failed to install $service"
-            exit 1
-        }
+        helm install "$service" ./argocd-config-chart --set "service=$service"
     done
 
-    log_info "All applications installed successfully"
+    log_info "All applications installed successfully."
 }
 
 configure_services() {
     log_info "Waiting for services to become ready..."
 
-    load_env_file
-
-    # From the services, jellyfin takes longest to start
+    load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
     wait_for_jellyfin
 
-    log_info "All services are up and running"
+    log_info "All services are up and running."
 
-    # Change to configuration directory
-    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"; 
+    cd "$(dirname "${BASH_SOURCE[0]}")/configuration"
     
     log_info "Configuring services..."
     ./configure_services run || {
-        cd .. # Return to previous directory on error
-        log_error "Failed to configure services"
+        log_error "Failed to configure services."
         exit 1
     }
 
@@ -168,45 +127,39 @@ configure_services() {
 
     log_info "Testing services..."
     ./configure_services test || {
-        cd .. # Return to previous directory on error
-        log_error "Service tests failed"
+        log_error "Service tests failed."
         exit 1
     }
-    log_info "All services configured and tested successfully"
     
-    # Return to previous directory
+    log_info "All services configured and tested successfully."
     cd ..
 }
 
 delete_services() {
     log_info "Removing ArgoCD applications..."
-    
     for service in "${SERVICES[@]}"; do
         log_info "Removing $service..."
-        helm uninstall "$service" || {
-            log_error "Failed to remove $service"
-            exit 1
-        }
+        helm uninstall "$service" || log_warn "Failed to remove $service or it doesn't exist."
     done
-    
-    log_info "All applications removed successfully"
+    log_info "All applications removed successfully."
 }
 
 cleanup_services() {
     log_info "Cleaning up config folders..."
+    
+    load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
+    
+    local dirs
+    mapfile -t dirs < <(get_service_dirs)
 
-    load_env_file
-
-    local folders=($(get_service_dirs))
-
-    for folder in "${folders[@]}"; do
-        if [ -d "$folder" ]; then
-            log_info "Removing: $folder"
-            sudo rm -rf "$folder" || ( sleep 5 && sudo rm -rf "$folder" )
+    for dir in "${dirs[@]}"; do
+        if [ -d "$dir" ]; then
+            log_info "Removing: $dir"
+            sudo rm -rf "$dir" || ( sleep 5 && sudo rm -rf "$dir" )
         fi
     done
 
-    log_info "Cleanup completed"
+    log_info "Cleanup completed."
 }
 
 ###############################################################################
@@ -255,5 +208,4 @@ main() {
     esac
 }
 
-# Execute main function
 main "$@"

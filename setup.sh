@@ -18,48 +18,54 @@ set -o pipefail
 # Source common utilities
 source "$(dirname "${BASH_SOURCE[0]}")/utils.sh"
 
-Hostname='x42@pi.local'
+readonly HOSTNAME='x42@pi.local'
+readonly REPO_URL='git@github.com:Cupprum/MediaServer.git'
 
-log_info 'Checking if MediaServer folder exists...'
-if ssh "$Hostname" '! test -d MediaServer'; then
-    log_info 'MediaServer folder not found, cloning repository...'
+main() {
+    log_info "Checking if MediaServer folder exists on ${HOSTNAME}..."
+    
+    if ssh "$HOSTNAME" '! test -d MediaServer'; then
+        log_info "MediaServer folder not found. Cloning repository..."
 
-    ssh "$Hostname" 'git clone git@github.com:Cupprum/MediaServer.git'
-    if [ $? -eq 128 ]; then
-        log_info 'Could not clone the repository, adding GitHub public ssh keys to known hosts...'
-        ssh "$Hostname" 'ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null'
-        log_info 'Cloning the repository again'
-        ssh "$Hostname" 'git clone git@github.com:Cupprum/MediaServer.git'
+        ssh "$HOSTNAME" "git clone ${REPO_URL}"
+        if [ $? -eq 128 ]; then
+            log_warn "Could not clone repository. Adding GitHub to known hosts..."
+            ssh "$HOSTNAME" 'ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null'
+            
+            log_info "Retrying repository clone..."
+            ssh "$HOSTNAME" "git clone ${REPO_URL}"
+        fi
+        log_info "Repository cloned successfully."
+
+        log_info "Copying secrets to MediaServer..."
+        scp .env "$HOSTNAME:~/MediaServer/.env"
+        scp .piactl_login "$HOSTNAME:~/MediaServer/.piactl_login"
+        log_info "Secrets copied."
+    else
+        log_info "MediaServer folder already exists."
     fi
-    log_info 'Repository cloned successfully'
 
-    log_info 'Copying secrets to MediaServer...'
-    log_info 'Copying Env vars...'
-    scp .env "$Hostname:~/MediaServer/.env"
+    log_info "Configuring Raspberry Pi..."
+    ssh "$HOSTNAME" 'cd MediaServer/rpi && sudo ./setup.sh'
 
-    log_info 'Copying Piactl login file...'
-    scp .piactl_login "$Hostname:~/MediaServer/.piactl_login"
+    log_info "Restarting the Raspberry Pi..."
+    ssh "$HOSTNAME" 'sudo reboot'
 
-    log_info 'Secrets copied'
-else
-    log_info 'MediaServer folder already exists'
-fi
+    # Note: the next ssh command would be waiting there either way
+    log_info "Sleeping for 120 seconds to allow Raspberry Pi to reboot..."
+    sleep 120
 
-log_info 'Configuring Raspberry Pi...'
-ssh "$Hostname" 'cd MediaServer/rpi; sudo ./setup.sh'
+    log_info "Setting up and configuring Kubernetes..."
+    ssh "$HOSTNAME" 'cd MediaServer/k8s && ./setup.sh'
 
-log_info 'Restarting the Raspberry Pi...'
-ssh "$Hostname" 'sudo reboot'
+    log_info "Deploying MediaServer to Kubernetes..."
+    ssh "$HOSTNAME" 'cd MediaServer/server && ./setup.sh install'
 
-# Note: the next ssh command would be waiting there either way
-log_info 'Going to sleep for 120 seconds, to wait for Raspberry to restart'
-sleep 120
+    log_info "Deploying Monitoring to Kubernetes..."
+    ssh "$HOSTNAME" 'cd MediaServer/monitoring && ./setup.sh install'
+    
+    log_info "MediaServer installation completed successfully!"
+}
 
-log_info 'Seting up and configuring Kubernetes...'
-ssh "$Hostname" 'cd MediaServer/k8s; ./setup.sh'
-
-log_info 'Deploying MediaServer to Kubernetes...'
-ssh "$Hostname" 'cd MediaServer/server; ./setup.sh install_and_configure'
-
-log_info 'Deploying Monitoring to Kubernetes...'
-ssh "$Hostname" 'cd MediaServer/monitoring; ./setup.sh install'
+# Execute main function
+main

@@ -35,3 +35,50 @@ verify_kube_config() {
         exit 1
     fi
 }
+
+load_env_vars() {
+    local env_file="$1"
+    if [ -f "$env_file" ]; then
+        log_info "Loading environment variables from ${env_file}..."
+        set -a
+        # shellcheck disable=SC1090
+        source "$env_file"
+        set +a
+    else
+        log_error "Environment file ${env_file} not found."
+        exit 1
+    fi
+}
+
+require_env_vars() {
+    local missing=()
+    for var in "$@"; do
+        if [ -z "${!var:-}" ]; then
+            missing+=("$var")
+        fi
+    done
+    if [ ${#missing[@]} -ne 0 ]; then
+        log_error "Missing required environment variables: ${missing[*]}"
+        exit 1
+    fi
+}
+
+ensure_namespace() {
+    local ns="$1"
+    if ! kubectl get namespace "$ns" &> /dev/null; then
+        log_info "Creating namespace: $ns..."
+        kubectl create namespace "$ns"
+    else
+        log_info "Namespace $ns already exists."
+    fi
+}
+
+ensure_directory() {
+    local dir="$1"
+    if [ ! -d "$dir" ]; then
+        log_info "Creating directory: $dir..."
+        mkdir -p "$dir"
+    else
+        log_info "Directory $dir already exists."
+    fi
+}

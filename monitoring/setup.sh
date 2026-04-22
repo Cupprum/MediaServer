@@ -30,96 +30,44 @@ Example:
 EOF
 }
 
-load_env_file() {
-    log_info "Loading environment variables..."
-    set -a
-    source "$(dirname "${BASH_SOURCE[0]}")/../.env"
-    set +a
-
-    if [ -z "${MEDIASERVER_GRAFANA_USERNAME:-}" ] || [ -z "${MEDIASERVER_GRAFANA_PASSWORD:-}" ]; then
-        log_error "MEDIASERVER_GRAFANA_USERNAME and MEDIASERVER_GRAFANA_PASSWORD must be present in the .env file"
-        exit 1
-    fi
-
-    if [ -z "${MEDIASERVER_CONFIG_DIR:-}" ]; then
-        log_error "MEDIASERVER_CONFIG_DIR is not set in the .env file"
-        exit 1
-    fi
-}
-
-verify_namespace() {
-    local namespace="monitoring"
-
-    if ! kubectl get namespace "$namespace" &> /dev/null; then
-        log_info "Creating namespace: $namespace..."
-        kubectl create namespace "$namespace" || {
-            log_error "Failed to create namespace: $namespace"
-            exit 1
-        }
-    else
-        log_info "Namespace $namespace already exists"
-    fi
-}
-
-verify_folders() {
-    local folder="$MEDIASERVER_CONFIG_DIR/prometheus"
-
-    if [ ! -d "$folder" ]; then
-        log_info "Creating config folder: $folder..."
-        mkdir -p "$folder"
-    else
-        log_info "Config folder already exist..."
-    fi
-}
-
 create_secrets() {
-    log_info "Checking if grafana-admin-credentials secret already exists..."
+    log_info "Checking grafana-admin-credentials secret..."
     if kubectl get secret grafana-admin-credentials --namespace monitoring &>/dev/null; then
-        log_info "grafana-admin-credentials secret already exists, skipping creation"
+        log_info "grafana-admin-credentials secret already exists, skipping."
     else
         log_info "Creating grafana-admin-credentials secret..."
         kubectl create secret generic grafana-admin-credentials \
             --namespace monitoring \
             --from-literal=admin-user="${MEDIASERVER_GRAFANA_USERNAME}" \
             --from-literal=admin-password="${MEDIASERVER_GRAFANA_PASSWORD}" \
-            --dry-run=client -o yaml | kubectl apply -f - || {
-                log_error "Failed to create grafana-admin-credentials secret"
-                exit 1
-        }
-        log_info "grafana-admin-credentials secret was created successfully"
+            --dry-run=client -o yaml | kubectl apply -f -
+        log_info "grafana-admin-credentials secret created."
     fi
 }
 
 install_monitoring() {
     log_info "Starting Monitoring installation..."
 
-    load_env_file
-    verify_namespace
-    verify_folders
+    load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
+    require_env_vars "MEDIASERVER_GRAFANA_USERNAME" "MEDIASERVER_GRAFANA_PASSWORD" "MEDIASERVER_CONFIG_DIR"
+
+    ensure_namespace "monitoring"
+    ensure_directory "$MEDIASERVER_CONFIG_DIR/prometheus"
     create_secrets
 
     log_info "Installing ArgoCD application for monitoring..."
-    kubectl apply --filename ./monitoring_app.yaml || {
-        log_error "Failed to create ArgoCD application for monitoring"
-        exit 1
-    }
-    log_info "ArgoCD application for monitoring was installed successfully"
+    kubectl apply --filename ./monitoring_app.yaml
+    log_info "ArgoCD application for monitoring installed successfully."
 }
 
 delete_monitoring() {
     log_info "Removing ArgoCD application for monitoring..."
-    kubectl delete --filename ./monitoring_app.yaml || {
-        log_error "Failed to remove ArgoCD application for monitoring"
-        exit 1
-    }
-        log_info "ArgoCD application for monitoring was removed successfully"
+    kubectl delete --filename ./monitoring_app.yaml || log_warn "App not found or already deleted."
 
     log_info "Cleaning up grafana-admin-credentials secret..."
-    kubectl delete secret grafana-admin-credentials --namespace monitoring || {
-        log_error "grafana-admin-credentials secret was not deleted"
-        exit 1
-    }
-    log_info "grafana-admin-credentials secret was deleted successfully"
+    kubectl delete secret grafana-admin-credentials --namespace monitoring || log_warn "Secret not found or already deleted."
+    
+    log_info "Monitoring deletion completed."
 }
 
 ###############################################################################
@@ -154,5 +102,4 @@ main() {
     esac
 }
 
-# Execute main function
 main "$@"
