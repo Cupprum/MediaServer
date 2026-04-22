@@ -1,4 +1,4 @@
-# Setup Raspberry Pi to host torrent downloading docker based media center
+# Setup Raspberry Pi to host media center
 
 Install the latest Raspbian OS using `Raspberry Pi Imager.app`.
 
