@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 set -u
@@ -6,23 +6,23 @@ set -o pipefail
 
 
 if [ $# -gt 1 ]; then
-    echo "Usage: $0 (jellyfin|qbittorrent|prowlarr|flaresolverr)"
-    exit 1
+  echo "Usage: $0 (jellyfin|qbittorrent|prowlarr|flaresolverr)"
+  exit 1
 fi
 
 if [ $# -eq 0 ]; then
-    echo "- Reconfiguring all services..."
-    echo ""
-    sudo rm -rf "../data/config"
-    mkdir -p "../data/config"
-    docker compose up -d --force-recreate
-    echo ""
+  echo "- Reconfiguring all services..."
+  echo ""
+  sudo rm -rf "../data/config"
+  mkdir -p "../data/config"
+  docker compose up -d --force-recreate
+  echo ""
 elif [ $# -eq 1 ]; then
-    echo "- Reconfiguring $1..."
-    echo ""
-    sudo rm -rf "../data/config/$1"
-    mkdir -p "../data/config/$1"
-    docker compose up -d --force-recreate "$1"
+  echo "- Reconfiguring $1..."
+  echo ""
+  sudo rm -rf "../data/config/$1"
+  mkdir -p "../data/config/$1"
+  docker compose up -d --force-recreate "$1"
 fi
 
 sleep 15
