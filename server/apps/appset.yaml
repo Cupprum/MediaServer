@@ -4,6 +4,7 @@ metadata:
   name: mediaserver-appset
   namespace: argocd
 spec:
+  goTemplate: true
   generators:
     - git:
         repoURL: https://github.com/Cupprum/MediaServer.git
@@ -12,7 +13,7 @@ spec:
           - path: "server/service-chart/values/*.yaml"
   template:
     metadata:
-      name: '{{path.basenameNormalized}}-app'
+      name: '{{ .path.filename | trimSuffix ".yaml" }}-app'
       namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io/background
@@ -24,7 +25,7 @@ spec:
         path: server/service-chart
         helm:
           valueFiles:
-            - values/{{path.basename}}
+            - values/{{ .path.filename }}
       destination:
         server: https://kubernetes.default.svc
         namespace: server
