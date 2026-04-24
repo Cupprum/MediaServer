@@ -54,6 +54,7 @@ setup_directories() {
   done
 }
 
+# TODO: this can be deleted if i move to a job and waves
 wait_for_jellyfin() {
   require_env_vars "MEDIASERVER_JELLYFIN_URL"
   
@@ -85,16 +86,12 @@ install_services() {
   load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
   setup_directories
   ensure_namespace "server"
+  kubectl apply -f ./bootstrap/app.yaml
   
-  local service
-  for service in "${SERVICES[@]}"; do
-    log_info "Installing ${service}..."
-    helm install "${service}" ./argocd-config-chart --set "service=${service}"
-  done
-
-  log_info "All applications installed successfully."
+  log_info "Applications installed successfully."
 }
 
+# TODO: this should be move to the hooks
 configure_services() {
   log_info "Waiting for services to become ready..."
 
@@ -125,12 +122,8 @@ configure_services() {
 
 delete_services() {
   log_info "Removing ArgoCD applications..."
-  local service
-  for service in "${SERVICES[@]}"; do
-    log_info "Removing ${service}..."
-    helm uninstall "${service}" || log_warn "Failed to remove ${service} or it doesn't exist."
-  done
-  log_info "All applications removed successfully."
+  kubectl delete -f ./bootstrap/app.yaml
+  log_info "Applications removed successfully."
 }
 
 cleanup_services() {

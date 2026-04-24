@@ -1,20 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{  .Values.service }}-app
+  name: mediaserver-apps
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io/background
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/Cupprum/MediaServer.git
-    path: server/service-chart
-    helm:
-      valueFiles:
-        - values/{{ .Values.service }}.yaml
+    path: server/bootstrap
   destination:
     server: https://kubernetes.default.svc
-    namespace: server
+    namespace: argocd
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
