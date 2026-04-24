@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: mediaserver-apps
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io/background
 spec:
   project: default
   source:
