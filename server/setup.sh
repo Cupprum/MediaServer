@@ -85,7 +85,6 @@ install_services() {
 
   load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
   setup_directories
-  ensure_namespace "server"
   kubectl apply -f ./bootstrap/app.yaml
   
   log_info "Applications installed successfully."

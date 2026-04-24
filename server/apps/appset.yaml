@@ -4,7 +4,7 @@ metadata:
   name: mediaserver-apps
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io/foreground
+    - resources-finalizer.argocd.argoproj.io/background
 spec:
   generators:
     - git:
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       name: '{{path.basenameNormalized}}-app'
-      namespace: server
+      namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io/background
     spec:
@@ -32,3 +32,5 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
