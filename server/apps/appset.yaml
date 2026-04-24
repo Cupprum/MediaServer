@@ -8,9 +8,10 @@ metadata:
 spec:
   generators:
     - git:
-      repoURL: https://github.com/Cupprum/MediaServer.git
-      files:
-        - path: "server/service-chart/values/*.yaml"
+        repoURL: https://github.com/Cupprum/MediaServer.git
+        revision: HEAD
+        files:
+          - path: "server/service-chart/values/*.yaml"
   template:
     metadata:
       name: '{{path.basenameNormalized}}-app'
@@ -21,6 +22,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/Cupprum/MediaServer.git
+        targetRevision: HEAD
         path: server/service-chart
         helm:
           valueFiles:

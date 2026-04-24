@@ -9,6 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Cupprum/MediaServer.git
+    targetRevision: HEAD
     path: server/apps
   destination:
     server: https://kubernetes.default.svc
