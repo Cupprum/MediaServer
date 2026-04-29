@@ -1,7 +1,0 @@
-serviceName: prowlarr
-image: linuxserver/prowlarr:latest
-port: 9696
-mountPoints:
-  - name: config
-    source: /home/x42/MediaServer/config/prowlarr/config
-    destination: /config

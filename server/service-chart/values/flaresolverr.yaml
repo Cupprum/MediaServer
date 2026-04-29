@@ -1,7 +1,0 @@
-serviceName: flaresolverr
-image: ghcr.io/flaresolverr/flaresolverr:latest
-port: 8191
-mountPoints:
-  - name: config
-    source: /home/x42/MediaServer/config/flaresolverr/config
-    destination: /config

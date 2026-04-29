@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: update-hook
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: configure-and-test-services
+        image: ghcr.io/cupprum/configure_services:latest 
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -euo pipefail
+            
+            /app/bin/configure_services
+            rc=0
+            /app/bin/qbittorrent.test || rc=$?
+            /app/bin/prowlarr.test    || rc=$?
+            /app/bin/jellyfin.test    || rc=$?
+            if [ $rc -ne 0 ]; then
+                exit $rc
+            fi
+        envFrom:
+        - configMapRef:
+            name: mediaserver-config
+      restartPolicy: Never

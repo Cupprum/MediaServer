@@ -1,0 +1,108 @@
+{{- range $appName, $appConfig := .Values.apps }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $appName }}
+  labels:
+    app: {{ $appName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $appName }}
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi
+      containers:
+        - name: {{ $appName }}
+          image: {{ $appConfig.image }}
+          {{- if eq $appName "qbittorrent" }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              mkdir -p /config/qBittorrent
+              CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
+              echo "[Preferences]" >> "$CONFIG_FILE"
+              echo "WebUI\\Password_PBKDF2=${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$CONFIG_FILE"
+              exec /init
+          envFrom:
+            - configMapRef:
+                name: mediaserver-config
+          {{- end }}
+          env:
+            - name: TZ
+              value: Europe/Copenhagen
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            {{- range $appConfig.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          ports:
+            - containerPort: {{ $appConfig.port }}
+              protocol: TCP
+          {{- if $appConfig.healthcheck }}
+          livenessProbe:
+            httpGet:
+              path: {{ $appConfig.healthcheck }}
+              port: {{ $appConfig.port }}
+            initialDelaySeconds: 40
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: {{ $appConfig.healthcheck }}
+              port: {{ $appConfig.port }}
+            initialDelaySeconds: 40
+            periodSeconds: 15
+          {{- end }}
+          volumeMounts:
+            {{- range $appConfig.mountPoints }}
+            - mountPath: {{ .destination | quote }}
+              name: {{ $appName }}-{{ .name }}
+              mountPropagation: HostToContainer
+            {{- end }}
+      volumes:
+        {{- range $appConfig.mountPoints }}
+        - name: {{ $appName }}-{{ .name }}
+          hostPath:
+            path: {{ .source | quote }}
+        {{- end }}
+      securityContext:
+        runAsUser: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $appName }}
+spec:
+  selector:
+    app: {{ $appName }}
+  ports:
+    - port: {{ $appConfig.port }}
+      protocol: TCP
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ $appName }}
+spec:
+  entryPoints:
+    - web
+  routes:
+  - kind: Rule
+    match: Host(`{{ $appName }}.pi.local`)
+    services:
+    - kind: Service
+      name: {{ $appName }}
+      namespace: {{ $.Release.Namespace }}
+      port: {{ $appConfig.port }}
+---
+{{- end }}

@@ -52,12 +52,9 @@ main() {
   log_info "Setting up and configuring Kubernetes..."
   ssh "${TARGET_HOST}" 'cd MediaServer/init && ./setup-k8s.sh'
 
-  log_info "Deploying MediaServer to Kubernetes..."
-  ssh "${TARGET_HOST}" 'cd MediaServer/server && ./setup.sh install'
+  log_info "Deploying MediaServer and Monitoring to Kubernetes..."
+  ssh "${TARGET_HOST}" 'cd MediaServer/kube && ./setup.sh install'
 
-  log_info "Deploying Monitoring to Kubernetes..."
-  ssh "${TARGET_HOST}" 'cd MediaServer/monitoring && ./setup.sh install'
-  
   log_info "MediaServer installation completed successfully!"
 }
 

@@ -1,0 +1,25 @@
+apps:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    port: 8080
+    healthcheck: /
+    mountPoints:
+      - name: data
+        source: /media/x42/T5/media
+        destination: /downloads
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    port: 9696
+    healthcheck: /
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    port: 8096
+    healthcheck: /health
+    mountPoints:
+      - name: data
+        source: /media/x42/T5/media
+        destination: /media
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    port: 8191
+    healthcheck: /
