@@ -42,6 +42,12 @@ prometheus:
         readOnly: true
 
   prometheus-node-exporter:
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsNonRoot: false
+      runAsUser: 1000
+
     extraHostVolumeMounts:
      - name: media
        hostPath: /media/x42
