@@ -1,6 +1,3 @@
-storage:
-  source: /home/x42/MediaServer/config/prometheus
-
 prometheus:
   alertmanager:
     enabled: false
@@ -9,6 +6,9 @@ prometheus:
     enabled: false
 
   server:
+    persistentVolume:
+      enabled: false
+
     service:
       servicePort: 9090
 
