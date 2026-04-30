@@ -41,6 +41,13 @@ prometheus:
         hostPath: /media/x42
         readOnly: true
 
+  prometheus-node-exporter:
+    extraHostVolumeMounts:
+     - name: media
+       hostPath: /media/x42
+       mountPath: /media/x42
+       readOnly: true
+
   configmapReload:
     prometheus:
       enabled: false
