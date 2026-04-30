@@ -34,13 +34,6 @@ prometheus:
             static_configs:
               - targets: ['localhost:9100']
 
-    extraHostPathMounts:
-      - name: media
-        mountPath: /media/x42
-        subPath: ""
-        hostPath: /media/x42
-        readOnly: true
-
   prometheus-node-exporter:
     securityContext:
       fsGroup: 1000
@@ -50,10 +43,8 @@ prometheus:
     extraHostVolumeMounts:
      - name: media
        hostPath: /media/x42
-       type: "Directory"
        mountPath: /media/x42
        readOnly: true
-       mountPropagation: HostToContainer
 
   configmapReload:
     prometheus:
