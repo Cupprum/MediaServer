@@ -9,9 +9,6 @@ prometheus:
     enabled: false
 
   server:
-    persistentVolume:
-      existingClaim: prometheus
-
     service:
       servicePort: 9090
 
@@ -33,6 +30,12 @@ prometheus:
           - job_name: node
             static_configs:
               - targets: ['localhost:9100']
+
+    extraHostPathMounts:
+      - name: data
+        mountPath: /data
+        subPath: ""
+        hostPath: /home/x42/MediaServer/config/prometheus
 
   prometheus-node-exporter:
     securityContext:
