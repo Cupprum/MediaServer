@@ -34,6 +34,7 @@ prometheus:
     extraHostPathMounts:
       - name: data
         mountPath: /data
+        subPath: ""
         hostPath: /home/x42/MediaServer/config/prometheus
         readOnly: false
 
