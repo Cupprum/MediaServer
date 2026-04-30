@@ -45,8 +45,10 @@ prometheus:
     extraHostVolumeMounts:
      - name: media
        hostPath: /media/x42
+       type: "Directory"
        mountPath: /media/x42
        readOnly: true
+       mountPropagation: HostToContainer
 
   configmapReload:
     prometheus:
