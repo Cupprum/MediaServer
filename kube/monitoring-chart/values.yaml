@@ -1,3 +1,5 @@
+storage:
+  source: /home/x42/MediaServer/config/prometheus
 prometheus:
   alertmanager:
     enabled: false
@@ -7,7 +9,8 @@ prometheus:
 
   server:
     persistentVolume:
-      enabled: false
+      existingClaim: prometheus
+      # enabled: false
 
     service:
       servicePort: 9090
@@ -31,12 +34,12 @@ prometheus:
             static_configs:
               - targets: ['localhost:9100']
 
-    extraHostPathMounts:
-      - name: data
-        mountPath: /data
-        subPath: ""
-        hostPath: /home/x42/MediaServer/config/prometheus
-        readOnly: false
+    # extraHostPathMounts:
+    #   - name: data
+    #     mountPath: /data
+    #     subPath: ""
+    #     hostPath: /home/x42/MediaServer/config/prometheus
+    #     readOnly: false
 
   prometheus-node-exporter:
     securityContext:
