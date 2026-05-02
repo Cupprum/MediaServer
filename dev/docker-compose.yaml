@@ -5,25 +5,18 @@ services:
     ports:
       - "8096:8096"
     volumes:
-      - "/home/x42/PP/MediaServer/data/config/jellyfin:/config:z"
-      - "/home/x42/PP/MediaServer/data/cache/jellyfin:/cache:z"
       - type: bind
         source: "/home/x42/PP/MediaServer/data/media/movies"
         target: "/media/movies"
       - type: bind
         source: "/home/x42/PP/MediaServer/data/media/tv"
         target: "/media/tv"
-    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   prowlarr:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     ports:
       - "9696:9696"
-    volumes:
-      - "/home/x42/PP/MediaServer/data/config/prowlarr:/config:z"
 
   qbittorrent:
     image: linuxserver/qbittorrent:latest
@@ -31,13 +24,22 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - "/home/x42/PP/MediaServer/data/config/qbittorrent:/config:z"
       - "/home/x42/PP/MediaServer/data/media:/downloads:z"
+    environment:
+      - MEDIASERVER_QBITTORRENT_RAW_PASSWORD=${MEDIASERVER_QBITTORRENT_RAW_PASSWORD}
+    entrypoint: ["/bin/bash", "-c"]
+    command: 
+      - |
+        set -euo pipefail
+        mkdir -p /config/qBittorrent
+        CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
+        echo "[Preferences]" >> "$$CONFIG_FILE"
+        # Use DOUBLE '$$' here so it passes literally into the shell script inside the container
+        echo "WebUI\Password_PBKDF2=$${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$$CONFIG_FILE"
+        exec /init
     
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     ports:
       - "8191:8191"
-    volumes:
-      - "/home/x42/PP/MediaServer/data/config/flaresolverr:/config:z"
