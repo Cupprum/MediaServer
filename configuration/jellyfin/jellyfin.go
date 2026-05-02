@@ -62,7 +62,8 @@ func (c *Config) LoadAccessToken() error {
 
 	h := map[string]string{"Authorization": c.AccessToken}
 
-	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil, 4)
+	// Error is required on first setup, so not backoff -> backoff = 1
+	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil, 1)
 	if err != nil {
 		if strings.Contains(err.Error(), "401 Unauthorized") {
 			// During first call we dont have a valid token yet
