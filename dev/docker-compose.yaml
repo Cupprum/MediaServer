@@ -5,12 +5,8 @@ services:
     ports:
       - "8096:8096"
     volumes:
-      - type: bind
-        source: "/home/x42/PP/MediaServer/data/media/movies"
-        target: "/media/movies"
-      - type: bind
-        source: "/home/x42/PP/MediaServer/data/media/tv"
-        target: "/media/tv"
+      - "/home/x42/PP/MediaServer/data/media/movies:/media/movies"
+      - "/home/x42/PP/MediaServer/data/media/tv:/media/tv"
 
   prowlarr:
     image: linuxserver/prowlarr:latest
