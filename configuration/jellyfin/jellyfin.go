@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -42,11 +43,7 @@ func GetConfig() (*Config, error) {
 	if c.Password, err = utils.RequireEnv("MEDIASERVER_JELLYFIN_PASSWORD"); err != nil {
 		return nil, err
 	}
-	var openSubtitlesEnabled string
-	if openSubtitlesEnabled, err = utils.RequireEnv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_ENABLED"); err != nil {
-		return nil, err
-	}
-	c.OpenSubtitlesEnabled = openSubtitlesEnabled == "true"
+	c.OpenSubtitlesEnabled = os.Getenv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_ENABLED") == "true"
 	if c.OpenSubtitlesUsername, err = utils.RequireEnv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_USERNAME"); err != nil {
 		return nil, err
 	}
