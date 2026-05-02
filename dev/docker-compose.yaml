@@ -2,6 +2,8 @@ services:
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
+    networks:
+      - mediaserver_net
     ports:
       - "8096:8096"
     volumes:
@@ -11,12 +13,16 @@ services:
   prowlarr:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
+    networks:
+      - mediaserver_net
     ports:
       - "9696:9696"
 
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
+    networks:
+      - mediaserver_net
     ports:
       - "8080:8080"
     volumes:
@@ -37,5 +43,11 @@ services:
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
+    networks:
+      - mediaserver_net
     ports:
       - "8191:8191"
+
+networks:
+  mediaserver_net:
+    driver: bridge
