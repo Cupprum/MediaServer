@@ -54,7 +54,7 @@ func (c *Config) Login() error {
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
 
-	r, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client, 6)
+	r, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client, 4)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (c *Config) setPreferences(b any) error {
 	// Send as form-encoded data with json parameter
 	formData := fmt.Sprintf("json=%s", url.QueryEscape(string(jsonBytes)))
 
-	_, err = utils.Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client, 6)
+	_, err = utils.Request("POST", c.Url+"/api/v2/app/setPreferences", formData, nil, c.Client, 4)
 	return err
 }
 

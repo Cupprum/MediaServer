@@ -94,7 +94,7 @@ func (c *Config) LoadApikey(client *http.Client) error {
 	log.Println("-- Retrieving apikey...")
 	// First call to initialize does not require authentication
 	// the subsequent calls do authentication via cookie in client
-	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client, 6)
+	rb, err := utils.Request("GET", c.Url+"/initialize.json", nil, nil, client, 4)
 	if err != nil {
 		return fmt.Errorf("failed to get apikey: %w", err)
 	}
@@ -134,7 +134,7 @@ func (c *Config) setHostSetting() error {
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
 
-	_, err = utils.Request("PUT", c.Url+"/api/v1/config/host", b, h, nil, 6)
+	_, err = utils.Request("PUT", c.Url+"/api/v1/config/host", b, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to configure login details")
 	}
@@ -157,7 +157,7 @@ func (c *Config) setDownloadClient() error {
 	setField(b, "password", c.QBittorrentPassword)
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = utils.Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil, 6)
+	_, err = utils.Request("POST", c.Url+"/api/v1/downloadclient", b, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to set downloadclient: %w", err)
 	}
@@ -173,7 +173,7 @@ func (c *Config) addTag(name string) error {
 	}{name}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	rb, err := utils.Request("POST", c.Url+"/api/v1/tag", b, h, nil, 6)
+	rb, err := utils.Request("POST", c.Url+"/api/v1/tag", b, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to add tag %v: %w", name, err)
 	}
@@ -204,7 +204,7 @@ func (c *Config) setIndexerProxy() error {
 	setField(b, "host", c.FlaresolverrHostUrl)
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = utils.Request("POST", c.Url+"/api/v1/indexerProxy", b, h, nil, 6)
+	_, err = utils.Request("POST", c.Url+"/api/v1/indexerProxy", b, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to set indexer proxy: %w", err)
 	}

@@ -59,8 +59,8 @@ func Request(method, url string, body interface{}, headers map[string]string, cl
 
 	backoff := func(err error) {
 		b--
-		log.Println("--- error: backing off, going to sleep for 30s: error message:", err)
-		time.Sleep(30 * time.Second)
+		log.Println("--- error: backing off, going to sleep for 10s: error message:", err)
+		time.Sleep(10 * time.Second)
 	}
 
 	for {

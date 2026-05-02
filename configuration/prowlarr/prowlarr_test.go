@@ -28,7 +28,7 @@ func login(c *prowlarr.Config) error {
 	}
 
 	b := fmt.Sprintf("username=%s&password=%s&rememberMe=on", c.Username, c.Password)
-	_, err = utils.Request("POST", c.Url+"/login", b, nil, client, 6)
+	_, err = utils.Request("POST", c.Url+"/login", b, nil, client, 1)
 	if err != nil {
 		return fmt.Errorf("failed to login: %w", err)
 	}
@@ -80,7 +80,7 @@ func TestProwlarrDownloadClients(t *testing.T) {
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	respBody, err := utils.Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil, 6)
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/downloadclient", nil, h, nil, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -131,7 +131,7 @@ func TestProwlarrIndexerProxy(t *testing.T) {
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexerProxy", nil, h, nil, 6)
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexerProxy", nil, h, nil, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,7 +156,7 @@ func TestProwlarrIndexers(t *testing.T) {
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexer", nil, h, nil, 6)
+	respBody, err := utils.Request("GET", c.Url+"/api/v1/indexer", nil, h, nil, 1)
 	if err != nil {
 		t.Error(err)
 	}

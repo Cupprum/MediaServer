@@ -34,7 +34,7 @@ func TestSeedingLimits(t *testing.T) {
 		t.Error(err)
 	}
 
-	rb, err := utils.Request("POST", c.Url+"/api/v2/app/preferences", nil, nil, c.Client, 6)
+	rb, err := utils.Request("POST", c.Url+"/api/v2/app/preferences", nil, nil, c.Client, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -71,7 +71,7 @@ func TestManagementMode(t *testing.T) {
 		t.Error(err)
 	}
 
-	rb, err := utils.Request("POST", c.Url+"/api/v2/app/preferences", nil, nil, c.Client, 6)
+	rb, err := utils.Request("POST", c.Url+"/api/v2/app/preferences", nil, nil, c.Client, 1)
 	if err != nil {
 		t.Error(err)
 	}

@@ -40,7 +40,7 @@ func getJellyfinItems(path string) ([]string, error) {
 
 	h := map[string]string{"Authorization": c.AccessToken}
 
-	rb, err := utils.Request("GET", c.Url+path, nil, h, nil, 6)
+	rb, err := utils.Request("GET", c.Url+path, nil, h, nil, 1)
 	if err != nil {
 		return nil, err
 	}

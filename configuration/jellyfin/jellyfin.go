@@ -65,7 +65,7 @@ func (c *Config) LoadAccessToken() error {
 
 	h := map[string]string{"Authorization": c.AccessToken}
 
-	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil, 6)
+	rb, err := utils.Request("POST", c.Url+"/Users/AuthenticateByName", b, h, nil, 4)
 	if err != nil {
 		if strings.Contains(err.Error(), "401 Unauthorized") {
 			// During first call we dont have a valid token yet
@@ -92,7 +92,7 @@ func (c *Config) LoadAccessToken() error {
 
 func (c *Config) checkSystemInfo() error {
 	log.Println("-- Checking system info...")
-	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil, 6)
+	_, err := utils.Request("GET", c.Url+"/System/Info", nil, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to get system info: %w", err)
 	}
@@ -104,7 +104,7 @@ func (c *Config) configureStartup() error {
 
 	url := c.Url + "/Startup/Configuration"
 
-	rconfig, err := utils.Request("GET", url, nil, nil, nil, 6)
+	rconfig, err := utils.Request("GET", url, nil, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to get startup configuration: %w", err)
 	}
@@ -114,7 +114,7 @@ func (c *Config) configureStartup() error {
 		return fmt.Errorf("failed to decode startup configuration response: %w", err)
 	}
 
-	_, err = utils.Request("POST", url, config, nil, nil, 6)
+	_, err = utils.Request("POST", url, config, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to set startup configuration: %w", err)
 	}
@@ -123,7 +123,7 @@ func (c *Config) configureStartup() error {
 
 func (c *Config) checkUser() error {
 	log.Println("-- Checking user status...")
-	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil, 6)
+	_, err := utils.Request("GET", c.Url+"/Startup/User", nil, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to get startup user: %w", err)
 	}
@@ -140,7 +140,7 @@ func (c *Config) createUser() error {
 		Name:     c.Username,
 		Password: c.Password,
 	}
-	_, err := utils.Request("POST", c.Url+"/Startup/User", b, nil, nil, 6)
+	_, err := utils.Request("POST", c.Url+"/Startup/User", b, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
@@ -155,7 +155,7 @@ func (c *Config) createMoviesLibrary() error {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
-	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil, 6)
+	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=movies&refreshLibrary=false&name=Movies", b, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to create movies library: %w", err)
 	}
@@ -170,7 +170,7 @@ func (c *Config) createTVShowsLibrary() error {
 		return fmt.Errorf("failed to retrieve json payload: %w", err)
 	}
 
-	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil, 6)
+	_, err = utils.Request("POST", c.Url+"/Library/VirtualFolders?collectionType=tvshows&refreshLibrary=false&name=Shows", b, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to create tv shows library: %w", err)
 	}
@@ -185,7 +185,7 @@ func (c *Config) configureRemoteAccess() error {
 		ERA bool `json:"EnableRemoteAccess"`
 	}{false}
 
-	_, err := utils.Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil, 6)
+	_, err := utils.Request("POST", c.Url+"/Startup/RemoteAccess", b, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to configure remote access: %w", err)
 	}
@@ -194,7 +194,7 @@ func (c *Config) configureRemoteAccess() error {
 
 func (c *Config) completeStartup() error {
 	log.Println("-- Completing startup...")
-	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil, 6)
+	_, err := utils.Request("POST", c.Url+"/Startup/Complete", nil, nil, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to complete startup: %w", err)
 	}
@@ -204,7 +204,7 @@ func (c *Config) completeStartup() error {
 func (c *Config) restart() error {
 	log.Println("-- Restarting jellyfin server...")
 	h := map[string]string{"Authorization": c.AccessToken}
-	_, err := utils.Request("POST", c.Url+"/System/Restart", nil, h, nil, 6)
+	_, err := utils.Request("POST", c.Url+"/System/Restart", nil, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to restart jellyfin server: %w", err)
 	}
@@ -216,7 +216,7 @@ func (c *Config) GetAppStatus(name string) (string, error) {
 
 	h := map[string]string{"Authorization": c.AccessToken}
 
-	rb, err := utils.Request("GET", c.Url+"/Plugins", nil, h, nil, 6)
+	rb, err := utils.Request("GET", c.Url+"/Plugins", nil, h, nil, 4)
 	if err != nil {
 		return "", fmt.Errorf("failed to get app status: %w", err)
 	}
@@ -252,7 +252,7 @@ func (c *Config) setupOpenSubtitlesApp() error {
 		strings.ReplaceAll(appId, "-", ""),
 		appVersion,
 	)
-	_, err := utils.Request("POST", c.Url+p, nil, h, nil, 6)
+	_, err := utils.Request("POST", c.Url+p, nil, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to install the OpenSubtitles app: %w", err)
 	}
@@ -279,7 +279,7 @@ func (c *Config) setupOpenSubtitlesApp() error {
 
 	log.Println("-- Validating Open Subtitles credentials...")
 	for i := 0; i < 5; i++ {
-		_, err = utils.Request("POST", c.Url+"/Jellyfin.Plugin.OpenSubtitles/ValidateLoginInfo", vb, h, nil, 6)
+		_, err = utils.Request("POST", c.Url+"/Jellyfin.Plugin.OpenSubtitles/ValidateLoginInfo", vb, h, nil, 4)
 		if err != nil {
 			if strings.Contains(err.Error(), "503 Service Unavailable") {
 				log.Println("--- Service unavailable; sleeping for 5 Seconds")
@@ -302,7 +302,7 @@ func (c *Config) setupOpenSubtitlesApp() error {
 		Password:           c.OpenSubtitlesPassword,
 		CredentialsInvalid: false,
 	}
-	_, err = utils.Request("POST", c.Url+p, cb, h, nil, 6)
+	_, err = utils.Request("POST", c.Url+p, cb, h, nil, 4)
 	if err != nil {
 		return fmt.Errorf("failed to set credentials for OpenSubtitles app: %w", err)
 	}
