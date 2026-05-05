@@ -6,7 +6,7 @@ apps:
     mountPoints:
       - name: data
         source: /media/x42/T5/media
-        destination: /downloads
+        destination: /config/Downloads
   prowlarr:
     image: linuxserver/prowlarr:latest
     port: 9696
