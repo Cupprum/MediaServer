@@ -12,7 +12,7 @@ apps:
     port: 9696
     healthcheck: /
   jellyfin:
-    image: jellyfin/jellyfin:latest
+    image: jellyfin/jellyfin:10.10
     port: 8096
     healthcheck: /health
     mountPoints:
