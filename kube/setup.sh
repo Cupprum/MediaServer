@@ -32,8 +32,24 @@ configs() {
     --dry-run=client -o yaml | kubectl apply -f -
   log_info "Grafana Secret has been created."
 
-  kubectl delete configmap mediaserver-config -n server --ignore-not-found
-  kubectl create configmap mediaserver-config -n server --from-env-file=../.env
+  kubectl delete secret mediaserver-secrets -n server --ignore-not-found
+  kubectl create secret generic mediaserver-secrets \
+    --namespace server \
+    --from-literal=jellyfin-username="${MEDIASERVER_JELLYFIN_USERNAME}" \
+    --from-literal=jellyfin-password="${MEDIASERVER_JELLYFIN_PASSWORD}" \
+    --from-literal=jellyfin-opensubtitles-username="${MEDIASERVER_JELLYFIN_OPENSUBTITLES_USERNAME}" \
+    --from-literal=jellyfin-opensubtitles-password="${MEDIASERVER_JELLYFIN_OPENSUBTITLES_PASSWORD}" \
+    --from-literal=qbittorrent-username="${MEDIASERVER_QBITTORRENT_USERNAME}" \
+    --from-literal=qbittorrent-password="${MEDIASERVER_QBITTORRENT_PASSWORD}" \
+    --from-literal=qbittorrent-raw-password="${MEDIASERVER_QBITTORRENT_RAW_PASSWORD}" \
+    --from-literal=prowlarr-username="${MEDIASERVER_PROWLARR_USERNAME}" \
+    --from-literal=prowlarr-password="${MEDIASERVER_PROWLARR_PASSWORD}" \
+    --from-literal=prowlarr-rutracker-username="${MEDIASERVER_PROWLARR_RUTRACKER_USERNAME}" \
+    --from-literal=prowlarr-rutracker-password="${MEDIASERVER_PROWLARR_RUTRACKER_PASSWORD}" \
+    --from-literal=prowlarr-sktorrent-username="${MEDIASERVER_PROWLARR_SKTORRENT_USERNAME}" \
+    --from-literal=prowlarr-sktorrent-password="${MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD}" \
+    --from-literal=prowlarr-skcztorrent-username="${MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME}" \
+    --from-literal=prowlarr-skcztorrent-password="${MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD}"
   log_info "ConfigMap has been created."
 }
 
@@ -47,7 +63,7 @@ install_services() {
   configs
 
   kubectl apply -f ./bootstrap/app.yaml
-  
+
   log_info "Applications installed successfully."
 }
 

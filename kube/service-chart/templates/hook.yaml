@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: configure-and-test-services
-        image: ghcr.io/cupprum/configure_services:latest 
+        image: ghcr.io/cupprum/configure_services:latest
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -26,7 +26,16 @@ spec:
             if [ $rc -ne 0 ]; then
                 exit $rc
             fi
-        envFrom:
-        - configMapRef:
-            name: mediaserver-config
+        env:
+          {{- range $key, $value := .Values.config.plain }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- range $key, $value := .Values.config.secrets }}
+          - name: {{ $key }}
+            valueFrom:
+              secretKeyRef:
+                name: mediaserver-secrets
+                key: {{ $value | quote }}
+          {{- end }}
       restartPolicy: Never

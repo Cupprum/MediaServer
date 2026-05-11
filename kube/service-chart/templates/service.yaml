@@ -21,7 +21,19 @@ spec:
       containers:
         - name: {{ $appName }}
           image: {{ $appConfig.image }}
+          env:
+            - name: TZ
+              value: Europe/Copenhagen
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
           {{- if eq $appName "qbittorrent" }}
+            - name: MEDIASERVER_QBITTORRENT_RAW_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mediaserver-secrets
+                  key: qbittorrent-raw-password
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -31,21 +43,7 @@ spec:
               echo "[Preferences]" >> "$CONFIG_FILE"
               echo "WebUI\\Password_PBKDF2=${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$CONFIG_FILE"
               exec /init
-          envFrom:
-            - configMapRef:
-                name: mediaserver-config
           {{- end }}
-          env:
-            - name: TZ
-              value: Europe/Copenhagen
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
-            {{- range $appConfig.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
           ports:
             - containerPort: {{ $appConfig.port }}
               protocol: TCP
