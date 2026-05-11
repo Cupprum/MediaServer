@@ -10,7 +10,7 @@ apps:
   prowlarr:
     image: linuxserver/prowlarr:latest
     port: 9696
-    healthcheck: /
+    healthcheck: /ping
   jellyfin:
     image: jellyfin/jellyfin:10.10
     port: 8096
