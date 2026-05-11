@@ -227,7 +227,7 @@ func (c *Config) setIndexer(indexer Indexer) error {
 	}
 
 	h := map[string]string{"X-Api-Key": c.Apikey}
-	_, err = utils.Request("POST", c.Url+"/api/v1/indexer", b, h, nil, 3)
+	_, err = utils.Request("POST", c.Url+"/api/v1/indexer", b, h, nil, 2)
 	if err != nil {
 		return fmt.Errorf("failed to set indexer %v: %w", indexer.Name, err)
 	}
