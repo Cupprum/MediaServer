@@ -18,12 +18,13 @@ Usage: $(basename "$0") [MODE]
 Modes:
     install                 Install applications and configure services
     delete                  Remove all ArgoCD application and all configs
+    secrets                 Recreate secrets containing credentials
     cleanup-images          Remove all images in k3s
     help, --help, -h        Display this help message
 EOF
 }
 
-configs() {
+secrets() {
   kubectl delete secret grafana-admin-credentials -n monitoring --ignore-not-found
   kubectl create secret generic grafana-admin-credentials \
     --namespace monitoring \
@@ -50,7 +51,7 @@ configs() {
     --from-literal=prowlarr-sktorrent-password="${MEDIASERVER_PROWLARR_SKTORRENT_PASSWORD}" \
     --from-literal=prowlarr-skcztorrent-username="${MEDIASERVER_PROWLARR_SKCZTORRENT_USERNAME}" \
     --from-literal=prowlarr-skcztorrent-password="${MEDIASERVER_PROWLARR_SKCZTORRENT_PASSWORD}"
-  log_info "ConfigMap has been created."
+  log_info "MediaServer Secret has been created."
 }
 
 install_services() {
@@ -60,7 +61,7 @@ install_services() {
   require_env_vars "MEDIASERVER_GRAFANA_USERNAME" "MEDIASERVER_GRAFANA_PASSWORD" "MEDIASERVER_CONFIG_DIR"
   ensure_directory "${MEDIASERVER_CONFIG_DIR}/prometheus"
 
-  configs
+  secrets
 
   kubectl apply -f ./bootstrap/app.yaml
 
@@ -92,6 +93,9 @@ main() {
   case "$1" in
     "install")
       install_services
+      ;;
+    "secrets")
+      secrets
       ;;
     "delete")
       delete_services
