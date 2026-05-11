@@ -21,6 +21,7 @@ type Config struct {
 	Username              string
 	Password              string
 	OpenSubtitlesEnabled  bool
+	OpenSubtitlesVersion  string
 	OpenSubtitlesUsername string
 	OpenSubtitlesPassword string
 }
@@ -44,6 +45,9 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 	c.OpenSubtitlesEnabled = os.Getenv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_ENABLED") == "true"
+	if c.OpenSubtitlesVersion, err = utils.RequireEnv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_VERSION"); err != nil {
+		return nil, err
+	}
 	if c.OpenSubtitlesUsername, err = utils.RequireEnv("MEDIASERVER_JELLYFIN_OPENSUBTITLES_USERNAME"); err != nil {
 		return nil, err
 	}
@@ -242,13 +246,12 @@ func (c *Config) setupOpenSubtitlesApp() error {
 	h := map[string]string{"Authorization": c.AccessToken}
 
 	appId := "4b9ed42f-5185-48b5-9803-6ff2989014c4"
-	appVersion := "20.0.0.0"
 
 	// Install OpenSubtitles app
 	p := fmt.Sprintf(
 		"/Packages/Installed/Open%%20Subtitles?assemblyGuid=%s&version=%s",
 		strings.ReplaceAll(appId, "-", ""),
-		appVersion,
+		c.OpenSubtitlesVersion,
 	)
 	_, err := utils.Request("POST", c.Url+p, nil, h, nil, 4)
 	if err != nil {
