@@ -242,7 +242,7 @@ func (c *Config) setupOpenSubtitlesApp() error {
 	h := map[string]string{"Authorization": c.AccessToken}
 
 	appId := "4b9ed42f-5185-48b5-9803-6ff2989014c4"
-	appVersion := "23.0.0.0"
+	appVersion := "20.0.0.0"
 
 	// Install OpenSubtitles app
 	p := fmt.Sprintf(
