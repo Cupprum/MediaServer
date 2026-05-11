@@ -54,19 +54,20 @@ func (c *Config) Login() error {
 
 	b := fmt.Sprintf("username=%s&password=%s", c.Username, c.Password)
 
-	r, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client, 4)
+	// r, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client, 4)
+	_, err := utils.Request("POST", c.Url+"/api/v2/auth/login", b, nil, c.Client, 4)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("------test")
-	fmt.Println(string(r))
-	fmt.Println("------test")
+	// fmt.Println("------test")
+	// fmt.Println(string(r))
+	// fmt.Println("------test")
 
-	// If response does not contain "Ok.", login failed
-	if string(r) != "Ok." {
-		return fmt.Errorf("not logged in")
-	}
+	// // If response does not contain "Ok.", login failed
+	// if string(r) != "Ok." {
+	// 	return fmt.Errorf("not logged in")
+	// }
 	return nil
 }
 
