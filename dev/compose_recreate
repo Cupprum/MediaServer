@@ -10,6 +10,9 @@ if [ $# -gt 1 ]; then
   exit 1
 fi
 
+source "$(dirname "${BASH_SOURCE[0]}")/../utils.sh"
+load_env_vars "$(dirname "${BASH_SOURCE[0]}")/../.env"
+
 if [ $# -eq 0 ]; then
   echo "- Reconfiguring all services..."
   echo ""
