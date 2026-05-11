@@ -25,8 +25,9 @@ apps:
     healthcheck: /
 config:
   plain:
+    MEDIASERVER_LOG: "debug"
     MEDIASERVER_JELLYFIN_DEPLOY: "true"
-    MEDIASERVER_JELLYFIN_URL: "http://localhost:8096"
+    MEDIASERVER_JELLYFIN_URL: "http://jellyfin:8096"
     MEDIASERVER_JELLYFIN_OPENSUBTITLES_ENABLED: "true"
     MEDIASERVER_QBITTORRENT_DEPLOY: "true"
     MEDIASERVER_QBITTORRENT_URL: "http://qbittorrent:8080"
