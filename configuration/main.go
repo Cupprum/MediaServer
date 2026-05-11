@@ -11,8 +11,10 @@ import (
 )
 
 func main() {
-	fmt.Print(os.Getenv("MEDIASERVER_QBITTORRENT_USERNAME"))
-	fmt.Print(os.Getenv("MEDIASERVER_QBITTORRENT_RAW_PASSWORD"))
+	fmt.Println(os.Getenv("MEDIASERVER_QBITTORRENT_USERNAME"))
+	fmt.Println(os.Getenv("MEDIASERVER_QBITTORRENT_RAW_PASSWORD"))
+	fmt.Println(os.Environ())
+	fmt.Println()
 	if os.Getenv("MEDIASERVER_QBITTORRENT_DEPLOY") == "true" {
 		if err := qbittorrent.Configure(); err != nil {
 			log.Fatalf("--- qbittorrent configuration failed: %v\n", err)
