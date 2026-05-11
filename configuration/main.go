@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	fmt.Print(os.Getenv("MEDIASERVER_QBITTORRENT_USERNAME"))
+	fmt.Print(os.Getenv("MEDIASERVER_QBITTORRENT_RAW_PASSWORD"))
 	if os.Getenv("MEDIASERVER_QBITTORRENT_DEPLOY") == "true" {
 		if err := qbittorrent.Configure(); err != nil {
 			log.Fatalf("--- qbittorrent configuration failed: %v\n", err)

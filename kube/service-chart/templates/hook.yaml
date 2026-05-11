@@ -17,7 +17,7 @@ spec:
         args:
           - |
             set -euo pipefail
-            
+
             /app/bin/configure_services
             rc=0
             /app/bin/qbittorrent.test || rc=$?
@@ -36,6 +36,6 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: mediaserver-secrets
-                key: {{ $value | quote }}
+                key: {{ $value }}
           {{- end }}
       restartPolicy: Never
