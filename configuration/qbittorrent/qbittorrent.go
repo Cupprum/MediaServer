@@ -59,6 +59,10 @@ func (c *Config) Login() error {
 		return err
 	}
 
+	fmt.Println("------test")
+	fmt.Println(string(r))
+	fmt.Println("------test")
+
 	// If response does not contain "Ok.", login failed
 	if string(r) != "Ok." {
 		return fmt.Errorf("not logged in")
