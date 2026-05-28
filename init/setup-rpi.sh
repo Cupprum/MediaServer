@@ -24,6 +24,11 @@ update_system() {
   apt upgrade -y 
 }
 
+setup_auto_restart() {
+  log_info "Setting auto restart each tuesday at 4 in the morning..."
+  echo "0 4 * * 2 root /sbin/reboot" | sudo tee /etc/cron.d/weekly_reboot > /dev/null
+}
+
 enable_vnc() {
   log_info "Enabling VNC..."
   raspi-config nonint do_vnc 0
@@ -172,6 +177,7 @@ main() {
   log_info "Starting Raspberry Pi setup process..."
   check_root
   update_system
+  setup_auto_restart
   enable_vnc
   disable_wifi
   install_tools
