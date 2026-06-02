@@ -4,6 +4,9 @@ apps:
     port: 8080
     healthcheck: /
     mountPoints:
+      - name: config
+        source: /home/x42/MediaServer/config/qbittorrent/config
+        destination: /config
       - name: data
         source: /media/x42/T5/media
         destination: /config/Downloads
@@ -11,11 +14,18 @@ apps:
     image: linuxserver/prowlarr:latest
     port: 9696
     healthcheck: /ping
+    mountPoints:
+      - name: config
+        source: /home/x42/MediaServer/config/prowlarr/config
+        destination: /config
   jellyfin:
     image: jellyfin/jellyfin:10.10
     port: 8096
     healthcheck: /health
     mountPoints:
+      - name: config
+        source: /home/x42/MediaServer/config/jellyfin/config
+        destination: /config
       - name: data
         source: /media/x42/T5/media
         destination: /media
@@ -23,6 +33,10 @@ apps:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     port: 8191
     healthcheck: /
+    mountPoints:
+      - name: config
+        source: /home/x42/MediaServer/config/flaresolverr/config
+        destination: /config
 config:
   plain:
     MEDIASERVER_LOG: "debug"
