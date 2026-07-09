@@ -61,6 +61,11 @@ grafana:
     runAsGroup: 1000
     fsGroup: 1000
 
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -95,3 +100,4 @@ grafana:
         gnetId: 19105
         revision: 7
         datasource: Prometheus
+
