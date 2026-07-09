@@ -45,6 +45,10 @@ prometheus:
        mountPath: /media/x42
        readOnly: true
 
+    configmapReload:
+      prometheus:
+        enabled: false
+
   configmapReload:
     prometheus:
       enabled: false
@@ -60,6 +64,11 @@ grafana:
     runAsUser: 1000
     runAsGroup: 1000
     fsGroup: 1000
+
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
 
   datasources:
     datasources.yaml:
