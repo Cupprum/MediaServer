@@ -45,10 +45,6 @@ prometheus:
        mountPath: /media/x42
        readOnly: true
 
-    configmapReload:
-      prometheus:
-        enabled: false
-
   configmapReload:
     prometheus:
       enabled: false
