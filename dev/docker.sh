@@ -6,17 +6,14 @@ set -o pipefail
 
 case ${1:-} in
   build)
-    docker build -t gemini-jail .
+    docker build -t clanker-jail .
     ;;
   run)
     cd ..
-    docker run -it\
-      --rm \
-      --userns=keep-id \
-      --security-opt label=disable \
-      -v "$(pwd):/home/gemini/workspace" \
-      -v "$HOME/.gemini:/home/gemini/.gemini" \
-      gemini-jail bash
+    docker run -it --rm \
+      -v "$(pwd):/home/clanker/workspace:z" \
+      -e "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY" \
+      clanker-jail
     ;;
   *)
     echo "Usage: ./docker.sh [build|run]"
