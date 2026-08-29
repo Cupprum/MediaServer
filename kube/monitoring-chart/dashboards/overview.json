@@ -413,8 +413,21 @@
       "gridPos": { "h": 6, "w": 4, "x": 12, "y": 16 },
       "fieldConfig": {
         "defaults": {
-          "unit": "decbytes"
-        }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 25 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "total" },
+            "properties": [ { "id": "unit", "value": "decbytes" } ]
+          }
+        ]
       },
       "options": {
         "colorMode": "value",
@@ -422,7 +435,7 @@
         "textMode": "value_and_name"
       },
       "targets": [
-        { "expr": "node_filesystem_avail_bytes{mountpoint=\"/media/x42/T5\"}", "legendFormat": "free", "instant": true, "refId": "A" },
+        { "expr": "100 * node_filesystem_avail_bytes{mountpoint=\"/media/x42/T5\"} / node_filesystem_size_bytes{mountpoint=\"/media/x42/T5\"}", "legendFormat": "free", "instant": true, "refId": "A" },
         { "expr": "node_filesystem_size_bytes{mountpoint=\"/media/x42/T5\"}", "legendFormat": "total", "instant": true, "refId": "B" }
       ]
     },
@@ -434,8 +447,21 @@
       "gridPos": { "h": 6, "w": 4, "x": 16, "y": 16 },
       "fieldConfig": {
         "defaults": {
-          "unit": "decbytes"
-        }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 25 }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "total" },
+            "properties": [ { "id": "unit", "value": "decbytes" } ]
+          }
+        ]
       },
       "options": {
         "colorMode": "value",
@@ -443,7 +469,7 @@
         "textMode": "value_and_name"
       },
       "targets": [
-        { "expr": "node_filesystem_avail_bytes{mountpoint=\"/\"}", "legendFormat": "free", "instant": true, "refId": "A" },
+        { "expr": "100 * node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}", "legendFormat": "free", "instant": true, "refId": "A" },
         { "expr": "node_filesystem_size_bytes{mountpoint=\"/\"}", "legendFormat": "total", "instant": true, "refId": "B" }
       ]
     },
