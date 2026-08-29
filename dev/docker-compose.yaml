@@ -35,9 +35,11 @@ services:
         set -euo pipefail
         mkdir -p /config/qBittorrent
         CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
-        echo "[Preferences]" >> "$$CONFIG_FILE"
-        # Use DOUBLE '$$' here so it passes literally into the shell script inside the container
-        echo "WebUI\Password_PBKDF2=$${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$$CONFIG_FILE"
+        if ! grep -qsF 'WebUI\Password_PBKDF2=' "$$CONFIG_FILE"; then
+          echo "[Preferences]" >> "$$CONFIG_FILE"
+          # Use DOUBLE '$$' here so it passes literally into the shell script inside the container
+          echo "WebUI\Password_PBKDF2=$${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$$CONFIG_FILE"
+        fi
         exec /init
     
   flaresolverr:

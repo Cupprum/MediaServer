@@ -2,7 +2,10 @@ apps:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     port: 8080
-    healthcheck: /
+    healthcheck: /api/v2/app/version
+    resources:
+      requests:
+        memory: "2Gi"
     mountPoints:
       - name: config
         source: /home/x42/MediaServer/config/qbittorrent/config

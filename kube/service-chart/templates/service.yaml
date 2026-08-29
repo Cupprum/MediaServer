@@ -42,26 +42,42 @@ spec:
               set -euo pipefail
               mkdir -p /config/qBittorrent
               CONFIG_FILE="/config/qBittorrent/qBittorrent.conf"
-              echo "[Preferences]" >> "$CONFIG_FILE"
-              echo "WebUI\\Password_PBKDF2=${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$CONFIG_FILE"
+              if ! grep -qsF 'WebUI\Password_PBKDF2=' "$CONFIG_FILE"; then
+                echo "[Preferences]" >> "$CONFIG_FILE"
+                echo "WebUI\\Password_PBKDF2=${MEDIASERVER_QBITTORRENT_RAW_PASSWORD//\'}" >> "$CONFIG_FILE"
+              fi
               exec /init
+          {{- end }}
+          {{- if $appConfig.resources }}
+          resources:
+            {{- toYaml $appConfig.resources | nindent 12 }}
           {{- end }}
           ports:
             - containerPort: {{ $appConfig.port }}
               protocol: TCP
           {{- if $appConfig.healthcheck }}
-          livenessProbe:
-            httpGet:
-              path: {{ $appConfig.healthcheck }}
+          startupProbe:
+            tcpSocket:
               port: {{ $appConfig.port }}
-            initialDelaySeconds: 40
-            periodSeconds: 15
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket:
+              port: {{ $appConfig.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: {{ $appConfig.healthcheck }}
               port: {{ $appConfig.port }}
-            initialDelaySeconds: 40
+            initialDelaySeconds: 30
             periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
           {{- end }}
           volumeMounts:
             {{- range $appConfig.mountPoints }}
