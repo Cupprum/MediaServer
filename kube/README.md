@@ -41,5 +41,6 @@ Grafana is configured in a following way:
 
 **Dashboards:**
 
+* Custom MediaServer Overview — service up/down, host resource and storage overview
 * [Kubernetes cluster monitoring (via Prometheus)](https://grafana.com/grafana/dashboards/315-kubernetes-cluster-monitoring-via-prometheus/)
 * [Node Exporter Full](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)

@@ -89,6 +89,15 @@ grafana:
           options:
             path: /var/lib/grafana/dashboards/default
 
+        - name: 'overview'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/overview
+
   dashboards:
     default:
       node-exporter-full:
@@ -100,4 +109,7 @@ grafana:
         gnetId: 19105
         revision: 7
         datasource: Prometheus
+
+  dashboardsConfigMaps:
+    overview: mediaserver-overview-dashboard
 

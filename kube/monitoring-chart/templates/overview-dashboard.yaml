@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mediaserver-overview-dashboard
+data:
+  overview.json: |
+    {{ .Files.Get "dashboards/overview.json" | nindent 4 }}
