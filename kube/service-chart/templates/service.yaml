@@ -8,6 +8,10 @@ metadata:
     app: {{ $appName }}
 spec:
   replicas: 1
+  {{- if $appConfig.strategy }}
+  strategy:
+    type: {{ $appConfig.strategy }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
