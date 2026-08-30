@@ -2,7 +2,7 @@ apps:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     port: 8080
-    healthcheck: /api/v2/app/version
+    healthcheck: /
     resources:
       requests:
         memory: "2Gi"
