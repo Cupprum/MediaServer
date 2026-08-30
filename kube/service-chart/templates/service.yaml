@@ -56,17 +56,11 @@ spec:
             - containerPort: {{ $appConfig.port }}
               protocol: TCP
           {{- if $appConfig.healthcheck }}
-          startupProbe:
-            tcpSocket:
-              port: {{ $appConfig.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 30
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: {{ $appConfig.healthcheck }}
               port: {{ $appConfig.port }}
-            initialDelaySeconds: 30
+            initialDelay: 40
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
@@ -74,10 +68,18 @@ spec:
             httpGet:
               path: {{ $appConfig.healthcheck }}
               port: {{ $appConfig.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 15
+            initialDelaySeconds: 20
+            periodSeconds: 20
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: {{ $appConfig.healthcheck }}
+              port: {{ $appConfig.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
           {{- end }}
           volumeMounts:
             {{- range $appConfig.mountPoints }}
