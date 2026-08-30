@@ -60,7 +60,7 @@ spec:
             httpGet:
               path: {{ $appConfig.healthcheck }}
               port: {{ $appConfig.port }}
-            initialDelay: 40
+            initialDelaySeconds: 40
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 5
