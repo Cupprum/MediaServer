@@ -327,12 +327,12 @@
             "value": "This site may use Cloudflare DDoS Protection, therefore Prowlarr requires <a href=\"https://wiki.servarr.com/prowlarr/faq#can-i-use-flaresolverr-indexers\" target=\"_blank\" rel=\"noreferrer\">FlareSolverr</a> to access it."
         },
         {
-            "name": "downloadlink",
-            "value": 0
+            "name": "primarydownloadlink",
+            "value": 1
         },
         {
-            "name": "downloadlink2",
-            "value": 1
+            "name": "fallbackdownloadlink",
+            "value": 0
         },
         {
             "name": "info_download",
