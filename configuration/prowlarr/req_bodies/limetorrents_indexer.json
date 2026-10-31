@@ -145,14 +145,6 @@
             "value": false
         },
         {
-            "name": "downloadlink",
-            "value": 1
-        },
-        {
-            "name": "downloadlink2",
-            "value": 0
-        },
-        {
             "name": "info_download",
             "value": "As the .torrent download links on this site are known to fail from time to time, you can optionally set as a fallback an automatic alternate link."
         },

@@ -6,6 +6,7 @@
     "launchBrowser": true,
     "authenticationMethod": "forms",
     "authenticationRequired": "enabled",
+    "allowedHosts": "*",
     "analyticsEnabled": true,
     "username": "admin",
     "password": "$MEDIASERVER_PROWLARR_PASSWORD",
