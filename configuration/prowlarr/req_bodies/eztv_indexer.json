@@ -101,5 +101,7 @@
     "implementation": "Cardigann",
     "configContract": "CardigannSettings",
     "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers#eztv",
-    "tags": []
+    "tags": [
+        1
+    ]
 }
