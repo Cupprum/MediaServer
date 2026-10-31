@@ -8,6 +8,7 @@ metadata:
     app: {{ $appName }}
 spec:
   replicas: 1
+  revisionHistoryLimit: 2
   {{- if $appConfig.strategy }}
   strategy:
     type: {{ $appConfig.strategy }}
