@@ -6,7 +6,7 @@
     "launchBrowser": true,
     "authenticationMethod": "forms",
     "authenticationRequired": "enabled",
-    "allowedHosts": "*",
+    "allowedHosts": "prowlarr,prowlarr.pi.local,pi.local,localhost,127.0.0.1,192.168.0.100",
     "analyticsEnabled": true,
     "username": "admin",
     "password": "$MEDIASERVER_PROWLARR_PASSWORD",
